@@ -51,6 +51,20 @@ Objects growing >= 5%/yr with p < 0.05 receive a **screening flag** to prioritis
 is not evidence of glacial-lake outburst-flood danger, which depends on dam type, moraine stability,
 trigger processes and downstream exposure.
 
+## Results (run 2026-10-19, 20 m; full tables in `reports/real/lake_analysis.md`)
+
+- Lake zone: 240 km2. Thresholds tuned on 64 train blocks, 2019: NDWI > 0.2, NIR < 0.3 (train F1 0.87); VV < -20 dB (train F1 0.28, SAR alone is weak in this terrain).
+- Validation (32 blocks, 2020; 0.18 km2 of JRC water): optical IoU 0.31, F1 0.48, precision 0.43, recall 0.53, area +21%. Fusion is the same as optical because the optical composite was valid on >= 99.7% of the zone; SAR-only IoU 0.06.
+- **Test (31 blocks, 2021) is not interpretable.** The random block split placed almost no lakes in the test blocks: 0.00076 km2 of JRC water and 27 water samples. The reported test IoU 0.002 and area error +29,996% mean "almost no true water to find", not a measured skill level. This is a split-design flaw: lakes are rare (34 objects in 240 km2) and the split was not stratified by water presence.
+- Annual zone water area (all 7 years comparable): 0.64-1.15 km2, no trend (Theil-Sen -0.005 km2/yr, 95% CI -0.16..+0.17, Kendall p = 1.0). Year-to-year swings of ~40% are larger than any trend and include segmentation noise.
+- 34 lake objects >= 0.01 km2 (largest ~0.08 km2). One object gets the screening flag (+9.7%/yr, p = 0.03). Testing 34 objects at p < 0.05 would give ~1.7 false flags by chance alone, so this single flag is **not evidence of growth**; it only marks a lake to look at in imagery.
+
+### Required protocol change before re-scoring (not yet run)
+
+Assign blocks to splits stratified by JRC water presence (so each split contains lakes), pick the
+stratification and a new held-out year *before* looking at scores, log it as a deviation in
+`docs/protocol.md`, and apply a multiple-testing correction (Benjamini-Hochberg) to growth flags.
+
 ## Inventory comparison
 
 Hi-MAG and ICIMOD inventories were not ingested (not on Earth Engine; licence and coverage not

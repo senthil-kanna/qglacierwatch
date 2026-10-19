@@ -32,6 +32,14 @@ for split in ("val", "test"):
 with st.container(border=True):
     st.subheader("Segmentation agreement with JRC (held-out spatial blocks and years)")
     st.dataframe(pd.DataFrame(rows), hide_index=True, column_config={c: st.column_config.NumberColumn(format="%.3f") for c in ("iou", "dice_f1", "precision", "recall", "area_error_frac")})
+    for split in ("val", "test"):
+        e = res["evaluation"][split]
+        if e["n_water_samples"] < 100:
+            st.error(
+                f"{split.capitalize()} scores are not interpretable: the {split} blocks contain only {e['label_water_km2']:.5f} km2 of "
+                f"reference water ({e['n_water_samples']} water samples). A water-stratified split is needed.",
+                icon=":material/error:",
+            )
 
 annual = pd.DataFrame(res["annual"])
 with st.container(border=True):
@@ -52,6 +60,7 @@ with st.container(border=True):
     if obj["top"]:
         top = pd.DataFrame([{"id": o["id"], "mean area km2": o["mean_area_km2"], "Theil-Sen km2/yr": o["growth"]["slope_km2_per_yr"], "rel. change/yr": o["growth"]["rel_change_per_yr"], "Kendall p": o["growth"]["kendall_p"], "years": o["growth"]["n_years"], "flag": o["flag"]} for o in obj["top"]])
         st.dataframe(top, hide_index=True)
+        st.caption(f"Flags are not corrected for multiple testing: about {0.05 * obj['count']:.1f} of {obj['count']} objects would reach p < 0.05 by chance.")
     overlays = sorted(art.glob("overlay_*.png"))
     if overlays:
         cols = st.columns(len(overlays))
