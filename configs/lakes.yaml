@@ -1,0 +1,29 @@
+﻿# Glacial-lake segmentation and area analysis (Earth Engine). See docs/lakes.md.
+min_elevation_m: 3500          # glacial-lake zone
+max_slope_deg: 12              # lakes are flat; also suppresses SAR layover/shadow on steep slopes
+window: ["09-15", "10-31"]     # post-monsoon: lowest snow cover, lakes ice-free, fewer clouds
+annual_years: [2019, 2020, 2021, 2022, 2023, 2024, 2025]   # S2 L2A coverage complete only from 2019
+min_valid_frac: 0.9            # composite must observe >= 90% of the zone to be comparable
+cloud_prob_max: 40             # s2cloudless probability
+scale_m: 20                    # 10 m exceeded Earth Engine interactive limits; lakes >= 0.01 km2 are >= 25 px
+
+labels:
+  source: "JRC/GSW1_4/YearlyHistory"      # Landsat-derived yearly water classes; independent sensor
+  water_classes: [2, 3]                    # 2 = seasonal, 3 = permanent water
+  edge_buffer_px: 1                        # drop mixed pixels at label boundaries
+  tune_year: 2019
+  val_year: 2020
+  test_year: 2021
+  block_km: 5
+  samples_per_class: 2000
+  seed: 42
+
+grids:
+  ndwi: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+  nir: [0.08, 0.12, 0.16, 0.20, 0.30]
+  vv_db: [-22, -20, -18, -16, -14]
+
+objects:
+  min_area_km2: 0.01             # 25 pixels at 20 m
+  min_years_for_trend: 5
+  growth_flag_rel_per_yr: 0.05   # >= 5%/yr Theil-Sen growth with Kendall p < 0.05 -> screening flag
