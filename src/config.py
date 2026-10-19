@@ -27,3 +27,44 @@ HYBAS_LEVEL = 8
 
 START_YEAR = 2015
 END_YEAR = 2025
+
+CONFIGS = ROOT / "configs"
+ARTIFACTS = ROOT / "artifacts"
+
+# "real" reads data/raw (Earth Engine + GloFAS). "demo" uses the clearly labelled synthetic
+# fixture and never mixes with real outputs.
+MODES = ("real", "demo")
+
+
+def mode() -> str:
+    m = os.getenv("QGW_MODE", "real")
+    if m not in MODES:
+        raise ValueError(f"QGW_MODE must be one of {MODES}, got {m!r}")
+    return m
+
+
+def data_root() -> Path:
+    return Path(os.getenv("QGW_DATA", str(ROOT / "data")))
+
+
+def raw_dir(m: str) -> Path:
+    return data_root() / ("raw" if m == "real" else "synthetic")
+
+
+def processed_dir(m: str) -> Path:
+    return data_root() / "processed" / m
+
+
+def artifact_dir(m: str) -> Path:
+    return Path(os.getenv("QGW_ARTIFACTS", str(ARTIFACTS))) / m
+
+
+def reports_dir(m: str) -> Path:
+    return Path(os.getenv("QGW_REPORTS", str(ROOT / "reports"))) / m
+
+
+def load_yaml(name: str) -> dict:
+    import yaml
+
+    with open(CONFIGS / f"{name}.yaml", encoding="utf-8") as fh:
+        return yaml.safe_load(fh)
