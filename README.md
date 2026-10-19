@@ -22,7 +22,7 @@ for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532
 | Season-aware drift monitors, replay 2016-2025, synthetic perturbations | yes | yes | - | `reports/real/drift_replay.md` |
 | Tier-2/3 retraining | yes | Tier 3 once (gate failed) | - | `reports/real/retraining_runs.json` |
 | VQC benchmark (PennyLane simulator) + matched classical models | yes | yes, 7 models x 5 seeds | - | `reports/real/quantum_benchmark.md` |
-| Glacial-lake segmentation (S2/S1, JRC silver labels) | yes | yes (20 m, 2019-2025): val IoU 0.31; **test split had almost no water, scores not interpretable**; 34 lakes, no area trend | EE account | needs water-stratified split; Hi-MAG not ingested |
+| Glacial-lake segmentation (S2/S1, JRC silver labels) | yes | yes (20 m, 2019-2025): water-stratified split: val IoU 0.37, **test IoU 0.11 (low skill, over-maps water)**; 34 lakes, no area trend, 0 growth flags after BH | EE account | better water/shadow separation; Hi-MAG not ingested |
 | REST API (FastAPI, /v1) | yes | locally, on real artifacts | - | `docs/openapi.json` |
 | Dashboard (Streamlit, 7 pages) | yes | headless render tests on real artifacts | - | |
 | Docker image, compose | yes | **not built locally** (no Docker) | Docker | built and smoke-tested in CI |

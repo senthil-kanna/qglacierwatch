@@ -11,7 +11,7 @@ CPUs, 24 GB RAM, no GPU, no Docker, no Azure CLI, Earth Engine credentials prese
 | C. baselines, LightGBM quantile, quantile LSTM | done | real CV + final fit |
 | D. evaluation, CQR, seasonal metrics, block bootstrap | done | `reports/real/forecast_results.md`; test scored once (`artifacts/real/test_access.log`) |
 | E. quantum benchmark | done | `reports/real/quantum_benchmark.md` (7 models x 5 seeds) |
-| F. lake segmentation and areas | ran; evaluation incomplete | Earth Engine run at 20 m; val IoU 0.31; test blocks held almost no water, so test scores are not interpretable; water-stratified re-split pending |
+| F. lake segmentation and areas | ran and evaluated | Earth Engine run at 20 m, water-stratified split; val IoU 0.37, test IoU 0.11 (over-maps water vs JRC); no growth flags after BH correction |
 | G. season-aware drift, tiered retraining, registry | done | replay 522 checks; 72 synthetic events; Tier-3 run; registry tests |
 | H. API and dashboard | done | API tests incl. auth/rate limit/validation; headless render of 7 pages on real artifacts |
 | I. Docker, Azure IaC, CI/CD | written; Bicep compiled + linted | Docker build and CI not executed locally (no Docker); Azure not deployed (no subscription access) |

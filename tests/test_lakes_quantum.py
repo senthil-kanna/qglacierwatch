@@ -65,6 +65,22 @@ def test_block_split_is_disjoint_and_deterministic():
     assert sum(1 for s in a.values() if s == "train") == 20
 
 
+def test_stratified_block_split_puts_water_in_every_split():
+    water = {b: (0.5 / (b + 1) if b < 9 else 0.0) for b in range(40)}  # 9 wet blocks, 31 dry
+    a = core.stratified_block_split(water, seed=3)
+    assert a == core.stratified_block_split(water, seed=3)
+    assert set(a) == set(water)
+    for s in ("train", "val", "test"):
+        assert any(a[b] == s for b in range(9))
+        assert any(a[b] == s for b in range(9, 40))
+
+
+def test_bh_adjust_matches_reference():
+    q = core.bh_adjust([0.01, 0.04, 0.03, np.nan, 0.5])
+    assert q[0] == pytest.approx(0.04) and q[1] == pytest.approx(0.0533333, rel=1e-4) and q[2] == pytest.approx(0.0533333, rel=1e-4)
+    assert np.isnan(q[3]) and q[4] == pytest.approx(0.5)
+
+
 def test_comparable_years_and_growth():
     assert core.comparable_years({2019: 0.95, 2020: 0.7, 2021: None, 2022: 0.91}, 0.9) == [2019, 2022]
     g = core.growth([2019, 2020, 2021, 2022, 2023, 2024], [0.10, 0.11, 0.12, 0.13, 0.14, 0.15])

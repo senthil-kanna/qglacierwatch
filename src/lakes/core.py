@@ -89,6 +89,42 @@ def block_split(block_ids, seed: int = 0, fractions=(0.5, 0.25, 0.25)) -> dict:
     return {int(b): ("train" if i < n_tr else "val" if i < n_tr + n_va else "test") for i, b in enumerate(ids)}
 
 
+def stratified_block_split(water_km2_by_block: dict, seed: int = 0) -> dict:
+    """50/25/25 block split that spreads water across splits.
+
+    Wet blocks (water > 0) are ranked by water area and taken in groups of four; each group is
+    assigned a random permutation of (train, train, val, test), so every split gets wet blocks of
+    similar size. Dry blocks are split at random. Stratifying on reference labels uses no predictions.
+    """
+    rng = np.random.default_rng(seed)
+    wet = sorted((b for b, w in water_km2_by_block.items() if w > 0), key=lambda b: (-water_km2_by_block[b], b))
+    dry = [b for b, w in water_km2_by_block.items() if w <= 0]
+    out = {}
+    for i in range(0, len(wet), 4):
+        group = wet[i : i + 4]
+        for b, s in zip(group, rng.permutation(["train", "train", "val", "test"])[: len(group)], strict=False):
+            out[int(b)] = str(s)
+    out.update(block_split(dry, seed=seed) if dry else {})
+    return out
+
+
+def bh_adjust(pvalues) -> np.ndarray:
+    """Benjamini-Hochberg adjusted p-values (q-values); NaN stays NaN."""
+    p = np.asarray(pvalues, float)
+    q = np.full_like(p, np.nan)
+    ok = np.isfinite(p)
+    m = int(ok.sum())
+    if m == 0:
+        return q
+    order = np.argsort(p[ok])
+    ranked = p[ok][order] * m / np.arange(1, m + 1)
+    ranked = np.minimum.accumulate(ranked[::-1])[::-1].clip(max=1.0)
+    adj = np.empty(m)
+    adj[order] = ranked
+    q[ok] = adj
+    return q
+
+
 def comparable_years(valid_frac_by_year: dict, min_valid: float) -> list[int]:
     """Years whose composite observed at least min_valid of the lake zone."""
     return sorted(y for y, v in valid_frac_by_year.items() if v is not None and v >= min_valid)

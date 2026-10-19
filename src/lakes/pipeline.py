@@ -6,7 +6,8 @@ Steps
      terrain hill-shadow from each scene's sun angles) and Sentinel-1 GRD IW VV (3x3 focal median).
   3. Silver labels: JRC Global Surface Water yearly history (Landsat, independent of S1/S2), with
      mixed boundary pixels removed. Not an authoritative glacial-lake inventory.
-  4. Spatial blocks (~5 km) split into train/val/test; thresholds tuned on train blocks in the tune
+  4. Spatial blocks (~5 km) split into train/val/test, stratified by tune-year reference water so
+     every split holds lakes; thresholds tuned on train blocks in the tune
      year, variants compared on val blocks in the val year, final scores on test blocks in the test
      year, so no block or year is used for both fitting and scoring.
   5. Annual water area for comparable years only (optical valid share >= min_valid_frac), lake
@@ -209,14 +210,15 @@ def markdown(rep):
     n_obj = rep["objects"]["count"]
     L += ["", f"## Lake objects: {n_obj} objects >= {rep['config']['objects']['min_area_km2']} km2", "",
           "Rapid-growth flag = SCREENING indicator for prioritising inspection, not evidence of GLOF hazard. "
-          f"Flags are uncorrected for multiple testing: about {0.05 * n_obj:.1f} of {n_obj} objects would pass p < 0.05 by chance.", "",
-          "| object | mean area km2 | Theil-Sen km2/yr | rel./yr | Kendall p | n years | screening flag |", "|---|---|---|---|---|---|---|"]
+          f"Flags use Benjamini-Hochberg q < 0.05 across all {n_obj} objects (false discovery rate control).", "",
+          "| object | mean area km2 | Theil-Sen km2/yr | rel./yr | Kendall p | BH q | n years | screening flag |", "|---|---|---|---|---|---|---|---|"]
     for o in rep["objects"]["top"]:
         g = o["growth"]
         rel = "-" if g["rel_change_per_yr"] is None else f"{g['rel_change_per_yr']:+.1%}"
         sl = "-" if g["slope_km2_per_yr"] is None else f"{g['slope_km2_per_yr']:+.4f}"
         p = "-" if g["kendall_p"] is None else f"{g['kendall_p']:.3f}"
-        L.append(f"| {o['id']} | {o['mean_area_km2']:.4f} | {sl} | {rel} | {p} | {g['n_years']} | {'FLAG' if o['flag'] else ''} |")
+        q = "-" if g.get("kendall_q_bh") is None else f"{g['kendall_q_bh']:.3f}"
+        L.append(f"| {o['id']} | {o['mean_area_km2']:.4f} | {sl} | {rel} | {p} | {q} | {g['n_years']} | {'FLAG' if o['flag'] else ''} |")
     return "\n".join(L) + "\n"
 
 
@@ -241,7 +243,9 @@ def main():
         samples[y], areas[y] = sample_year(y, basin, dem, zone, lc)
         print(f"  sampled {y}: {len(samples[y])} pixels, {int(samples[y]['label'].sum())} water")
     all_blocks = sorted(set().union(*[set(a) for a in areas.values()]))
-    split_of = core.block_split(all_blocks, seed=L["seed"])
+    # Stratify on tune-year reference water only, so val/test years play no part in the split.
+    strat = {b: areas[L["tune_year"]].get(b, {}).get("water_km2", 0.0) for b in all_blocks}
+    split_of = core.stratified_block_split(strat, seed=L["seed"])
 
     # Tune on train blocks of the tune year only.
     d = samples[L["tune_year"]]
@@ -270,12 +274,15 @@ def main():
     objects = {"count": 0, "top": []}
     if len(comp_years) >= 2:
         fc = lake_objects(basin, zone, masks, comp_years, lc)
-        feats = []
-        for i, f in enumerate(fc["features"]):
-            pr = f["properties"]
-            ser = [pr.get(f"a{y}", np.nan) for y in comp_years]
-            g = core.growth(comp_years, ser, lc["objects"]["min_years_for_trend"])
-            flag = bool(g["rel_change_per_yr"] is not None and g["rel_change_per_yr"] >= lc["objects"]["growth_flag_rel_per_yr"] and g["kendall_p"] < 0.05)
+        feats, growths = [], []
+        for f in fc["features"]:
+            ser = [f["properties"].get(f"a{y}", np.nan) for y in comp_years]
+            growths.append((ser, core.growth(comp_years, ser, lc["objects"]["min_years_for_trend"])))
+        # Benjamini-Hochberg across all objects, so ~5% false flags are not expected by chance alone.
+        qs = core.bh_adjust([np.nan if g["kendall_p"] is None else g["kendall_p"] for _, g in growths])
+        for i, (f, (ser, g), q) in enumerate(zip(fc["features"], growths, qs, strict=True)):
+            g["kendall_q_bh"] = None if np.isnan(q) else float(q)
+            flag = bool(g["rel_change_per_yr"] is not None and g["rel_change_per_yr"] >= lc["objects"]["growth_flag_rel_per_yr"] and q < 0.05)
             f["properties"] = {"id": i, "areas_km2": dict(zip(map(str, comp_years), ser, strict=True)), "mean_area_km2": float(np.nanmean(ser)), "growth": g, "screening_flag": flag}
             feats.append(f)
         (art / "lake_objects.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": feats}))
@@ -292,6 +299,8 @@ def main():
         "generated_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "config": lc, "zone_km2": zone_km2, "params": params,
         "splits": {"tune_year": L["tune_year"], "val_year": L["val_year"], "test_year": L["test_year"],
+                   "method": "water-stratified blocks (tune-year JRC water), groups of 4 wet blocks -> train/train/val/test",
+                   "wet_blocks": {s: sum(1 for b, v in split_of.items() if v == s and strat[b] > 0) for s in ("train", "val", "test")},
                    "blocks": {s: sum(1 for v in split_of.values() if v == s) for s in ("train", "val", "test")}},
         "evaluation": evaluation, "annual": annual.to_dict("records"), "comparable_years": comp_years,
         "zone_trend_fusion": zone_trend, "objects": objects,
