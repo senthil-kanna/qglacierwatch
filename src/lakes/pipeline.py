@@ -30,6 +30,7 @@ from src.ingest.ee_auth import initialize
 from src.lakes import core
 
 DEM_ID = "COPERNICUS/DEM/GLO30_2024_1"
+MIN_WATER_SAMPLES = 100  # below this a split's segmentation scores are reported as not interpretable
 
 
 def zone_image(basin, lc):
@@ -194,14 +195,21 @@ def markdown(rep):
         for v in ("optical_only", "sar_only", "fusion"):
             m = e[v]
             L.append(f"| {split} ({rep['splits'][split + '_year']}) | {v} | {m['iou']:.3f} | {m['dice_f1']:.3f} | {m['precision']:.3f} | {m['recall']:.3f} | {m['area_error_frac']:+.1%} | {m['n']} |")
+    for split in ("val", "test"):
+        e = rep["evaluation"][split]
+        if e["n_water_samples"] < MIN_WATER_SAMPLES:
+            L += ["", f"> **WARNING: {split} scores are not interpretable.** The {split} blocks contain only {e['label_water_km2']:.5f} km2 of reference water "
+                  f"({e['n_water_samples']} water samples < {MIN_WATER_SAMPLES}). See docs/lakes.md."]
     L += ["", "## Annual water area in the lake zone (post-monsoon composites)", "", "| year | optical km2 | fusion km2 | SAR km2 | optical valid share | comparable | S2 scenes | S1 scenes |", "|---|---|---|---|---|---|---|---|"]
     for r in rep["annual"]:
         L.append(f"| {r['year']} | {r['optical_km2']:.3f} | {r['fusion_km2']:.3f} | {r['sar_km2']:.3f} | {r['valid_frac']:.3f} | {'yes' if r['comparable'] else 'no'} | {r['s2_scenes']} | {r['s1_scenes']} |")
     t = rep["zone_trend_fusion"]
     if t["slope_km2_per_yr"] is not None:
         L += ["", f"Zone-total fusion area trend over comparable years: {t['slope_km2_per_yr']:+.4f} km2/yr (95% CI {t['slope_ci95'][0]:+.4f}..{t['slope_ci95'][1]:+.4f}), Kendall p = {t['kendall_p']:.3f}, n = {t['n_years']}."]
-    L += ["", f"## Lake objects: {rep['objects']['count']} objects >= {rep['config']['objects']['min_area_km2']} km2", "",
-          "Rapid-growth flag = SCREENING indicator for prioritising inspection, not evidence of GLOF hazard.", "",
+    n_obj = rep["objects"]["count"]
+    L += ["", f"## Lake objects: {n_obj} objects >= {rep['config']['objects']['min_area_km2']} km2", "",
+          "Rapid-growth flag = SCREENING indicator for prioritising inspection, not evidence of GLOF hazard. "
+          f"Flags are uncorrected for multiple testing: about {0.05 * n_obj:.1f} of {n_obj} objects would pass p < 0.05 by chance.", "",
           "| object | mean area km2 | Theil-Sen km2/yr | rel./yr | Kendall p | n years | screening flag |", "|---|---|---|---|---|---|---|"]
     for o in rep["objects"]["top"]:
         g = o["growth"]

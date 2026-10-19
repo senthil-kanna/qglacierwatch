@@ -1,0 +1,528 @@
+{
+  "generated_utc": "2026-10-19T15:40:06+00:00",
+  "config": {
+    "min_elevation_m": 3500,
+    "max_slope_deg": 12,
+    "window": [
+      "09-15",
+      "10-31"
+    ],
+    "annual_years": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "min_valid_frac": 0.9,
+    "cloud_prob_max": 40,
+    "scale_m": 20,
+    "labels": {
+      "source": "JRC/GSW1_4/YearlyHistory",
+      "water_classes": [
+        2,
+        3
+      ],
+      "edge_buffer_px": 1,
+      "tune_year": 2019,
+      "val_year": 2020,
+      "test_year": 2021,
+      "block_km": 5,
+      "samples_per_class": 2000,
+      "seed": 42
+    },
+    "grids": {
+      "ndwi": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5
+      ],
+      "nir": [
+        0.08,
+        0.12,
+        0.16,
+        0.2,
+        0.3
+      ],
+      "vv_db": [
+        -22,
+        -20,
+        -18,
+        -16,
+        -14
+      ]
+    },
+    "objects": {
+      "min_area_km2": 0.01,
+      "min_years_for_trend": 5,
+      "growth_flag_rel_per_yr": 0.05
+    }
+  },
+  "zone_km2": 240.1950509270515,
+  "params": {
+    "t_ndwi": 0.2,
+    "t_nir": 0.3,
+    "t_vv": -20.0,
+    "tune_f1_optical": 0.8688293370944993,
+    "tune_f1_sar": 0.28028932950968677
+  },
+  "splits": {
+    "tune_year": 2019,
+    "val_year": 2020,
+    "test_year": 2021,
+    "blocks": {
+      "train": 64,
+      "val": 32,
+      "test": 31
+    }
+  },
+  "evaluation": {
+    "val": {
+      "n_samples": 1307,
+      "n_water_samples": 889,
+      "label_water_km2": 0.17671363470458987,
+      "blocks": 32,
+      "optical_only": {
+        "iou": 0.31208416381918075,
+        "dice_f1": 0.4757075383194539,
+        "precision": 0.43385712833127466,
+        "recall": 0.5264937993235626,
+        "area_error_frac": 0.21351884051921013,
+        "n": 1304,
+        "evaluated_on": "optically valid pixels"
+      },
+      "sar_only": {
+        "iou": 0.05539274347095595,
+        "dice_f1": 0.10497086286339496,
+        "precision": 0.11987442737080489,
+        "recall": 0.093363329583802,
+        "area_error_frac": -0.22115724236159798,
+        "n": 1307
+      },
+      "fusion": {
+        "iou": 0.3116676048305594,
+        "dice_f1": 0.4752234539951461,
+        "precision": 0.43385712833127466,
+        "recall": 0.5253093363329584,
+        "area_error_frac": 0.2107887643875583,
+        "n": 1307,
+        "optical_share": 0.9977046671767407
+      }
+    },
+    "test": {
+      "n_samples": 615,
+      "n_water_samples": 27,
+      "label_water_km2": 0.0007612166137695313,
+      "blocks": 31,
+      "optical_only": {
+        "iou": 0.0022127160761702806,
+        "dice_f1": 0.00441566154704848,
+        "precision": 0.0022151668438136333,
+        "recall": 0.6666666666666666,
+        "area_error_frac": 299.95550975245396,
+        "n": 615,
+        "evaluated_on": "optically valid pixels"
+      },
+      "sar_only": {
+        "iou": 0.0,
+        "dice_f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "area_error_frac": 299.28884308578733,
+        "n": 615
+      },
+      "fusion": {
+        "iou": 0.0022127160761702806,
+        "dice_f1": 0.00441566154704848,
+        "precision": 0.0022151668438136333,
+        "recall": 0.6666666666666666,
+        "area_error_frac": 299.95550975245396,
+        "n": 615,
+        "optical_share": 1.0
+      }
+    }
+  },
+  "annual": [
+    {
+      "year": 2019,
+      "fusion_km2": 0.7315083785797469,
+      "optical_km2": 0.7291389149904717,
+      "sar_km2": 0.8693251726411594,
+      "valid_km2": 239.93161455854678,
+      "zone_km2": 240.23670158884127,
+      "valid_frac": 0.9987300565305935,
+      "s2_scenes": 37,
+      "s1_scenes": 22,
+      "window": "2019-09-15..2019-10-31",
+      "comparable": true
+    },
+    {
+      "year": 2020,
+      "fusion_km2": 1.0921135795651935,
+      "optical_km2": 1.0772225094551686,
+      "sar_km2": 0.35418639976129523,
+      "valid_km2": 239.5818742855553,
+      "zone_km2": 240.2367015888413,
+      "valid_frac": 0.9972742412006359,
+      "s2_scenes": 36,
+      "s1_scenes": 23,
+      "window": "2020-09-15..2020-10-31",
+      "comparable": true
+    },
+    {
+      "year": 2021,
+      "fusion_km2": 1.1537647247291627,
+      "optical_km2": 1.1520745970460577,
+      "sar_km2": 0.4240966001100948,
+      "valid_km2": 239.9853366852996,
+      "zone_km2": 240.2367015888412,
+      "valid_frac": 0.9989536781770679,
+      "s2_scenes": 36,
+      "s1_scenes": 24,
+      "window": "2021-09-15..2021-10-31",
+      "comparable": true
+    },
+    {
+      "year": 2022,
+      "fusion_km2": 0.6532654830343638,
+      "optical_km2": 0.6390495534260374,
+      "sar_km2": 2.069012282463475,
+      "valid_km2": 239.79841416009177,
+      "zone_km2": 240.23670158884119,
+      "valid_frac": 0.9981756017051069,
+      "s2_scenes": 36,
+      "s1_scenes": 18,
+      "window": "2022-09-15..2022-10-31",
+      "comparable": true
+    },
+    {
+      "year": 2023,
+      "fusion_km2": 0.8262208949890919,
+      "optical_km2": 0.8214808374468703,
+      "sar_km2": 0.49192771632475407,
+      "valid_km2": 239.92493351053153,
+      "zone_km2": 240.23670158884124,
+      "valid_frac": 0.998702246258595,
+      "s2_scenes": 36,
+      "s1_scenes": 19,
+      "window": "2023-09-15..2023-10-31",
+      "comparable": true
+    },
+    {
+      "year": 2024,
+      "fusion_km2": 1.0030130690720398,
+      "optical_km2": 1.0006447412306443,
+      "sar_km2": 0.43080696407157715,
+      "valid_km2": 239.98399501070634,
+      "zone_km2": 240.23670158884124,
+      "valid_frac": 0.9989480933743112,
+      "s2_scenes": 39,
+      "s1_scenes": 23,
+      "window": "2024-09-15..2024-10-31",
+      "comparable": true
+    },
+    {
+      "year": 2025,
+      "fusion_km2": 0.8172328587495904,
+      "optical_km2": 0.8094539359552037,
+      "sar_km2": 0.42798080331184807,
+      "valid_km2": 239.8721293081725,
+      "zone_km2": 240.23670158884127,
+      "valid_frac": 0.9984824455286906,
+      "s2_scenes": 48,
+      "s1_scenes": 24,
+      "window": "2025-09-15..2025-10-31",
+      "comparable": true
+    }
+  ],
+  "comparable_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "zone_trend_fusion": {
+    "n_years": 7,
+    "slope_km2_per_yr": -0.004494018119750753,
+    "slope_ci95": [
+      -0.1637719148700354,
+      0.174873793018838
+    ],
+    "rel_change_per_yr": -0.004928672962813241,
+    "kendall_p": 1.0
+  },
+  "objects": {
+    "count": 34,
+    "flagged": 1,
+    "top": [
+      {
+        "id": 15,
+        "mean_area_km2": 0.07898121683060058,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": -0.000788030622061342,
+          "slope_ci95": [
+            -0.0016886568773770705,
+            0.0015198022447293624
+          ],
+          "rel_change_per_yr": -0.00995009136310345,
+          "kendall_p": 0.7726190476190476
+        },
+        "flag": false
+      },
+      {
+        "id": 22,
+        "mean_area_km2": 0.0739436802021893,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 7.443304639309645e-09,
+          "slope_ci95": [
+            -0.00778613104193937,
+            0.014218186755897477
+          ],
+          "rel_change_per_yr": 9.356337507262688e-08,
+          "kendall_p": 1.0
+        },
+        "flag": false
+      },
+      {
+        "id": 0,
+        "mean_area_km2": 0.04572079235887421,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 0.0,
+          "slope_ci95": [
+            -0.000506397191202268,
+            0.002700795972486958
+          ],
+          "rel_change_per_yr": 0.0,
+          "kendall_p": 1.0
+        },
+        "flag": false
+      },
+      {
+        "id": 16,
+        "mean_area_km2": 0.0397363164852972,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 0.0002250440108279387,
+          "slope_ci95": [
+            -0.00033756307675503194,
+            0.0007876543580399206
+          ],
+          "rel_change_per_yr": 0.005797105393407194,
+          "kendall_p": 0.22425655667185918
+        },
+        "flag": false
+      },
+      {
+        "id": 6,
+        "mean_area_km2": 0.03193198580161801,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 0.0009004210684603701,
+          "slope_ci95": [
+            -0.0040518196183256805,
+            0.009791835327632725
+          ],
+          "rel_change_per_yr": 0.06926593257501364,
+          "kendall_p": 1.0
+        },
+        "flag": false
+      },
+      {
+        "id": 30,
+        "mean_area_km2": 0.029139667017651454,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 0.002145927835954353,
+          "slope_ci95": [
+            0.00025410102534806356,
+            0.004065977205755189
+          ],
+          "rel_change_per_yr": 0.09743493937663883,
+          "kendall_p": 0.03015873015873016
+        },
+        "flag": true
+      },
+      {
+        "id": 29,
+        "mean_area_km2": 0.021826071311287314,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": -0.007317271997453645,
+          "slope_ci95": [
+            -0.011066241044318303,
+            -0.002371399779804051
+          ],
+          "rel_change_per_yr": -0.17632607660955155,
+          "kendall_p": 0.002777777777777778
+        },
+        "flag": false
+      },
+      {
+        "id": 10,
+        "mean_area_km2": 0.01765123089509351,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 0.001692586054559797,
+          "slope_ci95": [
+            -0.002031104794392983,
+            0.014217702540918253
+          ],
+          "rel_change_per_yr": 0.0943397207975588,
+          "kendall_p": 0.3620501922003584
+        },
+        "flag": false
+      },
+      {
+        "id": 24,
+        "mean_area_km2": 0.017557925964605862,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": -0.00022571942342134813,
+          "slope_ci95": [
+            -0.000677167292451486,
+            0.001354335225187242
+          ],
+          "rel_change_per_yr": -0.012578489929782999,
+          "kendall_p": 0.7726190476190476
+        },
+        "flag": false
+      },
+      {
+        "id": 1,
+        "mean_area_km2": 0.017339499226571724,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": -0.000561925737808148,
+          "slope_ci95": [
+            -0.012474818518967368,
+            0.013317694611032493
+          ],
+          "rel_change_per_yr": -0.03205115324497043,
+          "kendall_p": 0.5619047619047619
+        },
+        "flag": false
+      },
+      {
+        "id": 25,
+        "mean_area_km2": 0.01375634384541107,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 0.0006757593170429269,
+          "slope_ci95": [
+            -0.009629365100408904,
+            0.005518606912422304
+          ],
+          "rel_change_per_yr": 0.08163341802616722,
+          "kendall_p": 1.0
+        },
+        "flag": false
+      },
+      {
+        "id": 31,
+        "mean_area_km2": 0.012632670051451507,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": -0.0008470226021017879,
+          "slope_ci95": [
+            -0.0013552360857526462,
+            -0.00011293664768648644
+          ],
+          "rel_change_per_yr": -0.05952409701638702,
+          "kendall_p": 0.010714285714285714
+        },
+        "flag": false
+      },
+      {
+        "id": 7,
+        "mean_area_km2": 0.011913707271950054,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": -0.0,
+          "slope_ci95": [
+            -0.0038828167744213715,
+            0.0018569940148154274
+          ],
+          "rel_change_per_yr": -0.0,
+          "kendall_p": 0.8778504987103268
+        },
+        "flag": false
+      },
+      {
+        "id": 21,
+        "mean_area_km2": 0.01141518450874303,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 0.00033858526148833334,
+          "slope_ci95": [
+            -0.0006771708431188017,
+            0.00389373283542227
+          ],
+          "rel_change_per_yr": 0.034482663924972484,
+          "kendall_p": 0.3813492063492063
+        },
+        "flag": false
+      },
+      {
+        "id": 9,
+        "mean_area_km2": 0.010443399365093293,
+        "growth": {
+          "n_years": 7,
+          "slope_km2_per_yr": 0.00022563144254187742,
+          "slope_ci95": [
+            -0.0028767745825462043,
+            0.0038074912954471074
+          ],
+          "rel_change_per_yr": 0.03100808685712366,
+          "kendall_p": 0.7612636496364197
+        },
+        "flag": false
+      }
+    ],
+    "overlay_region": {
+      "geodesic": false,
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            77.43698306244394,
+            32.119059750971225
+          ],
+          [
+            77.47551135894497,
+            32.119059750971225
+          ],
+          [
+            77.47551135894497,
+            32.14857163619061
+          ],
+          [
+            77.43698306244394,
+            32.14857163619061
+          ],
+          [
+            77.43698306244394,
+            32.119059750971225
+          ]
+        ]
+      ]
+    }
+  },
+  "inventory_comparison": "Hi-MAG and ICIMOD inventories not ingested (not on Earth Engine; licence and coverage to be verified). Use compare_inventory() with a local GeoJSON.",
+  "sources": {
+    "S2": "COPERNICUS/S2_SR_HARMONIZED + COPERNICUS/S2_CLOUD_PROBABILITY",
+    "S1": "COPERNICUS/S1_GRD (IW, VV)",
+    "DEM": "COPERNICUS/DEM/GLO30_2024_1",
+    "labels": "JRC/GSW1_4/YearlyHistory"
+  }
+}

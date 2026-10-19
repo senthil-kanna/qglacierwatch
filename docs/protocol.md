@@ -69,4 +69,6 @@ requires a named human approver.
 
 ## Protocol deviations
 
-None recorded.
+- 2026-10-19, lakes: processing scale changed from 10 m to 20 m before any scores were seen (10 m exceeded Earth Engine interactive limits).
+- 2026-10-19, lakes: JRC labels were initially masked outside the historical water extent (only shoreline pixels counted as land). This was fixed before any scores were computed, by unmasking to "not water".
+- 2026-10-19, lakes: the held-out lake test split (2021) contained almost no water (0.00076 km2). Scores were reported as non-interpretable; a water-stratified block split is proposed but has **not** been run.
