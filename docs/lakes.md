@@ -47,23 +47,21 @@ Optical-only is scored on optically valid pixels only; SAR-only and fusion on al
 Annual zone-total areas are reported for every year with a flag for comparability (optical valid
 share >= 0.9). Lake objects are connected areas that are water in >= 2 comparable years and >= 0.01
 km2. Per-object Theil-Sen slopes and Kendall p-values are computed when >= 5 comparable years exist.
-Objects growing >= 5%/yr with p < 0.05 receive a **screening flag** to prioritise inspection. A flag
+Objects growing >= 5%/yr with Benjamini-Hochberg q < 0.05 (across all objects) receive a **screening flag** to prioritise inspection. A flag
 is not evidence of glacial-lake outburst-flood danger, which depends on dam type, moraine stability,
 trigger processes and downstream exposure.
 
 ## Results (run 2026-10-19, 20 m; full tables in `reports/real/lake_analysis.md`)
 
-- Lake zone: 240 km2. Thresholds tuned on 64 train blocks, 2019: NDWI > 0.2, NIR < 0.3 (train F1 0.87); VV < -20 dB (train F1 0.28, SAR alone is weak in this terrain).
-- Validation (32 blocks, 2020; 0.18 km2 of JRC water): optical IoU 0.31, F1 0.48, precision 0.43, recall 0.53, area +21%. Fusion is the same as optical because the optical composite was valid on >= 99.7% of the zone; SAR-only IoU 0.06.
-- **Test (31 blocks, 2021) is not interpretable.** The random block split placed almost no lakes in the test blocks: 0.00076 km2 of JRC water and 27 water samples. The reported test IoU 0.002 and area error +29,996% mean "almost no true water to find", not a measured skill level. This is a split-design flaw: lakes are rare (34 objects in 240 km2) and the split was not stratified by water presence.
-- Annual zone water area (all 7 years comparable): 0.64-1.15 km2, no trend (Theil-Sen -0.005 km2/yr, 95% CI -0.16..+0.17, Kendall p = 1.0). Year-to-year swings of ~40% are larger than any trend and include segmentation noise.
-- 34 lake objects >= 0.01 km2 (largest ~0.08 km2). One object gets the screening flag (+9.7%/yr, p = 0.03). Testing 34 objects at p < 0.05 would give ~1.7 false flags by chance alone, so this single flag is **not evidence of growth**; it only marks a lake to look at in imagery.
+Split: water-stratified blocks (see `docs/protocol.md` deviations). Blocks are ranked by 2019 JRC
+water area; wet blocks in groups of 4 get train/train/val/test, dry blocks are split 50/25/25 at
+random. Wet blocks per split: train 6, val 4, test 3.
 
-### Required protocol change before re-scoring (not yet run)
-
-Assign blocks to splits stratified by JRC water presence (so each split contains lakes), pick the
-stratification and a new held-out year *before* looking at scores, log it as a deviation in
-`docs/protocol.md`, and apply a multiple-testing correction (Benjamini-Hochberg) to growth flags.
+- Lake zone: 240 km2. Thresholds tuned on 63 train blocks, 2019: NDWI > 0.2, NIR < 0.3 (train F1 0.80); VV < -20 dB (train F1 0.23, SAR alone is weak in this terrain).
+- Validation (32 blocks, 2020; 0.076 km2 of JRC water, 352 water samples): optical IoU 0.37, F1 0.54, precision 0.38, recall 0.94, area +148%. Fusion equals optical (optical composite valid on >= 99.7% of the zone); SAR-only IoU 0.04.
+- **Test (32 blocks, 2021; 0.087 km2 of JRC water, 475 water samples) is now interpretable, and skill is low:** optical/fusion IoU 0.11, F1 0.20, precision 0.13, recall 0.39, area +197%. SAR-only IoU 0.16 (precision 1.0, recall 0.16, area -84%). The detector over-maps water (likely shadow, wet snow and turbid shallows that JRC does not label) and generalises poorly from 2019 thresholds to 2021. Caveat: 2021 imagery was scored once before under the old split, so this score is not fully blind.
+- Annual zone water area (all 7 years comparable): 0.64-1.15 km2, no trend (Theil-Sen -0.005 km2/yr, 95% CI -0.16..+0.17, Kendall p = 1.0). Given the test precision, absolute areas are likely overestimated; year-to-year swings of ~40% include segmentation noise.
+- 34 lake objects >= 0.01 km2 (largest ~0.08 km2). **No object is flagged** after Benjamini-Hochberg correction (smallest q = 0.09). Under the earlier uncorrected rule one object (+9.7%/yr, p = 0.03, q = 0.34) was flagged; that flag was a likely chance result.
 
 ## Inventory comparison
 
