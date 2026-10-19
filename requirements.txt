@@ -8,3 +8,4 @@ dvc==3.67.1
 dagshub==0.7.2
 mlflow==3.17.1
 matplotlib==3.11.2
+requests==2.34.2
