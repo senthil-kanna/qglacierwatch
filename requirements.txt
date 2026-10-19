@@ -1,4 +1,5 @@
-﻿earthengine-api==1.7.48
+﻿--extra-index-url https://download.pytorch.org/whl/cpu
+earthengine-api==1.7.48
 cdsapi==0.7.7
 pandas==3.0.6
 xarray==2026.9.0
@@ -9,3 +10,17 @@ dagshub==0.7.2
 mlflow==3.17.1
 matplotlib==3.11.2
 requests==2.34.2
+numpy==2.5.4
+scipy==1.18.1
+scikit-learn==1.9.1
+lightgbm==4.7.0
+torch==2.14.1
+pennylane==0.45.1
+PyYAML==6.0.3
+joblib==1.6.0
+fastapi==0.148.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+pydantic-settings==2.16.0
+streamlit==1.66.0
+plotly==7.1.0

@@ -13,6 +13,7 @@ import pandas as pd
 
 from src import config
 from src.ingest.basin import basin_geometry
+from src.ingest.ee_auth import initialize
 
 MODIS_ID = "MODIS/061/MOD10A1"
 ERA5_ID = "ECMWF/ERA5_LAND/DAILY_AGGR"
@@ -89,20 +90,21 @@ def main() -> None:
     args = parser.parse_args()
     years = range(args.start, args.end + 1)
 
-    ee.Initialize(project=config.EE_PROJECT)
-    config.DATA_RAW.mkdir(parents=True, exist_ok=True)
+    initialize()
+    out = config.raw_dir("real")
+    out.mkdir(parents=True, exist_ok=True)
 
     region = basin_geometry(config.GAUGE_LON, config.GAUGE_LAT, config.HYBAS_LEVEL)
     area_km2 = region.area(maxError=100).divide(1e6).getInfo()
     print(f"Basin {config.GAUGE_NAME}: {area_km2:,.0f} km2")
-    (config.DATA_RAW / "basin.geojson").write_text(json.dumps(region.getInfo()))
+    (out / "basin.geojson").write_text(json.dumps(region.getInfo()))
 
     modis = fetch_modis(region, years)
-    modis.to_parquet(config.DATA_RAW / "modis_snow.parquet", index=False)
+    modis.to_parquet(out / "modis_snow.parquet", index=False)
     print(f"MODIS: {len(modis)} days, {modis['date'].min().date()} to {modis['date'].max().date()}")
 
     era5 = fetch_era5(region, years)
-    era5.to_parquet(config.DATA_RAW / "era5_land.parquet", index=False)
+    era5.to_parquet(out / "era5_land.parquet", index=False)
     print(f"ERA5-Land: {len(era5)} days, {era5['date'].min().date()} to {era5['date'].max().date()}")
 
 
