@@ -5,7 +5,9 @@ monitoring, drift-triggered retraining governance and a fair simulated quantum-c
 for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532 km2).
 
 > **Read this first.** Observed discharge for this gauge is not publicly available, so the forecast
-> target is **GloFAS v4 reanalysis (modelled)**. Every skill score measures how well GloFAS is
+> target is **GloFAS v4 modelled discharge**: consolidated reanalysis up to 2023-08-04, and
+> operational forecast-derived values from 2023-08-05 (Open-Meteo `seamless_v4`; see
+> `docs/protocol_fresh2026.md`). Every skill score measures how well GloFAS is
 > reproduced, not the real river. No model has passed the promotion gate, nothing is deployed to
 > Azure, and nothing here is a live feed. Synthetic data are used only in tests and `demo` mode.
 

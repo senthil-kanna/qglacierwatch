@@ -7,7 +7,7 @@ All numbers below are copied from `reports/real/forecast_results.md` (run 2026-1
 
 Probabilistic daily discharge guidance (P10/P50/P90) for the Beas above Bhuntar at 1, 7 and 30
 days, for research on snowmelt-driven forecasting and for monitoring/governance experiments.
-**Not for flood warning or operational decisions**: the target is GloFAS reanalysis (modelled), no
+**Not for flood warning or operational decisions**: the target is GloFAS v4 modelled discharge (reanalysis to 2023-08-04, forecast-derived after), no
 weather forecasts are used, and no production model has passed the promotion gate.
 
 ## Models

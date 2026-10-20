@@ -17,7 +17,8 @@ GAUGE_LON = 77.146
 GAUGE_LAT = 31.877
 
 # Observed CWC discharge for the Indus basin (incl. Beas) is classified and not on India-WRIS,
-# so the target is GloFAS v4 reanalysis. This cell sits on the Beas main stem just below the
+# so the target is GloFAS v4 modelled discharge (Open-Meteo seamless_v4: reanalysis to 2023-08-04,
+# forecast-derived afterwards). This cell sits on the Beas main stem just below the
 # Parvati confluence, matching the traced catchment.
 GLOFAS_LAT = 31.825
 GLOFAS_LON = 77.125

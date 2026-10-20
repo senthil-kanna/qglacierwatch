@@ -87,6 +87,13 @@ All results go to `reports/fresh2026/real/` and are reported whatever they are, 
 actual evaluation dates, missing observations, seeds, software versions, the code commit and the
 commands above.
 
-## Deviations
+## Deviations and procedural notes
 
-(none yet)
+- 2026-10-20 (procedural, before any model ran): `src.features.build` was first run without
+  `QGW_CONFIG_OVERLAY`, so the feature table ended 2025-12-31 (dataset 2b46646ce1c0 inside
+  `data/fresh2026`). It was deleted and rebuilt with the overlay (dataset 07aa2d700953, issue dates
+  to 2026-09-30). No model was trained or scored in between.
+- Data version built 2026-10-20: +273 rows each for MODIS, ERA5-Land and discharge
+  (2026-01-01..2026-09-30), no missing dates; MODIS has 83 days without a usable snow fraction
+  (cloud), handled as in earlier years. Stability check: 0 of 365 stored 2025 discharge values
+  changed upstream.

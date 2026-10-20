@@ -73,7 +73,7 @@ def provenance_banner() -> None:
         st.warning("DEMO MODE: all values come from a SYNTHETIC fixture, not observations.", icon=":material/science:")
     elif not meta["target_is_observed"]:
         st.info(
-            f"Target discharge is **{meta['target_source']}**: modelled GloFAS v4 reanalysis, not gauge observations. "
+            f"Target discharge is **{meta['target_source']}**: modelled GloFAS v4 discharge (reanalysis to 2023-08-04, forecast-derived after), not gauge observations. "
             "Skill shown here is skill at reproducing GloFAS. Nothing on this dashboard is a live feed.",
             icon=":material/info:",
         )
