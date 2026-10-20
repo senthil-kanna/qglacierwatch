@@ -36,7 +36,9 @@ Cloud (blocked on the student subscription):
 
 External:
 
-- [ ] Observed CWC Bhuntar discharge: formal data request (see `docs/gauge_data_request.md`); until then GloFAS v4 is the target.
+- [x] Gauge consistency check (2026-10-20, registered c5b244c): Bajoura Bridge (HP Water Dept via NWDP), 737 valid days 2023-07..2026-09; GloFAS NSE 0.21 vs gauge; forecasts NSE 0.1-0.3 vs gauge. Raw data private (terms unclear).
+- [ ] Observed CWC Bhuntar discharge (long, quality-controlled record): formal data request (`docs/gauge_data_request.md`); until then GloFAS v4 is the target.
+- [ ] Confirm NWDP redistribution terms (helpdesk-nwic@gov.in) before sharing any gauge series.
 
 ## Blockers and external dependencies
 
