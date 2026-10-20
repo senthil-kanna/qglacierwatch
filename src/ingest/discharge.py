@@ -14,11 +14,11 @@ import requests
 from src import config
 
 FLOOD_API = "https://flood-api.open-meteo.com/v1/flood"
-GAUGE_CSV = config.DATA_RAW / "discharge_gauge.csv"
+GAUGE_CSV = config.DATA_RAW / "discharge_gauge.csv"  # user-supplied gauge data always lives in data/raw
 
 
 def fetch_glofas(lat: float, lon: float, start: str, end: str) -> pd.DataFrame:
-    params = {
+    params: dict[str, str | float] = {
         "latitude": lat,
         "longitude": lon,
         "daily": "river_discharge",
@@ -49,7 +49,9 @@ def main() -> None:
         df = fetch_glofas(config.GLOFAS_LAT, config.GLOFAS_LON, start, end)
 
     df = df[(df["date"] >= start) & (df["date"] <= end)].sort_values("date")
-    df.to_parquet(config.DATA_RAW / "discharge.parquet", index=False)
+    out = config.raw_dir("real")
+    out.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(out / "discharge.parquet", index=False)
 
     missing = df["discharge_m3s"].isna().sum()
     print(f"Discharge ({df['source'].iloc[0]}): {len(df)} days, {missing} missing, "

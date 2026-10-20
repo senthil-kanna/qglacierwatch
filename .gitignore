@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# QGlacierWatch generated outputs
+artifacts/
+mlruns/
+
+reports/demo/

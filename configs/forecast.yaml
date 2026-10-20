@@ -1,0 +1,54 @@
+# Forecasting experiment protocol. Fixed before final evaluation (see docs/protocol.md).
+horizons: [1, 7, 30]           # days after the issue date t
+quantiles: [0.1, 0.5, 0.9]
+
+# Days between a value's valid date and when it is usable at issue time.
+# Assumptions for an operational setting, not measured latencies.
+availability_lag_days:
+  discharge: 1      # gauge/GloFAS value for day t-1 is known on day t
+  modis: 1          # MOD10A1 is typically available within ~1-2 days
+  era5: 5           # ERA5-Land (ERA5T) preliminary data lag of ~5 days
+
+warmup_days: 75     # dropped so every lag/rolling feature is defined
+
+splits:
+  train: ["2015-01-01", "2020-12-31"]
+  calibration: ["2021-01-01", "2022-12-31"]   # tuning folds end here; conformal calibration
+  test: ["2023-01-01", "2025-12-31"]          # untouched until final evaluation
+
+# Rolling-origin folds for model selection: train on all issue dates up to the year before each value.
+cv_validation_years: [2019, 2020, 2021, 2022]
+
+seasons:            # month -> season label used for every seasonal breakdown
+  winter: [12, 1, 2]
+  pre_monsoon: [3, 4, 5]
+  monsoon: [6, 7, 8, 9]
+  post_monsoon: [10, 11]
+
+seeds: [11, 22, 33]
+
+gbm:
+  # Tuning budget: every config below is evaluated on all CV folds; nothing else is tried.
+  grid:
+    - {num_leaves: 15, learning_rate: 0.05, n_estimators: 400, min_child_samples: 20}
+    - {num_leaves: 31, learning_rate: 0.05, n_estimators: 400, min_child_samples: 20}
+    - {num_leaves: 15, learning_rate: 0.03, n_estimators: 800, min_child_samples: 40}
+    - {num_leaves: 7, learning_rate: 0.05, n_estimators: 600, min_child_samples: 40}
+  common: {subsample: 0.8, subsample_freq: 1, colsample_bytree: 0.8, reg_lambda: 1.0}
+
+lstm:
+  seq_len: 60
+  grid:
+    - {hidden: 32, layers: 1, dropout: 0.0, lr: 0.003, epochs: 60}
+    - {hidden: 64, layers: 1, dropout: 0.1, lr: 0.002, epochs: 60}
+  batch_size: 128
+  patience: 8
+
+calibration:
+  method: cqr        # conformalized quantile regression on the calibration period
+  target_coverage: 0.8
+
+bootstrap:
+  block_days: 30     # moving-block bootstrap to respect autocorrelation
+  n_resamples: 1000
+  ci: 0.95

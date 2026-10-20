@@ -1,0 +1,19 @@
+# Quantum-classical benchmark. Fixed before running; see docs/quantum_benchmark.md.
+horizon: 7                    # primary task; h=7 is where learned models and persistence are closest
+seeds: [101, 202, 303, 404, 505]
+inputs: pca                   # PCA of the standard feature set, fitted on training rows only
+n_components: 4
+epochs: 40
+batch_size: 64
+patience: 6
+lr_grid: [0.01, 0.05]         # equal tuning budget for every model, chosen on the inner hold-out
+shots_eval: 1000              # finite-shot re-evaluation of the trained VQC (one seed)
+
+models:
+  vqc:            {type: vqc, n_qubits: 4, layers: 2, entangle: true}
+  vqc_noent:      {type: vqc, n_qubits: 4, layers: 2, entangle: false}   # ablation: no CNOTs
+  vqc_1layer:     {type: vqc, n_qubits: 4, layers: 1, entangle: true}    # ablation: no data re-uploading
+  vqc_6q:         {type: vqc, n_qubits: 6, layers: 2, entangle: true, n_components: 6}  # ablation: more qubits
+  linear:         {type: mlp, hidden: 0}                                  # 4 inputs -> 3 quantiles
+  mlp_matched:    {type: mlp, hidden: 5}                                  # parameter count close to vqc
+  mlp_large:      {type: mlp, hidden: 32}

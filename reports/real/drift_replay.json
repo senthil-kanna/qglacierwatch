@@ -1,0 +1,2542 @@
+{
+  "mode": "real",
+  "generated_utc": "2026-10-19T14:14:03+00:00",
+  "dataset_id": "2b46646ce1c0",
+  "forecast_model_family": "gbm_quantile",
+  "note": "Real-data replay has no ground-truth drift labels; alert rates there describe behaviour, not accuracy. Accuracy is measured only on controlled synthetic perturbations.",
+  "replay": {
+    "n_checks": 522,
+    "by_detector": {
+      "covariate|baseline": {
+        "checks_evaluated": 522,
+        "checks_with_alert": 521,
+        "alert_rate": 0.9980842911877394,
+        "alerts_by_season": {
+          "monsoon": 175,
+          "post_monsoon": 86,
+          "pre_monsoon": 132,
+          "winter": 128
+        },
+        "alerts_by_year": {
+          "2016": 52,
+          "2017": 52,
+          "2018": 52,
+          "2019": 52,
+          "2020": 52,
+          "2021": 53,
+          "2022": 52,
+          "2023": 52,
+          "2024": 52,
+          "2025": 52
+        },
+        "targets": {
+          "t_mean7": 521,
+          "pdd7": 521,
+          "logq0": 515,
+          "melt7": 512,
+          "swe_change30": 509,
+          "snow_frac": 471,
+          "p_sum7": 396
+        }
+      },
+      "covariate|season_aware": {
+        "checks_evaluated": 350,
+        "checks_with_alert": 17,
+        "alert_rate": 0.04857142857142857,
+        "alerts_by_season": {
+          "monsoon": 6,
+          "post_monsoon": 4,
+          "pre_monsoon": 5,
+          "winter": 2
+        },
+        "alerts_by_year": {
+          "2019": 1,
+          "2021": 1,
+          "2022": 6,
+          "2024": 3,
+          "2025": 6
+        },
+        "targets": {
+          "pdd7": 8,
+          "p_sum7": 5,
+          "t_mean7": 4,
+          "melt7": 3,
+          "logq0": 3,
+          "snow_frac": 2
+        }
+      },
+      "data_quality|rule": {
+        "checks_evaluated": 522,
+        "checks_with_alert": 4,
+        "alert_rate": 0.007662835249042145,
+        "alerts_by_season": {
+          "post_monsoon": 4
+        },
+        "alerts_by_year": {
+          "2022": 4
+        },
+        "targets": {
+          "modis": 4
+        }
+      },
+      "prediction|baseline": {
+        "checks_evaluated": 230,
+        "checks_with_alert": 225,
+        "alert_rate": 0.9782608695652174,
+        "alerts_by_season": {
+          "monsoon": 73,
+          "post_monsoon": 43,
+          "pre_monsoon": 53,
+          "winter": 56
+        },
+        "alerts_by_year": {
+          "2021": 21,
+          "2022": 52,
+          "2023": 50,
+          "2024": 52,
+          "2025": 50
+        },
+        "targets": {
+          "log_p50_h7": 225
+        }
+      },
+      "prediction|season_aware": {
+        "checks_evaluated": 49,
+        "checks_with_alert": 11,
+        "alert_rate": 0.22448979591836735,
+        "alerts_by_season": {
+          "post_monsoon": 7,
+          "winter": 4
+        },
+        "alerts_by_year": {
+          "2025": 11
+        },
+        "targets": {
+          "log_p50_h7": 11
+        }
+      },
+      "residual|baseline": {
+        "checks_evaluated": 248,
+        "checks_with_alert": 83,
+        "alert_rate": 0.3346774193548387,
+        "alerts_by_season": {
+          "monsoon": 59,
+          "post_monsoon": 4,
+          "pre_monsoon": 20
+        },
+        "alerts_by_year": {
+          "2021": 16,
+          "2022": 11,
+          "2023": 14,
+          "2024": 20,
+          "2025": 22
+        },
+        "targets": {
+          "h1": 72,
+          "h7": 70
+        }
+      },
+      "residual|season_aware": {
+        "checks_evaluated": 204,
+        "checks_with_alert": 63,
+        "alert_rate": 0.3088235294117647,
+        "alerts_by_season": {
+          "monsoon": 31,
+          "post_monsoon": 6,
+          "pre_monsoon": 25,
+          "winter": 1
+        },
+        "alerts_by_year": {
+          "2022": 8,
+          "2023": 14,
+          "2024": 17,
+          "2025": 24
+        },
+        "targets": {
+          "h7": 49,
+          "h1": 42
+        }
+      }
+    },
+    "first_check": "2016-01-01",
+    "last_check": "2025-12-26"
+  },
+  "documented_events": [
+    {
+      "start": "2023-07-07",
+      "end": "2023-07-12",
+      "label": "July 2023 extreme rainfall and flooding in Himachal Pradesh (Beas valley affected)",
+      "alerts_within_30d": [
+        "covariate/baseline/logq0",
+        "covariate/baseline/melt7",
+        "covariate/baseline/p_sum7",
+        "covariate/baseline/pdd7",
+        "covariate/baseline/snow_frac",
+        "covariate/baseline/swe_change30",
+        "covariate/baseline/t_mean7",
+        "prediction/baseline/log_p50_h7",
+        "residual/baseline/h1",
+        "residual/baseline/h7",
+        "residual/season_aware/h1",
+        "residual/season_aware/h7"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "check_date": "2019-09-20",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "melt7; snow_frac"
+    },
+    {
+      "check_date": "2021-05-21",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "p_sum7"
+    },
+    {
+      "check_date": "2022-03-11",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.50 at h7"
+    },
+    {
+      "check_date": "2022-03-18",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.13 at h7"
+    },
+    {
+      "check_date": "2022-04-22",
+      "severity": "warning",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "t_mean7; pdd7; melt7"
+    },
+    {
+      "check_date": "2022-05-13",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "pdd7"
+    },
+    {
+      "check_date": "2022-05-20",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "t_mean7; pdd7"
+    },
+    {
+      "check_date": "2022-05-27",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "t_mean7; pdd7"
+    },
+    {
+      "check_date": "2022-06-03",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "t_mean7; pdd7"
+    },
+    {
+      "check_date": "2022-07-08",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2022-07-15",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2022-07-22",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.25 at h7"
+    },
+    {
+      "check_date": "2022-07-29",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2022-08-12",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "snow_frac"
+    },
+    {
+      "check_date": "2022-09-02",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2022-09-09",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2022-10-21",
+      "severity": "warning",
+      "tier": 1,
+      "action": "fix inputs, re-run ingestion; no model change",
+      "reasons": "input problem: modis"
+    },
+    {
+      "check_date": "2022-10-28",
+      "severity": "warning",
+      "tier": 1,
+      "action": "fix inputs, re-run ingestion; no model change",
+      "reasons": "input problem: modis"
+    },
+    {
+      "check_date": "2022-11-04",
+      "severity": "warning",
+      "tier": 1,
+      "action": "fix inputs, re-run ingestion; no model change",
+      "reasons": "input problem: modis"
+    },
+    {
+      "check_date": "2022-11-11",
+      "severity": "warning",
+      "tier": 1,
+      "action": "fix inputs, re-run ingestion; no model change",
+      "reasons": "input problem: modis"
+    },
+    {
+      "check_date": "2023-03-03",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.14 at h1"
+    },
+    {
+      "check_date": "2023-03-10",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.09 at h1"
+    },
+    {
+      "check_date": "2023-03-17",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2023-06-30",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2023-07-07",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2023-07-14",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2023-07-21",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1; coverage drop at h7"
+    },
+    {
+      "check_date": "2023-07-28",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1; coverage drop at h7"
+    },
+    {
+      "check_date": "2023-08-04",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1; coverage drop at h7"
+    },
+    {
+      "check_date": "2023-08-11",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2023-09-01",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2023-09-08",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 3.12 at h1"
+    },
+    {
+      "check_date": "2023-09-15",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 3.07 at h1"
+    },
+    {
+      "check_date": "2023-09-22",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.32 at h1"
+    },
+    {
+      "check_date": "2024-03-01",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.82 at h7"
+    },
+    {
+      "check_date": "2024-03-08",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 3.52 at h1; QS ratio 3.92 at h7"
+    },
+    {
+      "check_date": "2024-03-15",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 3.85 at h1; QS ratio 4.54 at h7"
+    },
+    {
+      "check_date": "2024-03-22",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 4.46 at h1; QS ratio 4.57 at h7"
+    },
+    {
+      "check_date": "2024-03-29",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 3.63 at h1; QS ratio 3.39 at h7"
+    },
+    {
+      "check_date": "2024-04-05",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.71 at h7"
+    },
+    {
+      "check_date": "2024-04-12",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2024-04-19",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2024-04-26",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2024-05-03",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2024-05-10",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2024-05-17",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2024-07-26",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2024-08-02",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2024-08-09",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2024-08-16",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2024-08-23",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2024-11-29",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "pdd7"
+    },
+    {
+      "check_date": "2024-12-06",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "pdd7"
+    },
+    {
+      "check_date": "2024-12-13",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "pdd7"
+    },
+    {
+      "check_date": "2025-03-14",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.89 at h1; QS ratio 4.58 at h7"
+    },
+    {
+      "check_date": "2025-03-21",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 3.14 at h1; QS ratio 4.69 at h7"
+    },
+    {
+      "check_date": "2025-03-28",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 3.21 at h1; QS ratio 4.74 at h7"
+    },
+    {
+      "check_date": "2025-04-04",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.75 at h7"
+    },
+    {
+      "check_date": "2025-04-18",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1"
+    },
+    {
+      "check_date": "2025-04-25",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1; coverage drop at h7"
+    },
+    {
+      "check_date": "2025-05-02",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1; coverage drop at h7"
+    },
+    {
+      "check_date": "2025-05-09",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h1; coverage drop at h7"
+    },
+    {
+      "check_date": "2025-06-27",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2025-07-04",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2025-07-11",
+      "severity": "critical",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2025-08-22",
+      "severity": "warning",
+      "tier": 2,
+      "action": "refit CQR offsets on the most recent labelled window",
+      "reasons": "coverage drop at h7"
+    },
+    {
+      "check_date": "2025-08-29",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.84 at h1; QS ratio 2.33 at h7"
+    },
+    {
+      "check_date": "2025-09-05",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 4.30 at h1; QS ratio 2.96 at h7"
+    },
+    {
+      "check_date": "2025-09-12",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 7.18 at h1; QS ratio 4.44 at h7"
+    },
+    {
+      "check_date": "2025-09-19",
+      "severity": "critical",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 8.86 at h1; QS ratio 5.59 at h7"
+    },
+    {
+      "check_date": "2025-09-26",
+      "severity": "critical",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 9.49 at h1; QS ratio 7.18 at h7"
+    },
+    {
+      "check_date": "2025-10-03",
+      "severity": "critical",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 8.51 at h1; QS ratio 7.39 at h7"
+    },
+    {
+      "check_date": "2025-10-10",
+      "severity": "critical",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 5.61 at h1; QS ratio 5.60 at h7"
+    },
+    {
+      "check_date": "2025-10-17",
+      "severity": "critical",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 4.30 at h1; QS ratio 4.43 at h7"
+    },
+    {
+      "check_date": "2025-10-24",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.19 at h1; QS ratio 2.63 at h7"
+    },
+    {
+      "check_date": "2025-10-31",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "log_p50_h7"
+    },
+    {
+      "check_date": "2025-11-07",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "log_p50_h7"
+    },
+    {
+      "check_date": "2025-11-14",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "log_p50_h7"
+    },
+    {
+      "check_date": "2025-11-21",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 4.24 at h1"
+    },
+    {
+      "check_date": "2025-11-28",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 3.76 at h1; QS ratio 2.75 at h7"
+    },
+    {
+      "check_date": "2025-12-05",
+      "severity": "warning",
+      "tier": 3,
+      "action": "retrain candidate on extended data, evaluate vs incumbent",
+      "reasons": "QS ratio 2.09 at h1"
+    },
+    {
+      "check_date": "2025-12-12",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "log_p50_h7"
+    },
+    {
+      "check_date": "2025-12-19",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "log_p50_h7"
+    },
+    {
+      "check_date": "2025-12-26",
+      "severity": "info",
+      "tier": 0,
+      "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+      "reasons": "log_p50_h7"
+    }
+  ],
+  "synthetic": {
+    "temperature_bias": {
+      "spec": {
+        "column": "temperature_2m",
+        "offset": 2.5,
+        "days": 90
+      },
+      "summary": {
+        "baseline": {
+          "events": 24,
+          "detected": 24,
+          "detected_without_clean_alarm": 0,
+          "missed": 0,
+          "recall": 1.0,
+          "clean_windows_with_alarm": 24,
+          "false_alarm_window_rate": 1.0,
+          "precision_event_level": 0.0,
+          "median_delay_days": 0.0,
+          "delay_days": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "season_aware": {
+          "events": 24,
+          "detected": 10,
+          "detected_without_clean_alarm": 5,
+          "missed": 14,
+          "recall": 0.4166666666666667,
+          "clean_windows_with_alarm": 5,
+          "false_alarm_window_rate": 0.20833333333333334,
+          "precision_event_level": 0.5,
+          "median_delay_days": 42.0,
+          "delay_days": [
+            0,
+            56,
+            28,
+            42,
+            7,
+            49,
+            42,
+            0,
+            42,
+            42
+          ]
+        }
+      },
+      "events": [
+        {
+          "onset": "2021-04-29",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2021-04-29",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2023-09-18",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-09-18",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2020-07-04",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-07-04",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 56,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2021-03-06",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2021-03-06",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2021-09-29",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2021-09-29",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2021-09-13",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2021-09-13",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2024-12-28",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2024-12-28",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 28,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2024-05-23",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-05-23",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 42,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2025-01-11",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2025-01-11",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2025-06-21",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2025-06-21",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 7,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2020-06-06",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-06-06",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2020-10-12",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-10-12",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 49,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2024-10-07",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2024-10-07",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 42,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-06-07",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-06-07",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2020-11-29",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-11-29",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2020-12-28",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-12-28",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2025-01-08",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2025-01-08",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2021-12-22",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2021-12-22",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2021-06-13",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2021-06-13",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2020-12-06",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-12-06",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2022-07-09",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-07-09",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-03-27",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2023-03-27",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2024-05-24",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-05-24",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 42,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2023-05-22",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-05-22",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 42,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        }
+      ]
+    },
+    "snow_sensor_dropout": {
+      "spec": {
+        "column": "snow_frac_valid",
+        "value": 0.0,
+        "days": 45
+      },
+      "summary": {
+        "baseline": {
+          "events": 24,
+          "detected": 24,
+          "detected_without_clean_alarm": 0,
+          "missed": 0,
+          "recall": 1.0,
+          "clean_windows_with_alarm": 24,
+          "false_alarm_window_rate": 1.0,
+          "precision_event_level": 0.0,
+          "median_delay_days": 0.0,
+          "delay_days": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "season_aware": {
+          "events": 24,
+          "detected": 20,
+          "detected_without_clean_alarm": 8,
+          "missed": 4,
+          "recall": 0.8333333333333334,
+          "clean_windows_with_alarm": 12,
+          "false_alarm_window_rate": 0.5,
+          "precision_event_level": 0.4,
+          "median_delay_days": 24.5,
+          "delay_days": [
+            21,
+            0,
+            28,
+            35,
+            0,
+            35,
+            0,
+            0,
+            28,
+            0,
+            28,
+            49,
+            21,
+            35,
+            0,
+            21,
+            14,
+            28,
+            35,
+            35
+          ]
+        }
+      },
+      "events": [
+        {
+          "onset": "2025-06-01",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2025-06-01",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 21,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2020-07-30",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-07-30",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2022-09-05",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "data_quality",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-09-05",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "data_quality",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-02-09",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-02-09",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 28,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-10-11",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2023-10-11",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2020-01-10",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-01-10",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2021-02-10",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2021-02-10",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 35,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2022-07-22",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-07-22",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2020-05-12",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-05-12",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 35,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2025-05-12",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2025-05-12",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-07-11",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-07-11",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-05-23",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-05-23",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 28,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2022-10-31",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "data_quality",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2022-10-31",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "data_quality"
+          ]
+        },
+        {
+          "onset": "2023-04-12",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2023-04-12",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 28,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2021-11-23",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2021-11-23",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 49,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2021-10-14",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2021-10-14",
+          "detector": "season_aware",
+          "detected": false,
+          "delay_days": null,
+          "clean_alert_in_window": false,
+          "alert_kinds": []
+        },
+        {
+          "onset": "2020-09-17",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2020-09-17",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 21,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2021-02-18",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2021-02-18",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 35,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2024-03-18",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-03-18",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-06-07",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-06-07",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 21,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-07-15",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-07-15",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2021-07-12",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2021-07-12",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 28,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2023-12-17",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2023-12-17",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 35,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        },
+        {
+          "onset": "2024-10-22",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction"
+          ]
+        },
+        {
+          "onset": "2024-10-22",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 35,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate"
+          ]
+        }
+      ]
+    },
+    "discharge_rating_shift": {
+      "spec": {
+        "scale": 1.35,
+        "days": 90
+      },
+      "summary": {
+        "baseline": {
+          "events": 24,
+          "detected": 24,
+          "detected_without_clean_alarm": 0,
+          "missed": 0,
+          "recall": 1.0,
+          "clean_windows_with_alarm": 24,
+          "false_alarm_window_rate": 1.0,
+          "precision_event_level": 0.0,
+          "median_delay_days": 0.0,
+          "delay_days": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "season_aware": {
+          "events": 24,
+          "detected": 24,
+          "detected_without_clean_alarm": 3,
+          "missed": 0,
+          "recall": 1.0,
+          "clean_windows_with_alarm": 21,
+          "false_alarm_window_rate": 0.875,
+          "precision_event_level": 0.125,
+          "median_delay_days": 14.0,
+          "delay_days": [
+            0,
+            14,
+            14,
+            14,
+            14,
+            14,
+            7,
+            14,
+            0,
+            14,
+            0,
+            0,
+            14,
+            0,
+            14,
+            14,
+            14,
+            14,
+            0,
+            14,
+            14,
+            14,
+            14,
+            14
+          ]
+        }
+      },
+      "events": [
+        {
+          "onset": "2024-12-04",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-12-04",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-11-15",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-11-15",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-05-22",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-05-22",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-01-28",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-01-28",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-10-29",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-10-29",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-11-07",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-11-07",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-08-22",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-08-22",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 7,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-01-21",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-01-21",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-05-18",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-05-18",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-01-21",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-01-21",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-08-31",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "data_quality",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-08-31",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "data_quality",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-05-26",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2022-05-26",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-10-08",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-10-08",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-09-20",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-09-20",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2025-05-24",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2025-05-24",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-01-16",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-01-16",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-06-12",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-06-12",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2025-02-14",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2025-02-14",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-03-20",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-03-20",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-02-12",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-02-12",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-05-27",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-05-27",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-09-27",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2024-09-27",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-05-17",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-05-17",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-10-14",
+          "detector": "baseline",
+          "detected": true,
+          "delay_days": 0,
+          "clean_alert_in_window": true,
+          "alert_kinds": [
+            "covariate",
+            "prediction",
+            "residual"
+          ]
+        },
+        {
+          "onset": "2023-10-14",
+          "detector": "season_aware",
+          "detected": true,
+          "delay_days": 14,
+          "clean_alert_in_window": false,
+          "alert_kinds": [
+            "residual"
+          ]
+        }
+      ]
+    }
+  }
+}
