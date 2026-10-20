@@ -87,6 +87,41 @@ All results go to `reports/fresh2026/real/` and are reported whatever they are, 
 actual evaluation dates, missing observations, seeds, software versions, the code commit and the
 commands above.
 
+## Results (single test access 2026-10-20T07:53:38Z; dataset 07aa2d700953; code 75251b5)
+
+Full tables: `reports/fresh2026/real/forecast_results.md`, `quantum_benchmark.md`. Test target
+dates 2026-01-02..2026-09-30 (h1: 272 samples, h7: 266, h30: 243); no missing observations.
+Selected by CV: gbm_quantile (`num_leaves 7, lr 0.05, 600 trees, min_child_samples 40`; CV QS
+6.410) over quantile_lstm (6.474). Seeds 11/22/33. Software: Python 3.12.6, numpy 2.5.4, pandas
+3.0.6, LightGBM 4.7.0, torch 2.14.1+cpu, scikit-learn 1.9.1, scipy 1.18.1, earthengine-api 1.7.48,
+PennyLane 0.45.1; Windows 11.
+
+| model | h | NSE | KGE | MAE | QS | cov80 | width80 |
+|---|---|---|---|---|---|---|---|
+| persistence | 1 / 7 / 30 | 0.993 / 0.947 / 0.521 | 0.991 / 0.952 / 0.643 | 3.02 / 9.27 / 29.86 | 1.87 / 5.32 / 15.59 | 0.860 / 0.827 / 0.811 | 9.6 / 30.4 / 72.6 |
+| climatology | 1 / 7 / 30 | 0.916 / 0.918 / 0.919 | 0.819 / 0.817 / 0.812 | 13.68 / 13.55 / 13.85 | 9.27 / 9.14 / 9.55 | 0.871 / 0.895 / 0.955 | 65.9 / 67.0 / 73.4 |
+| **gbm_quantile** | 1 / 7 / 30 | 0.994 / 0.980 / 0.962 | 0.978 / 0.977 / 0.928 | 2.36 / 5.82 / 9.56 | 1.89 / 4.27 / 8.32 | **0.938** / 0.887 / **0.955** | 16.1 / 32.9 / 72.7 |
+| quantile_lstm | 1 / 7 / 30 | 0.995 / 0.975 / 0.960 | 0.985 / 0.907 / 0.917 | 2.80 / 6.58 / 10.14 | 2.01 / 4.59 / 8.29 | 0.864 / 0.820 / 0.947 | 15.1 / 33.1 / 73.0 |
+
+- **Gate: failed**, now on *over*-coverage: gbm_quantile P10-P90 coverage 0.938 (1 d) and 0.955
+  (30 d) exceed 0.90; 7 d (0.887) passes; NSE floors and "beats climatology" pass at all horizons.
+  No model is promoted.
+- **Skill:** learned models beat climatology at 1 and 7 days (bootstrap CIs exclude 0) and beat
+  persistence at 30 days (gbm -7.27 QS, CI [-15.6, -0.33]). At 1 day nothing beats persistence
+  (H1b holds). At 30 days the gain over climatology is not significant (CI [-3.84, 0.88]).
+- **Why the intervals are wide (descriptive, read-only):** the uncalibrated quantiles under-covered
+  badly in calibration 2024-2025 (0.65 / 0.48 / 0.35), partly because 2025 was an extreme
+  high-flow year (mean 132 m3/s vs ~95 typical; peak 366). CQR widened the intervals accordingly
+  (30 d log offsets 0.09-0.37 by season). 2026 was a low-flow year (mean 83, peak 221), so the same
+  widening over-covers. This is the non-exchangeability caveat of conformal calibration across
+  hydrological regimes, observed directly.
+- **Quantum benchmark (h = 7 d, 4 PCA inputs, 5 seeds):** VQC test QS 15.9 +/- 3.0, worse than
+  linear (6.46), capacity-matched MLP (7.16) and large MLP (6.58), paired t p <= 0.005 against all
+  three (Wilcoxon p = 0.0625, the minimum attainable with 5 seeds). Consistent with H3; a noiseless
+  simulator result says nothing about quantum advantage.
+- **2026 is now consumed.** No setting is changed in response to these results. A further claim
+  needs a later unseen period (e.g. Oct 2026 onward) under a new registered protocol.
+
 ## Deviations and procedural notes
 
 - 2026-10-20 (procedural, before any model ran): `src.features.build` was first run without
