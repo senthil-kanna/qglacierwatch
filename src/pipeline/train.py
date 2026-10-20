@@ -280,7 +280,9 @@ def main() -> None:
         "git_sha": git_sha(),
         "protocol_sha256": {
             p: sha256(config.ROOT / p) for p in ("docs/protocol.md", "configs/forecast.yaml", "configs/governance.yaml")
-        },
+        }
+        | ({str(o.relative_to(config.ROOT)): sha256(o)} if (o := config.overlay_file("forecast")) else {}),
+        "splits": cfg["splits"],
         "python": platform.python_version(),
         "platform": platform.platform(),
         "selected_configs": chosen,
