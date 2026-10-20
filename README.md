@@ -4,12 +4,17 @@ Season-aware probabilistic discharge forecasting (P10/P50/P90 at 1, 7 and 30 day
 monitoring, drift-triggered retraining governance and a fair simulated quantum-classical benchmark
 for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532 km2).
 
-> **Read this first.** Observed discharge for this gauge is not publicly available, so the forecast
-> target is **GloFAS v4 modelled discharge**: consolidated reanalysis up to 2023-08-04, and
+> **Read this first.** Long-term observed discharge (CWC, Bhuntar) is not publicly available, so the
+> forecast target is **GloFAS v4 modelled discharge**: consolidated reanalysis up to 2023-08-04, and
 > operational forecast-derived values from 2023-08-05 (Open-Meteo `seamless_v4`; see
-> `docs/protocol_fresh2026.md`). Every skill score measures how well GloFAS is
-> reproduced, not the real river. No model has passed the promotion gate, nothing is deployed to
-> Azure, and nothing here is a live feed. Synthetic data are used only in tests and `demo` mode.
+> `docs/protocol_fresh2026.md`). Every skill score measures how well GloFAS is reproduced, not the
+> real river. **A consistency check against a state telemetry gauge 3.7 km downstream (Bajoura
+> Bridge, HP Water Department via the National Water Data Portal, 737 days 2023-2026) shows GloFAS
+> matches it poorly (NSE 0.21; about half the observed flow in 2026; large seasonal biases), and
+> our forecasts reach only NSE 0.1-0.3 against it** (`docs/protocol_gauge_check.md`; gauge quality
+> unknown, so this is not independent validation). No model has passed the promotion gate, nothing
+> is deployed to Azure, and nothing here is a live feed. Synthetic data are used only in tests and
+> `demo` mode.
 
 ## What is implemented, what ran, what is blocked
 
@@ -106,7 +111,7 @@ Errors are JSON `{"error", "detail"}` with 401/404/422/429/503. Set `QGW_API_KEY
 
 ## Limitations and future work
 
-- **Observed discharge**: obtain CWC/HP data (or a nearby open gauge) and rerun; the pipeline switches automatically and reports `target_is_observed: true`.
+- **Observed discharge**: the only open gauge found near the outlet (Bajoura Bridge, HP Water Department telemetry via NWDP) covers 2023-07..2026-09 with gaps (737 of 1,173 days), has unknown method, rating curve and quality control, and its raw data are not redistributed here (terms unclear). It shows GloFAS is a weak stand-in at this site (NSE 0.21, seasonal biases of 0.5-2x), so forecasts of GloFAS are not forecasts of the river. A long, quality-controlled record (CWC Bhuntar; see `docs/gauge_data_request.md`) is needed before retraining on observed flow; the pipeline switches automatically when `data/raw/discharge_gauge.csv` exists.
 - **Weather forecasts**: add ECMWF/GEFS precipitation and temperature forecasts for 7-30 day leads; current long-lead skill relies on basin state only.
 - **Calibration under shift**: per-season CQR was tried once (registered, 2026-10-20) and still missed the gate at 30 d. Adaptive conformal inference (ACI) or a longer calibration window needs a fresh, unseen test year before it can be judged fairly.
 - **Spatial detail**: elevation-band snow cover and temperature lapse rates instead of basin means.
