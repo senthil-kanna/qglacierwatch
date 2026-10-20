@@ -80,8 +80,8 @@ class Store:
             warnings.append(f"snow cover is {int(row['snow_age'])} days old (cloud/sensor gap)")
         for h in bundle["horizons"]:
             q = np.mean([m.predict(table, idx) for m in bundle["models"][h]], axis=0)
-            q = bundle["cqr"][h].apply(np.sort(q, axis=1))[0]
             target = issue + pd.Timedelta(days=h)
+            q = bundle["cqr"][h].apply(np.sort(q, axis=1), pd.DatetimeIndex([target]))[0]
             obs = table.loc[issue, f"y_h{h}"]
             rows.append(
                 {

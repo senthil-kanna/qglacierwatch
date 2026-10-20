@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 
 from src.evaluate.bootstrap import block_bootstrap_diff
@@ -94,6 +95,25 @@ def test_cqr_reaches_target_coverage_on_exchangeable_data():
     assert cqr.q_hat > 0
     assert coverage(y[2000:], adj[:, 0], adj[:, 2]) == pytest.approx(0.8, abs=0.03)
     assert np.all(adj[:, 0] <= adj[:, 1]) and np.all(adj[:, 1] <= adj[:, 2])
+
+
+def test_seasonal_cqr_fixes_coverage_in_the_noisy_season():
+    """SYNTHETIC: summer is 3x noisier; pooled CQR under-covers it, per-season CQR does not."""
+    rng = np.random.default_rng(2)
+    dates = pd.date_range("2000-01-01", periods=4 * 365, freq="D")
+    summer = np.isin(dates.month, [6, 7, 8, 9])
+    y = np.exp(3 + rng.normal(0, np.where(summer, 0.6, 0.2)))
+    q = np.column_stack([np.full(len(y), np.exp(2.9)), np.full(len(y), np.exp(3)), np.full(len(y), np.exp(3.1))])
+    seasons = {"summer": [6, 7, 8, 9], "rest": [1, 2, 3, 4, 5, 10, 11, 12]}
+    cal, test = slice(0, 730), slice(730, None)
+    pooled = CQR(0.8).fit(y[cal], q[cal]).apply(q[test])
+    mondrian = CQR(0.8, seasons).fit(y[cal], q[cal], dates[cal]).apply(q[test], dates[test])
+    s = summer[test]
+    assert coverage(y[test][s], pooled[s, 0], pooled[s, 2]) < 0.7
+    assert coverage(y[test][s], mondrian[s, 0], mondrian[s, 2]) == pytest.approx(0.8, abs=0.06)
+    assert coverage(y[test][~s], mondrian[~s, 0], mondrian[~s, 2]) == pytest.approx(0.8, abs=0.06)
+    # Without dates, a seasonal CQR falls back to the pooled offset.
+    assert np.allclose(CQR(0.8, seasons).fit(y[cal], q[cal], dates[cal]).apply(q[test]), pooled)
 
 
 def test_cqr_can_narrow_overwide_intervals_without_crossing():
