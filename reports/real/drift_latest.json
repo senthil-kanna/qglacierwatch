@@ -1,0 +1,32 @@
+{
+  "check_date": "2025-12-31",
+  "staleness_days": 293,
+  "stale": true,
+  "severity": "info",
+  "alerts": [
+    {
+      "check_date": "2025-12-31",
+      "kind": "prediction",
+      "detector": "season_aware",
+      "target": "log_p50_h7",
+      "statistic": 4.088475447044217,
+      "p_value": 0.02644563579323016,
+      "flagged": true,
+      "detail": {
+        "current_mean": 4.376071538511925,
+        "n_reference_years": 4,
+        "reference_mean": 3.9331747833855504,
+        "reference_sd": 0.09689159338771415
+      },
+      "alert": true
+    }
+  ],
+  "recommendation": {
+    "tier": 0,
+    "action": "monitor: inputs outside seasonal range, skill not yet degraded",
+    "reasons": [
+      "log_p50_h7"
+    ]
+  },
+  "generated_utc": "2026-10-20T09:35:23+00:00"
+}
