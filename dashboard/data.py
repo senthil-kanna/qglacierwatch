@@ -49,6 +49,14 @@ def basin_geojson() -> dict | None:
     return json.loads(path.read_text()) if path.exists() and config.mode() == "real" else None
 
 
+@st.cache_data(ttl="1h")
+def snow_maps() -> pd.DataFrame | None:
+    from src.ingest.snow_maps import OUT_NAME
+
+    path = config.raw_dir("real") / OUT_NAME
+    return pd.read_parquet(path) if path.exists() and config.mode() == "real" else None
+
+
 @st.cache_data(ttl="10m")
 def raw_daily() -> pd.DataFrame:
     from src.features.build import load_raw, merge_daily

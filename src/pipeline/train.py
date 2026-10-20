@@ -32,7 +32,7 @@ from src.evaluate.splits import assert_ordered, cv_folds, issue_mask, main_split
 from src.features.build import load_latest
 from src.ingest.provenance import sha256
 from src.models.baselines import Climatology, Persistence
-from src.models.calibration import CQR
+from src.models.calibration import make_cqr
 from src.models.gbm import GBMQuantile
 from src.models.lstm import QuantileLSTM
 from src.registry.registry import registry_for
@@ -123,7 +123,7 @@ def calibrate(table, cfg, fitted, splits) -> dict:
     for (name, h), entry in fitted.items():
         idx = _idx(table, splits["calibration"], h)
         qp, _ = ensemble_predict(entry, table, idx)
-        cal[(name, h)] = CQR(cfg["calibration"]["target_coverage"]).fit(table.loc[idx, f"y_h{h}"], qp)
+        cal[(name, h)] = make_cqr(cfg).fit(table.loc[idx, f"y_h{h}"], qp, idx + pd.Timedelta(days=h))
     return cal
 
 
@@ -132,9 +132,9 @@ def evaluate_period(table, cfg, fitted, cal, period, label) -> tuple[dict, pd.Da
     for (name, h), entry in fitted.items():
         idx = _idx(table, period, h, embargo=False)
         raw, per_seed = ensemble_predict(entry, table, idx)
-        calq = cal[(name, h)].apply(raw)
-        y = table.loc[idx, f"y_h{h}"].to_numpy()
         tdates = idx + pd.Timedelta(days=h)
+        calq = cal[(name, h)].apply(raw, tdates)
+        y = table.loc[idx, f"y_h{h}"].to_numpy()
         t0 = time.perf_counter()
         entry["members"][0].predict(table, idx)
         infer = time.perf_counter() - t0
@@ -146,6 +146,7 @@ def evaluate_period(table, cfg, fitted, cal, period, label) -> tuple[dict, pd.Da
             "seasonal_calibrated": score_by_season(tdates, y, calq, cfg["seasons"]),
             "per_seed_raw_qs": [float(np.mean(quantile_score(y, q))) for q in per_seed],
             "cqr_q_hat": cal[(name, h)].q_hat,
+            "cqr_q_hat_by_season": cal[(name, h)].q_hat_by_season,
             "cqr_n": cal[(name, h)].n,
             "train_seconds": entry["train_seconds"],
             "inference_seconds_per_member": infer,
