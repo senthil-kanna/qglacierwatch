@@ -1,9 +1,24 @@
+import calendar
+
 import altair as alt
+import numpy as np
 import pydeck as pdk
 import streamlit as st
 
 from dashboard import data
 from src import config
+from src.ingest.snow_maps import CELL_DEG, MIN_VALID_DAYS
+
+# Sequential blue ramp (low snow -> pale, high -> deep); readable on light and dark backgrounds.
+RAMP = np.array([[222, 235, 247], [158, 202, 225], [66, 146, 198], [8, 81, 156], [8, 48, 107]], float)
+
+
+def ramp_color(f: np.ndarray) -> list[list[int]]:
+    x = np.clip(f, 0, 1) * (len(RAMP) - 1)
+    i = np.minimum(x.astype(int), len(RAMP) - 2)
+    rgb = RAMP[i] + (RAMP[i + 1] - RAMP[i]) * (x - i)[:, None]
+    return [[*map(int, c), 200] for c in rgb]
+
 
 data.provenance_banner()
 gj = data.basin_geojson()
@@ -45,6 +60,34 @@ with st.container(border=True):
     snow = base.mark_circle(size=14).encode(y=alt.Y("snow_frac_valid:Q", title="Snow fraction", scale=alt.Scale(domain=[0, 1])), opacity=alt.Opacity("valid_frac:Q", legend=alt.Legend(title="Cloud-free share")))
     st.altair_chart(snow.properties(height=220), width="stretch")
     st.caption(f"Days with < 20% cloud-free view are blank ({int(d['snow_frac_valid'].isna().sum())} of {len(d)} days in {year}).")
+
+maps = data.snow_maps()
+with st.container(border=True):
+    st.subheader("Snow-cover map")
+    if maps is None:
+        st.info("Snow maps available in real mode only (run `python -m src.ingest.snow_maps`).")
+    elif year not in set(maps["year"]):
+        st.info(f"No snow map for {year}.")
+    else:
+        month = st.select_slider("Month", options=range(1, 13), value=4, format_func=lambda m: calendar.month_abbr[m], key="snow_month")
+        cells = maps[(maps["year"] == year) & (maps["month"] == month)].dropna(subset=["snow_freq"]).copy()
+        h = CELL_DEG / 2
+        cells["polygon"] = [[[x - h, y - h], [x + h, y - h], [x + h, y + h], [x - h, y + h]] for x, y in zip(cells["lon"], cells["lat"], strict=True)]
+        cells["color"] = ramp_color(cells["snow_freq"].to_numpy())
+        cells["pct"] = (cells["snow_freq"] * 100).round().astype(int)
+        grid = pdk.Layer("PolygonLayer", cells[["polygon", "color", "pct", "valid_days"]], get_polygon="polygon", get_fill_color="color", stroked=False, pickable=True)
+        layers = [grid]
+        if gj:
+            layers.append(pdk.Layer("GeoJsonLayer", {"type": "Feature", "geometry": gj}, stroked=True, filled=False, get_line_color=[80, 80, 80], line_width_min_pixels=1))
+        st.pydeck_chart(
+            pdk.Deck(layers=layers, initial_view_state=pdk.ViewState(latitude=32.07, longitude=77.4, zoom=8.3), tooltip={"text": "Snow on {pct}% of cloud-free days ({valid_days} clear days)"}, map_style=None),
+            height=420,
+        )
+        n_all = int(((maps["year"] == year) & (maps["month"] == month)).sum())
+        st.caption(
+            f"{calendar.month_name[month]} {year}: share of cloud-free days each ~1 km cell was snow-covered (MOD10A1, NDSI >= 10). "
+            f"Pale = rarely snow, dark blue = almost always. Cells with fewer than {MIN_VALID_DAYS} clear days are blank ({n_all - len(cells)} of {n_all})."
+        )
 
 col1, col2 = st.columns(2)
 with col1, st.container(border=True):

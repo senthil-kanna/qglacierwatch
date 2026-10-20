@@ -26,6 +26,11 @@ SOURCES = {
         "licence": "NASA EOSDIS open data, no restrictions on reuse",
         "kind": "satellite observation, basin mean at 500 m",
     },
+    "modis_snow_maps.parquet": {
+        "product": "MODIS/061/MOD10A1 (NDSI_Snow_Cover) via Google Earth Engine",
+        "licence": "NASA EOSDIS open data, no restrictions on reuse",
+        "kind": "satellite observation, monthly snow-day frequency per 0.01 deg cell",
+    },
     "era5_land.parquet": {
         "product": "ECMWF/ERA5_LAND/DAILY_AGGR via Google Earth Engine",
         "licence": "Copernicus licence (free, attribution required)",
