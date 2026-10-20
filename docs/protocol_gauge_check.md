@@ -90,6 +90,36 @@ location with a larger catchment; IST assumption for timestamps; large gaps (e.g
 Apr 2025 and Oct - Nov 2025); 2.5 years only, so no retraining; forecasts were trained to reproduce
 GloFAS, so their errors against the gauge combine model error and GloFAS error.
 
+## Results (run once 2026-10-20T09:10:44Z, code 97a1c5b; `reports/real/gauge_check.md`)
+
+Data: Himachal Pradesh Water Department, via National Water Data Portal (NWIC).
+
+- **Data quality:** 75,395 readings, 6,177 invalid (blank/non-numeric), no duplicate timestamps.
+  737 valid days of 1,173 calendar days (2023-07-14..2026-09-28); missing days concentrate in
+  Dec 2024-Apr 2025 and Oct-Nov 2025 (per-month counts in the report). Flagged days: zero 21,
+  spike 6, flatline 39, extreme 4 (2024-08-01: 767 m3/s, 2026-07-11: 679, 2026-08-07: 649,
+  2026-08-08: 636; possibly genuine floods, not verified). Excluding flagged days barely changes
+  the results (NSE 0.21 both ways).
+- **C1 GloFAS vs observed (all 737 days):** mean 111 vs 135 m3/s (bias ratio 0.83), r 0.52, NSE
+  0.21, KGE 0.40. 2023-2025: bias 0.97, NSE 0.20. **2026: GloFAS about half the observed flow**
+  (bias 0.50, r 0.78, NSE 0.22). By season: winter bias 1.96 with r -0.47; pre-monsoon 0.49
+  (r -0.36); monsoon 0.75 (r 0.13); post-monsoon 2.18 (r 0.62). Within-season NSE is negative
+  in every season.
+- **C2 forecasts vs observed:** against the gauge the learned models reach NSE 0.18-0.30 (2023-25)
+  and 0.12-0.23 (2026), versus 0.80-0.99 against GloFAS on the same dates. P10-P90 intervals
+  contain the observed flow 7-25% (2023-25) and 0-14% (2026) of the time. Against the gauge,
+  climatology of GloFAS (NSE 0.30-0.38) does as well as or better than the learned models;
+  persistence of GloFAS is worst at 30 days.
+
+**Interpretation (with the caveats above):** the forecasting skill reported elsewhere is skill at
+reproducing GloFAS. At this gauge GloFAS has large seasonal biases (too little spring snowmelt
+flow, too much winter and post-monsoon flow) and in 2026 about half the observed volume, so
+forecasts of GloFAS carry those errors to the real river. The negative winter and pre-monsoon
+correlations could also reflect gauge problems (ice, rating curve, sensor); with unknown station
+quality this is a consistency check, not independent validation. Retraining on the gauge is not
+possible with ~2.5 years and was not attempted.
+
 ## Deviations
 
-(none yet)
+- None to the method. The observation period ended 2026-09-28 (last valid day), one day before the
+  2026 file's last reading.

@@ -13,6 +13,17 @@ Consequences for this project: forecast skill, interval coverage and drift resul
 the models reproduce GloFAS, not the real river. Reports state `target_is_observed: false`. Nothing
 in the repository claims access to gauge observations.
 
+## Open gauge data found (2026-10-20)
+
+The National Water Data Portal (https://nwdp.nwic.gov.in, NWIC) publishes Himachal Pradesh Water
+Department telemetry, including **Bajoura Bridge** (31.850 N, 77.170 E, 3.7 km below our outlet),
+from 2023-07 onward with gaps. It was used for a registered consistency check
+(`docs/protocol_gauge_check.md`: GloFAS NSE 0.21 against it) but not for training: too short,
+gappy, and with unknown method and quality. Raw files stay in git-ignored
+`data/external/nwdp_hp_discharge/`; redistribution terms should be confirmed with
+helpdesk-nwic@gov.in before sharing them. The request below (CWC Bhuntar, from 2015) is still
+needed; ask also for Bajoura's station metadata and rating curve from the HP Water Department.
+
 ## Switching to gauge data
 
 Place a CSV at `data/raw/discharge_gauge.csv` with columns `date` (YYYY-MM-DD) and
