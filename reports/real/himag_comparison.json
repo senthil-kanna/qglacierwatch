@@ -1,0 +1,598 @@
+{
+  "generated_utc": "2026-10-20T07:41:19+00:00",
+  "source": {
+    "citation": "Chen et al. (2021), ESSD 13, 741-766, doi:10.5194/essd-13-741-2021",
+    "data": "Zenodo record 4275164, version 3.0 (2020-12-04), doi:10.5281/zenodo.4275164",
+    "licence": "CC BY 4.0",
+    "zip_md5": "abd64cb0a4a3584954e6ba1c04465c94",
+    "years": "2008-2017 (annual, Landsat 30 m)"
+  },
+  "our_year": "2019",
+  "min_area_km2": 0.01,
+  "himag_by_year": {
+    "2008": {
+      "lakes": 19,
+      "area_km2": 0.5817488976525013
+    },
+    "2009": {
+      "lakes": 5,
+      "area_km2": 0.20135594905592524
+    },
+    "2010": {
+      "lakes": 9,
+      "area_km2": 0.3658614610701994
+    },
+    "2011": {
+      "lakes": 12,
+      "area_km2": 0.310311139172745
+    },
+    "2012": {
+      "lakes": 13,
+      "area_km2": 0.3460347005015601
+    },
+    "2013": {
+      "lakes": 9,
+      "area_km2": 0.27767235343800173
+    },
+    "2014": {
+      "lakes": 14,
+      "area_km2": 0.41043839871327975
+    },
+    "2015": {
+      "lakes": 13,
+      "area_km2": 0.40985762360619693
+    },
+    "2016": {
+      "lakes": 13,
+      "area_km2": 0.4682464132805554
+    },
+    "2017": {
+      "lakes": 24,
+      "area_km2": 0.6916173268910777
+    }
+  },
+  "primary_2017": {
+    "himag_lakes_all_sizes": 24,
+    "himag_area_km2": 0.6916173268910777,
+    "himag_lakes_ge_0.01": 21,
+    "himag_area_ge_0.01_km2": 0.6631536734756229,
+    "recall_count": 0.8095238095238095,
+    "recall_area": 0.8821227718983936,
+    "himag_missed": [
+      "GL077300E32144N",
+      "GL077455E32099N",
+      "GL077371E32171N",
+      "GL077785E31858N"
+    ],
+    "our_objects": 34,
+    "our_objects_matched": 19,
+    "our_unmatched_ids": [
+      0,
+      3,
+      8,
+      13,
+      17,
+      18,
+      19,
+      20,
+      25,
+      26,
+      27,
+      28,
+      30,
+      32,
+      33
+    ],
+    "our_unmatched_area_km2": 0.12340318088536151,
+    "polygon_iou_unions": 0.3546696403134868,
+    "matched_groups": 19,
+    "matched_area_ratio_median": 0.5072789391782655,
+    "matched_area_ours_km2": 0.3377788311045151,
+    "matched_area_himag_km2": 0.6043090764165794,
+    "pairs": [
+      {
+        "our_ids": [
+          1
+        ],
+        "himag_ids": [
+          "GL077078E32292N"
+        ],
+        "our_area_km2": 0.004383039224194363,
+        "himag_area_km2": 0.023516757252530825,
+        "ratio": 0.1863794049973735
+      },
+      {
+        "our_ids": [
+          2
+        ],
+        "himag_ids": [
+          "GL077085E32304N"
+        ],
+        "our_area_km2": 0.005056697875261307,
+        "himag_area_km2": 0.01137754150649449,
+        "ratio": 0.4444455660631833
+      },
+      {
+        "our_ids": [
+          4
+        ],
+        "himag_ids": [
+          "GL077090E32293N"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.015536334831517814,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          5
+        ],
+        "himag_ids": [
+          "GL077094E32303N"
+        ],
+        "our_area_km2": 0.002359831240028143,
+        "himag_area_km2": 0.011689125264415661,
+        "ratio": 0.2018826205252503
+      },
+      {
+        "our_ids": [
+          6
+        ],
+        "himag_ids": [
+          "GL077298E32156N"
+        ],
+        "our_area_km2": 0.025998958939453587,
+        "himag_area_km2": 0.04710215080360371,
+        "ratio": 0.5519696764561428
+      },
+      {
+        "our_ids": [
+          7
+        ],
+        "himag_ids": [
+          "GL077307E32160N"
+        ],
+        "our_area_km2": 0.011817246588179842,
+        "himag_area_km2": 0.019751694420295115,
+        "ratio": 0.5982902700255159
+      },
+      {
+        "our_ids": [
+          9
+        ],
+        "himag_ids": [
+          "GL077417E31937N"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.02345666776636467,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          10
+        ],
+        "himag_ids": [
+          "GL077421E31917N"
+        ],
+        "our_area_km2": 0.006093314383178949,
+        "himag_area_km2": 0.03333305805273767,
+        "ratio": 0.18280094114192746
+      },
+      {
+        "our_ids": [
+          11
+        ],
+        "himag_ids": [
+          "GL077432E32134N"
+        ],
+        "our_area_km2": 0.008443229919066653,
+        "himag_area_km2": 0.00986496176712017,
+        "ratio": 0.855880653000386
+      },
+      {
+        "our_ids": [
+          12
+        ],
+        "himag_ids": [
+          "GL077434E32134N"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.01720086624888458,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          14
+        ],
+        "himag_ids": [
+          "GL077453E32097N"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.011880930503546558,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          15
+        ],
+        "himag_ids": [
+          "GL077455E32133N"
+        ],
+        "our_area_km2": 0.07497667300049216,
+        "himag_area_km2": 0.07978960343517232,
+        "ratio": 0.9396797298461248
+      },
+      {
+        "our_ids": [
+          16
+        ],
+        "himag_ids": [
+          "GL077492E32179N"
+        ],
+        "our_area_km2": 0.038820066110929474,
+        "himag_area_km2": 0.033419008702326246,
+        "ratio": 1.1616163261068624
+      },
+      {
+        "our_ids": [
+          21
+        ],
+        "himag_ids": [
+          "GL077525E31898N"
+        ],
+        "our_area_km2": 0.00643314330955036,
+        "himag_area_km2": 0.022627279129217984,
+        "ratio": 0.2843091859526061
+      },
+      {
+        "our_ids": [
+          22
+        ],
+        "himag_ids": [
+          "GL077525E31914N"
+        ],
+        "our_area_km2": 0.07413725295918994,
+        "himag_area_km2": 0.14614691688025508,
+        "ratio": 0.5072789391782655
+      },
+      {
+        "our_ids": [
+          23
+        ],
+        "himag_ids": [
+          "GL077532E31897N"
+        ],
+        "our_area_km2": 0.008464705460937694,
+        "himag_area_km2": 0.01365293181591193,
+        "ratio": 0.6199917772293001
+      },
+      {
+        "our_ids": [
+          24
+        ],
+        "himag_ids": [
+          "GL077538E31899N"
+        ],
+        "our_area_km2": 0.016251955647021532,
+        "himag_area_km2": 0.020291251862889558,
+        "ratio": 0.8009341048466581
+      },
+      {
+        "our_ids": [
+          29
+        ],
+        "himag_ids": [
+          "GL077789E31848N"
+        ],
+        "our_area_km2": 0.040651612798683345,
+        "himag_area_km2": 0.05421083816475451,
+        "ratio": 0.7498798058634929
+      },
+      {
+        "our_ids": [
+          31
+        ],
+        "himag_ids": [
+          "GL077791E31836N"
+        ],
+        "our_area_km2": 0.01389110364834778,
+        "himag_area_km2": 0.00946115800854053,
+        "ratio": 1.4682244642577964
+      }
+    ]
+  },
+  "ever_2008_2017": {
+    "himag_lakes_all_sizes": 33,
+    "himag_area_km2": 1.0553297101656216,
+    "himag_lakes_ge_0.01": 29,
+    "himag_area_ge_0.01_km2": 1.0184802812520986,
+    "recall_count": 0.7241379310344828,
+    "recall_area": 0.7459940966842847,
+    "himag_missed": [
+      "ever-0",
+      "ever-2",
+      "ever-12",
+      "ever-16",
+      "ever-19",
+      "ever-29",
+      "ever-30",
+      "ever-31"
+    ],
+    "our_objects": 34,
+    "our_objects_matched": 23,
+    "our_unmatched_ids": [
+      8,
+      17,
+      18,
+      19,
+      20,
+      25,
+      26,
+      27,
+      28,
+      30,
+      32
+    ],
+    "our_unmatched_area_km2": 0.0693564064858947,
+    "polygon_iou_unions": 0.3492087757603305,
+    "matched_groups": 23,
+    "matched_area_ratio_median": 0.4444455660631832,
+    "matched_area_ours_km2": 0.39182560550398193,
+    "matched_area_himag_km2": 0.7791063971790763,
+    "pairs": [
+      {
+        "our_ids": [
+          0
+        ],
+        "himag_ids": [
+          "ever-1"
+        ],
+        "our_area_km2": 0.04523851067642681,
+        "himag_area_km2": 0.029624463077486476,
+        "ratio": 1.5270660115628036
+      },
+      {
+        "our_ids": [
+          1
+        ],
+        "himag_ids": [
+          "ever-3"
+        ],
+        "our_area_km2": 0.004383039224194363,
+        "himag_area_km2": 0.034390589590910674,
+        "ratio": 0.12744879562497488
+      },
+      {
+        "our_ids": [
+          2
+        ],
+        "himag_ids": [
+          "ever-6"
+        ],
+        "our_area_km2": 0.005056697875261307,
+        "himag_area_km2": 0.011377541506494492,
+        "ratio": 0.4444455660631832
+      },
+      {
+        "our_ids": [
+          3
+        ],
+        "himag_ids": [
+          "ever-7"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.012894258749900384,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          4
+        ],
+        "himag_ids": [
+          "ever-4"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.015536334831517814,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          5
+        ],
+        "himag_ids": [
+          "ever-5"
+        ],
+        "our_area_km2": 0.002359831240028143,
+        "himag_area_km2": 0.011689125264415661,
+        "ratio": 0.2018826205252503
+      },
+      {
+        "our_ids": [
+          6
+        ],
+        "himag_ids": [
+          "ever-17"
+        ],
+        "our_area_km2": 0.025998958939453587,
+        "himag_area_km2": 0.06736809658992546,
+        "ratio": 0.38592390546093586
+      },
+      {
+        "our_ids": [
+          7
+        ],
+        "himag_ids": [
+          "ever-18"
+        ],
+        "our_area_km2": 0.011817246588179842,
+        "himag_area_km2": 0.01975169442029511,
+        "ratio": 0.598290270025516
+      },
+      {
+        "our_ids": [
+          9
+        ],
+        "himag_ids": [
+          "ever-9"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.023456667766364667,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          10
+        ],
+        "himag_ids": [
+          "ever-8"
+        ],
+        "our_area_km2": 0.006093314383178949,
+        "himag_area_km2": 0.03333305805273766,
+        "ratio": 0.1828009411419275
+      },
+      {
+        "our_ids": [
+          11
+        ],
+        "himag_ids": [
+          "ever-15"
+        ],
+        "our_area_km2": 0.008443229919066653,
+        "himag_area_km2": 0.009864961767120171,
+        "ratio": 0.8558806530003858
+      },
+      {
+        "our_ids": [
+          12
+        ],
+        "himag_ids": [
+          "ever-14"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.01720086624888458,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          13
+        ],
+        "himag_ids": [
+          "ever-10"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.02616088803346368,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          14
+        ],
+        "himag_ids": [
+          "ever-11"
+        ],
+        "our_area_km2": 0.0,
+        "himag_area_km2": 0.011880930503546558,
+        "ratio": 0.0
+      },
+      {
+        "our_ids": [
+          15
+        ],
+        "himag_ids": [
+          "ever-13"
+        ],
+        "our_area_km2": 0.07497667300049216,
+        "himag_area_km2": 0.10131495174415196,
+        "ratio": 0.7400356187290975
+      },
+      {
+        "our_ids": [
+          16
+        ],
+        "himag_ids": [
+          "ever-24"
+        ],
+        "our_area_km2": 0.038820066110929474,
+        "himag_area_km2": 0.05901765848243745,
+        "ratio": 0.6577703539777268
+      },
+      {
+        "our_ids": [
+          21
+        ],
+        "himag_ids": [
+          "ever-22"
+        ],
+        "our_area_km2": 0.00643314330955036,
+        "himag_area_km2": 0.023403041053562716,
+        "ratio": 0.2748849303313521
+      },
+      {
+        "our_ids": [
+          22
+        ],
+        "himag_ids": [
+          "ever-23"
+        ],
+        "our_area_km2": 0.07413725295918994,
+        "himag_area_km2": 0.1481193654998664,
+        "ratio": 0.500523700658553
+      },
+      {
+        "our_ids": [
+          23
+        ],
+        "himag_ids": [
+          "ever-20"
+        ],
+        "our_area_km2": 0.008464705460937694,
+        "himag_area_km2": 0.01365293181591193,
+        "ratio": 0.6199917772293001
+      },
+      {
+        "our_ids": [
+          24
+        ],
+        "himag_ids": [
+          "ever-21"
+        ],
+        "our_area_km2": 0.016251955647021532,
+        "himag_area_km2": 0.022018127266764227,
+        "ratio": 0.7381170728154262
+      },
+      {
+        "our_ids": [
+          29
+        ],
+        "himag_ids": [
+          "ever-28"
+        ],
+        "our_area_km2": 0.040651612798683345,
+        "himag_area_km2": 0.06249603445003443,
+        "ratio": 0.6504670761339953
+      },
+      {
+        "our_ids": [
+          31
+        ],
+        "himag_ids": [
+          "ever-26"
+        ],
+        "our_area_km2": 0.01389110364834778,
+        "himag_area_km2": 0.009461158008540534,
+        "ratio": 1.468224464257796
+      },
+      {
+        "our_ids": [
+          33
+        ],
+        "himag_ids": [
+          "ever-27"
+        ],
+        "our_area_km2": 0.00880826372304,
+        "himag_area_km2": 0.015093652454743246,
+        "ratio": 0.5835740387855535
+      }
+    ]
+  }
+}

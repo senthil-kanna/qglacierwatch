@@ -21,7 +21,7 @@ Engine credentials present (project `ee-senthil-hydro`), internet access. Last u
 
 Research validation (do not let cloud work replace these):
 
-- [ ] **Hi-MAG comparison**: locate Chen et al. (2021) inventory, verify source/licence/CRS/dates, clip to the basin, run `src.lakes.pipeline.compare_inventory`, report overlap and area differences, or document the exact blocker.
+- [x] **Hi-MAG comparison** (2026-10-20): v3.0, CC BY 4.0, MD5 verified; method committed before scoring (aa18713); 17/21 Hi-MAG 2017 lakes >= 0.01 km2 found (88% of area), matched areas ~0.5x Hi-MAG, 11 extra objects; no common year (Hi-MAG ends 2017). `reports/real/himag_comparison.md`.
 - [ ] **Fresh 2026 forecast evaluation**: commit a protocol first; verify Jan-Sep 2026 data exist (provenance, coverage, timestamps); train 2015-2023, calibrate 2024-2025, evaluate once on 2026; no tuning on 2026.
 - [ ] **Lake-segmentation improvement**: SWIR (MNDWI), terrain-shadow and slope filters, S1 features, selected on validation only, frozen before one test evaluation; disclose that the JRC reference ends in 2021 and the test split was seen before.
 
@@ -44,4 +44,4 @@ External:
 - Azure: student subscription verification pending; then `az login` and the steps in `docs/deployment.md`.
 - Docker: needed to build/run the image locally (CI builds it).
 - Earth Engine service account: needed for scheduled ingestion in Azure (`deploy.ps1 -EeKeyFile`).
-- Hi-MAG/ICIMOD lake inventories: download and licence check pending.
+- Lake reference data after 2017/2021: Hi-MAG ends 2017 and JRC GSW 1.4 ends 2021; no post-2021 reference exists in this project.

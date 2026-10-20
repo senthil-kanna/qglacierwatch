@@ -304,29 +304,13 @@ def main():
                    "blocks": {s: sum(1 for v in split_of.values() if v == s) for s in ("train", "val", "test")}},
         "evaluation": evaluation, "annual": annual.to_dict("records"), "comparable_years": comp_years,
         "zone_trend_fusion": zone_trend, "objects": objects,
-        "inventory_comparison": "Hi-MAG and ICIMOD inventories not ingested (not on Earth Engine; licence and coverage to be verified). Use compare_inventory() with a local GeoJSON.",
+        "inventory_comparison": "Hi-MAG v3.0 (2008-2017): run `python -m src.lakes.inventory` after this pipeline; results in reports/real/himag_comparison.md.",
         "sources": {"S2": "COPERNICUS/S2_SR_HARMONIZED + COPERNICUS/S2_CLOUD_PROBABILITY", "S1": "COPERNICUS/S1_GRD (IW, VV)", "DEM": DEM_ID, "labels": L["source"]},
     }
     out = config.reports_dir("real")
     (out / "lake_analysis.json").write_text(json.dumps(rep, indent=2, default=float))
     (out / "lake_analysis.md").write_text(markdown(rep), encoding="utf-8")
     print(markdown(rep))
-
-
-def compare_inventory(inventory_geojson: str, objects_geojson: str) -> dict:
-    """Area agreement between our lake objects and an external inventory (e.g. Hi-MAG), by overlap."""
-    import geopandas as gpd
-
-    inv = gpd.read_file(inventory_geojson).to_crs(32643)
-    ours = gpd.read_file(objects_geojson).to_crs(32643)
-    hits = gpd.sjoin(ours, inv, predicate="intersects")
-    return {
-        "inventory_lakes": len(inv),
-        "our_objects": len(ours),
-        "our_objects_matching_inventory": int(hits.index.nunique()),
-        "inventory_area_km2": float(inv.area.sum() / 1e6),
-        "our_area_km2": float(ours.area.sum() / 1e6),
-    }
 
 
 if __name__ == "__main__":
