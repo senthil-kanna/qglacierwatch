@@ -1,0 +1,20 @@
+# Promotion gate for the forecast model registry. A candidate is promotable only if every rule
+# passes AND a named person approves. There is no override that promotes a worse model.
+gate:
+  # Candidate's mean QS (CRPS approx., m3/s) over horizons must be at most this fraction of the
+  # incumbent's on the same evaluation window. 1.0 = no worse; 0.98 = at least 2% better.
+  max_qs_ratio_vs_incumbent: 0.98
+  # Absolute floors, applied per horizon on the evaluation window.
+  min_nse: {h1: 0.7, h7: 0.4, h30: 0.0}
+  # Calibration: empirical P10-P90 coverage must lie within this band (nominal 0.80).
+  coverage_band: [0.70, 0.90]
+  # Must beat climatology QS at every horizon (otherwise it adds no skill).
+  must_beat_climatology: true
+  min_eval_samples: 180
+
+# Tiered retraining policy driven by drift alerts (see src/drift and docs/governance.md).
+retraining:
+  tier1_data_quality:  {action: "fix inputs, re-run ingestion; no model change"}
+  tier2_recalibrate:   {action: "refit CQR offsets on the most recent labelled window", min_samples: 90}
+  tier3_retrain:       {action: "retrain candidate on extended data, evaluate vs incumbent", requires_alerts: ["residual"], min_persistence_windows: 2}
+  tier4_promote:       {action: "manual approval after gate passes; rollback kept available"}

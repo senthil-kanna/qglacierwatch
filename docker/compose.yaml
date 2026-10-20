@@ -1,0 +1,24 @@
+# Local stack without Azure: `docker compose -f docker/compose.yaml up --build`
+# Uses demo (SYNTHETIC) mode by default; set QGW_MODE=real and mount real data to switch.
+services:
+  setup:
+    build: {context: .., dockerfile: docker/Dockerfile}
+    command: ["demo-setup"]
+    environment: {QGW_MODE: "${QGW_MODE:-demo}"}
+    volumes: ["qgw:/mnt/qgw"]
+  api:
+    build: {context: .., dockerfile: docker/Dockerfile}
+    command: ["api"]
+    environment: {QGW_MODE: "${QGW_MODE:-demo}", QGW_API_KEY: "${QGW_API_KEY:-}"}
+    ports: ["8000:8000"]
+    volumes: ["qgw:/mnt/qgw"]
+    depends_on: {setup: {condition: service_completed_successfully}}
+  dashboard:
+    build: {context: .., dockerfile: docker/Dockerfile}
+    command: ["dashboard"]
+    environment: {QGW_MODE: "${QGW_MODE:-demo}"}
+    ports: ["8501:8501"]
+    volumes: ["qgw:/mnt/qgw"]
+    depends_on: {setup: {condition: service_completed_successfully}}
+volumes:
+  qgw: {}

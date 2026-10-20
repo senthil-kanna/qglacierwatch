@@ -1,0 +1,22 @@
+[
+  {
+    "ts": "2026-10-19T14:17:15+00:00",
+    "tier": 3,
+    "reason": "drift replay: persistent Tier-3 residual alerts at 6 checks in 2024",
+    "incumbent": "gbm_quantile-2b46646ce1c0-20261019T140653666064",
+    "incumbent_is_production": false,
+    "candidate": "gbm_quantile-2b46646ce1c0-20261019T141714814366",
+    "eval_window": [
+      "2025-01-01",
+      "2025-12-31"
+    ],
+    "candidate_mean_qs": 13.172646980779755,
+    "incumbent_mean_qs": 17.713520396364224,
+    "gate_passed": false,
+    "gate_reasons": [
+      "h30: P10-P90 coverage 0.633 outside [0.7, 0.9]",
+      "no incumbent: first production model, absolute floors only"
+    ],
+    "promoted": false
+  }
+]

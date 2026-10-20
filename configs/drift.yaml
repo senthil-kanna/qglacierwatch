@@ -1,0 +1,41 @@
+# Drift monitoring. Thresholds are starting points chosen for a weekly check on daily data; their
+# false-alarm behaviour is measured in the replay (reports/<mode>/drift_replay.md), not assumed.
+check_every_days: 7
+window_days: 30
+min_window_valid_frac: 0.6       # a window with <60% valid days is a data-quality issue, not drift
+
+covariate:
+  features: [t_mean7, p_sum7, pdd7, melt7, snow_frac, swe_change30, logq0]
+  min_reference_years: 4         # season-aware: one window mean per past year
+  max_reference_years: 10
+  baseline_reference_days: 365   # naive monitor: previous year, ignoring season
+  fdr_q: 0.05                    # Benjamini-Hochberg across features at each check
+  persistence_checks: 2          # flagged in this many consecutive checks before alerting
+
+residual:
+  horizons: [1, 7]
+  min_window_samples: 20
+  min_reference_samples: 60
+  doy_halfwidth: 15              # season-matched reference: target day-of-year +/- this
+  qs_ratio_alert: 2.0            # window QS / reference QS
+  coverage_p_alert: 0.001        # binomial test of window P10-P90 coverage against 0.80
+  persistence_checks: 2
+
+data_quality:
+  max_missing_frac: {discharge: 0.1, era5: 0.1, modis: 0.3}
+  stuck_days: 5                  # identical consecutive values of a continuous variable
+  max_staleness_days: 10         # operational only: newest input older than this
+
+synthetic_eval:
+  n_events_per_type: 24
+  onset_range: ["2020-01-01", "2025-06-30"]
+  max_delay_days: 60             # alert after this counts as a miss
+  seed: 2024
+  events:
+    temperature_bias: {column: temperature_2m, offset: 2.5, days: 90}
+    snow_sensor_dropout: {column: snow_frac_valid, value: 0.0, days: 45}
+    discharge_rating_shift: {scale: 1.35, days: 90}
+
+# Documented real events used only as context in the replay. Not ground-truth drift labels.
+documented_events:
+  - {start: "2023-07-07", end: "2023-07-12", label: "July 2023 extreme rainfall and flooding in Himachal Pradesh (Beas valley affected)"}

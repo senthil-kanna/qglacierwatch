@@ -1,0 +1,13 @@
+.git
+.venv
+.dvc/cache
+data
+artifacts
+reports
+mlruns
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.env
+*.joblib
