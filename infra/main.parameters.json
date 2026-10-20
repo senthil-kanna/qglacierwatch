@@ -6,9 +6,13 @@
     "location": { "value": "centralindia" },
     "deployApps": { "value": false },
     "imageTag": { "value": "bootstrap" },
+    "useAcr": { "value": false },
+    "externalImage": { "value": "ghcr.io/senthil-kanna/qglacierwatch" },
     "monthlyBudgetUsd": { "value": 20 },
     "alertEmail": { "value": "you@example.com" },
     "budgetStartDate": { "value": "2026-11-01" },
-    "eeProject": { "value": "ee-senthil-hydro" }
+    "eeProject": { "value": "ee-senthil-hydro" },
+    "enableAlerts": { "value": true },
+    "adminPrincipalId": { "value": "" }
   }
 }

@@ -1,0 +1,208 @@
+{
+  "generated_utc": "2026-10-20T08:20:45+00:00",
+  "domain": "basin, > 3500 m, slope < 25 deg",
+  "years": {
+    "tune": 2019,
+    "val": 2020,
+    "test": 2021
+  },
+  "blocks": {
+    "train": 66,
+    "val": 34,
+    "test": 34
+  },
+  "t_vv": -20.0,
+  "train_f1_sar": 0.06293725012054692,
+  "grids": {
+    "idx": [
+      -0.1,
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6
+    ],
+    "nir": [
+      0.08,
+      0.12,
+      0.16,
+      0.2,
+      0.3
+    ],
+    "swir": [
+      0.03,
+      0.05,
+      0.08,
+      0.12
+    ]
+  },
+  "variants": {
+    "A": {
+      "index": "ndwi",
+      "max_slope": 12,
+      "swir_guard": false,
+      "sar_union": false
+    },
+    "B": {
+      "index": "mndwi",
+      "max_slope": 12,
+      "swir_guard": false,
+      "sar_union": false
+    },
+    "C": {
+      "index": "mndwi",
+      "max_slope": 20,
+      "swir_guard": false,
+      "sar_union": false
+    },
+    "D": {
+      "index": "mndwi",
+      "max_slope": 12,
+      "swir_guard": true,
+      "sar_union": false
+    },
+    "E": {
+      "index": "mndwi",
+      "max_slope": 20,
+      "swir_guard": true,
+      "sar_union": false
+    },
+    "F": {
+      "index": "mndwi",
+      "max_slope": 20,
+      "swir_guard": true,
+      "sar_union": true
+    }
+  },
+  "params": {
+    "A": {
+      "params": {
+        "t_idx": 0.2,
+        "t_nir": 0.3,
+        "t_vv": -20.0
+      },
+      "train_f1": 0.7005208333333334
+    },
+    "B": {
+      "params": {
+        "t_idx": 0.1,
+        "t_nir": 0.2,
+        "t_vv": -20.0
+      },
+      "train_f1": 0.7089262613195342
+    },
+    "C": {
+      "params": {
+        "t_idx": -0.1,
+        "t_nir": 0.08,
+        "t_vv": -20.0
+      },
+      "train_f1": 0.6100278551532035
+    },
+    "D": {
+      "params": {
+        "t_idx": -0.1,
+        "t_nir": 0.3,
+        "t_vv": -20.0,
+        "t_swir": 0.05
+      },
+      "train_f1": 0.7351077313054499
+    },
+    "E": {
+      "params": {
+        "t_idx": -0.1,
+        "t_nir": 0.08,
+        "t_vv": -20.0,
+        "t_swir": 0.08
+      },
+      "train_f1": 0.6080892608089262
+    },
+    "F": {
+      "params": {
+        "t_idx": -0.1,
+        "t_nir": 0.08,
+        "t_vv": -20.0,
+        "t_swir": 0.08
+      },
+      "train_f1": null,
+      "note": "E thresholds reused (protocol)"
+    }
+  },
+  "validation": {
+    "A": {
+      "iou": 0.1556507103936825,
+      "dice_f1": 0.26937327861055654,
+      "precision": 0.16164878344079145,
+      "recall": 0.8075,
+      "area_error_frac": 3.995397941214758,
+      "n": 859,
+      "n_water": 400,
+      "label_water_km2": 0.08448124084472657
+    },
+    "B": {
+      "iou": 0.043939721594098625,
+      "dice_f1": 0.08418057227864184,
+      "precision": 0.04449111127282011,
+      "recall": 0.78,
+      "area_error_frac": 16.531591764859034,
+      "n": 859,
+      "n_water": 400,
+      "label_water_km2": 0.08448124084472657
+    },
+    "C": {
+      "iou": 0.09412534264465248,
+      "dice_f1": 0.17205586778044735,
+      "precision": 0.09531991753199605,
+      "recall": 0.8825000000000001,
+      "area_error_frac": 8.258295882429517,
+      "n": 859,
+      "n_water": 400,
+      "label_water_km2": 0.08448124084472657
+    },
+    "D": {
+      "iou": 0.02937530572749969,
+      "dice_f1": 0.057074043964439214,
+      "precision": 0.02963905503101748,
+      "recall": 0.7675,
+      "area_error_frac": 24.894887647288545,
+      "n": 859,
+      "n_water": 400,
+      "label_water_km2": 0.08448124084472657
+    },
+    "E": {
+      "iou": 0.09305876652403318,
+      "dice_f1": 0.17027221110894789,
+      "precision": 0.0943417047953266,
+      "recall": 0.8724999999999999,
+      "area_error_frac": 8.248295882429517,
+      "n": 859,
+      "n_water": 400,
+      "label_water_km2": 0.08448124084472657
+    },
+    "F": {
+      "iou": 0.09305876652403318,
+      "dice_f1": 0.17027221110894789,
+      "precision": 0.0943417047953266,
+      "recall": 0.8724999999999999,
+      "area_error_frac": 8.248295882429517,
+      "n": 859,
+      "n_water": 400,
+      "label_water_km2": 0.08448124084472657
+    }
+  },
+  "selected": "A",
+  "test": {
+    "A": {
+      "iou": 0.07741134703302462,
+      "dice_f1": 0.14369877808731082,
+      "precision": 0.08966441267761384,
+      "recall": 0.3616236162361624,
+      "area_error_frac": 3.033078513951472,
+      "n": 1140,
+      "n_water": 542,
+      "label_water_km2": 0.09673139886474612
+    }
+  }
+}

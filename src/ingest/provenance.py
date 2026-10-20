@@ -39,7 +39,7 @@ SOURCES = {
     "discharge.parquet": {
         "product": "GloFAS v4 river_discharge via Open-Meteo Flood API, or gauge CSV if supplied",
         "licence": "CC BY 4.0 (Copernicus Emergency Management Service)",
-        "kind": "MODELLED reanalysis discharge unless source column says 'gauge'",
+        "kind": "MODELLED discharge (seamless_v4: reanalysis to 2023-08-04, forecast-derived after) unless source column says 'gauge'",
     },
     "basin.geojson": {
         "product": "WWF HydroSHEDS HydroBASINS level 8, traced upstream of the outlet",

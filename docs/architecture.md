@@ -6,7 +6,7 @@
 flowchart LR
     subgraph Sources
         GEE[(Google Earth Engine<br/>MOD10A1, ERA5-Land,<br/>S1 GRD, S2 L2A, GLO-30, JRC GSW)]
-        OM[(Open-Meteo Flood API<br/>GloFAS v4 reanalysis)]
+        OM[(Open-Meteo Flood API<br/>GloFAS v4 seamless)]
         GAUGE[(optional gauge CSV)]
     end
     subgraph Jobs["Batch jobs (Container Apps Jobs / local CLI)"]

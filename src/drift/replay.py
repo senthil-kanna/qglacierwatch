@@ -198,7 +198,12 @@ def main() -> None:
         staleness = (pd.Timestamp(datetime.now(UTC).date()) - T).days
         rec = recommend(now, gov["retraining"], cfg["residual"]["qs_ratio_alert"])
         out = {"check_date": str(T.date()), "staleness_days": staleness, "stale": staleness > cfg["data_quality"]["max_staleness_days"],
-               "severity": severity(now), "alerts": now.to_dict("records"), "recommendation": rec}
+               "severity": severity(now), "alerts": now.to_dict("records"), "recommendation": rec,
+               "generated_utc": datetime.now(UTC).isoformat(timespec="seconds")}
+        # Persist the operational check (the scheduled job's container is discarded after it runs).
+        reports = config.reports_dir(args.mode)
+        reports.mkdir(parents=True, exist_ok=True)
+        (reports / "drift_latest.json").write_text(json.dumps(out, indent=2, default=str))
         print(json.dumps(out, indent=2, default=str))
         return
 

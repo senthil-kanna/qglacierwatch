@@ -196,7 +196,7 @@ def results_markdown(test: dict, cv_sel: pd.DataFrame, comps: list[dict], meta: 
     lines = [
         f"# Forecast results ({meta['mode']} mode)",
         "",
-        f"Target: `{meta['target_source']}` ({'observed gauge' if meta['target_is_observed'] else 'MODELLED reanalysis, not observed discharge'}).",
+        f"Target: `{meta['target_source']}` ({'observed gauge' if meta['target_is_observed'] else 'MODELLED GloFAS v4: reanalysis to 2023-08-04, forecast-derived after; not observed discharge'}).",
         f"Dataset `{meta['dataset_id']}`, generated {meta['generated_utc']}, code `{meta['git_sha']}`.",
         "",
         "## Held-out test period (calibrated intervals)",
@@ -280,7 +280,9 @@ def main() -> None:
         "git_sha": git_sha(),
         "protocol_sha256": {
             p: sha256(config.ROOT / p) for p in ("docs/protocol.md", "configs/forecast.yaml", "configs/governance.yaml")
-        },
+        }
+        | ({str(o.relative_to(config.ROOT)): sha256(o)} if (o := config.overlay_file("forecast")) else {}),
+        "splits": cfg["splits"],
         "python": platform.python_version(),
         "platform": platform.platform(),
         "selected_configs": chosen,

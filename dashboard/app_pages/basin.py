@@ -45,7 +45,7 @@ with col2, st.container(border=True):
     st.markdown(
         "- **Snow cover**: MODIS MOD10A1 v6.1, NDSI >= 10, basin mean of cloud-free pixels\n"
         "- **Meteorology**: ERA5-Land daily aggregates, basin mean\n"
-        "- **Discharge**: GloFAS v4 reanalysis (modelled) at 31.825 N, 77.125 E\n"
+        "- **Discharge**: GloFAS v4 (modelled) at 31.825 N, 77.125 E: reanalysis to 2023-08-04, forecast-derived after\n"
         "- **Availability lags assumed**: discharge 1 d, MODIS 1 d, ERA5-Land 5 d"
     )
 

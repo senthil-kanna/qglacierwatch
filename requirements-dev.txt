@@ -5,3 +5,8 @@ httpx==0.28.1
 ruff==0.17.1
 mypy==2.4.0
 pip-audit==2.10.1
+# Local-only lake inventory comparison (src.lakes.inventory); not needed in the container image.
+geopandas==1.2.0
+shapely==2.1.2
+pyogrio==0.13.0
+pyproj==3.8.0
