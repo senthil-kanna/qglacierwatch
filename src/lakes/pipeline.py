@@ -222,13 +222,89 @@ def markdown(rep):
     return "\n".join(L) + "\n"
 
 
+def variant_image(basin, dem, year, lc, rule):
+    """Earth Engine version of core.variant_water for the frozen v2 rule (docs/protocol_lakes_v2.md)."""
+    spec, p = rule["spec"], rule["params"]
+    comp, ndwi, nir, valid, n_s2 = s2_composite(basin, dem, year, lc)
+    mndwi = comp.normalizedDifference(["B3", "B11"])
+    vv, n_s1 = s1_composite(basin, year, lc)
+    idx = ndwi if spec["index"] == "ndwi" else mndwi
+    opt = idx.gt(p["t_idx"]).And(nir.lt(p["t_nir"]))
+    if spec["swir_guard"]:
+        opt = opt.And(comp.select("B11").lt(p["t_swir"]))
+    v = valid.unmask(0)
+    sar = vv.lt(p["t_vv"]).unmask(0)
+    water = opt.unmask(0).where(v.Not(), sar)
+    if spec["sar_union"]:
+        water = water.Or(v.And(sar).And(mndwi.gt(0).unmask(0)))
+    water = water.And(ee.Terrain.slope(dem).lt(spec["max_slope"]))
+    return water, v, n_s2, n_s1
+
+
+def run_frozen_rule(lc) -> None:
+    """Annual areas and lake objects 2019-2025 with the frozen v2 rule, in the v2 domain (slope < 25 deg).
+    Writes *_v2 outputs so the v1 results stay available for comparison."""
+    import yaml
+
+    rule = yaml.safe_load((config.CONFIGS / "lakes_rule.yaml").read_text())
+    lc = {**lc, "max_slope_deg": rule["domain_max_slope"]}
+    full = ee.Geometry(json.loads((config.raw_dir("real") / "basin.geojson").read_text()))
+    dem, zone = zone_image(full, lc)
+    basin = zone.reduceToVectors(geometry=full, scale=300, geometryType="polygon", maxPixels=1e9, bestEffort=True).geometry().buffer(600).intersection(full, 100)
+    dem, zone = zone_image(basin, lc)
+    area = ee.Image.pixelArea().divide(1e6)
+    rows, masks = [], {}
+    for y in lc["annual_years"]:
+        water, v, n_s2, n_s1 = variant_image(basin, dem, y, lc, rule)
+        masks[y] = water.updateMask(zone)
+        stack = area.multiply(water).rename("water_km2").addBands(area.multiply(v).rename("valid_km2")).addBands(area.rename("zone_km2")).updateMask(zone)
+        r = stack.reduceRegion(ee.Reducer.sum(), basin, scale=lc["scale_m"], maxPixels=1e10, tileScale=8).getInfo()
+        rows.append({"year": y, **r, "valid_frac": r["valid_km2"] / r["zone_km2"], "s2_scenes": n_s2.getInfo(), "s1_scenes": n_s1.getInfo()})
+        print(f"  {y}: water {r['water_km2']:.3f} km2, valid {rows[-1]['valid_frac']:.3f}", flush=True)
+    annual = pd.DataFrame(rows)
+    annual["comparable"] = annual["year"].isin(core.comparable_years(dict(zip(annual["year"], annual["valid_frac"], strict=True)), lc["min_valid_frac"]))
+    comp_years = annual.loc[annual["comparable"], "year"].tolist()
+    trend = core.growth(comp_years, annual.loc[annual["comparable"], "water_km2"], lc["objects"]["min_years_for_trend"])
+    fc = lake_objects(basin, zone, masks, comp_years, lc)
+    growths = [core.growth(comp_years, [f["properties"].get(f"a{y}", np.nan) for y in comp_years], lc["objects"]["min_years_for_trend"]) for f in fc["features"]]
+    qs = core.bh_adjust([np.nan if g["kendall_p"] is None else g["kendall_p"] for g in growths])
+    feats = []
+    for i, (f, g, q) in enumerate(zip(fc["features"], growths, qs, strict=True)):
+        ser = [f["properties"].get(f"a{y}", np.nan) for y in comp_years]
+        g["kendall_q_bh"] = None if np.isnan(q) else float(q)
+        flag = bool(g["rel_change_per_yr"] is not None and g["rel_change_per_yr"] >= lc["objects"]["growth_flag_rel_per_yr"] and q < 0.05)
+        f["properties"] = {"id": i, "areas_km2": dict(zip(map(str, comp_years), ser, strict=True)), "mean_area_km2": float(np.nanmean(ser)), "growth": g, "screening_flag": flag}
+        feats.append(f)
+    art = config.artifact_dir("real") / "lakes"
+    art.mkdir(parents=True, exist_ok=True)
+    (art / "lake_objects_v2.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": feats}))
+    rep = {"generated_utc": datetime.now(UTC).isoformat(timespec="seconds"), "rule": rule, "annual": annual.to_dict("records"),
+           "comparable_years": comp_years, "zone_trend": trend, "objects": {"count": len(feats), "flagged": sum(f["properties"]["screening_flag"] for f in feats),
+           "total_mean_area_km2": float(sum(f["properties"]["mean_area_km2"] for f in feats))}}
+    out = config.reports_dir("real")
+    (out / "lake_analysis_v2.json").write_text(json.dumps(rep, indent=2, default=float))
+    L = [f"# Lake areas and objects with the frozen v2 rule (generated {rep['generated_utc']})", "",
+         f"Rule: variant {rule['variant']} {rule['spec']}, thresholds {rule['params']}; domain slope < {rule['domain_max_slope']} deg.", "",
+         "| year | water km2 | optical valid share | comparable |", "|---|---|---|---|"]
+    L += [f"| {r['year']} | {r['water_km2']:.3f} | {r['valid_frac']:.3f} | {'yes' if r['comparable'] else 'no'} |" for r in rep["annual"]]
+    if trend["slope_km2_per_yr"] is not None:
+        L += ["", f"Trend: {trend['slope_km2_per_yr']:+.4f} km2/yr (95% CI {trend['slope_ci95'][0]:+.4f}..{trend['slope_ci95'][1]:+.4f}), Kendall p = {trend['kendall_p']:.3f}."]
+    L += ["", f"Lake objects >= {lc['objects']['min_area_km2']} km2: {rep['objects']['count']} (screening flags after BH: {rep['objects']['flagged']})."]
+    (out / "lake_analysis_v2.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+    print("\n".join(L))
+
+
 def main():
     p = argparse.ArgumentParser()
-    p.parse_args()
+    p.add_argument("--frozen-rule", action="store_true", help="annual areas + objects with configs/lakes_rule.yaml (v2); no tuning or scoring")
+    args = p.parse_args()
     if config.mode() != "real":
         raise SystemExit("Lake analysis runs on Earth Engine data in real mode only (QGW_MODE=real).")
     lc = config.load_yaml("lakes")
     initialize()
+    if args.frozen_rule:
+        run_frozen_rule(lc)
+        return
     full_basin = ee.Geometry(json.loads((config.raw_dir("real") / "basin.geojson").read_text()))
     dem, zone = zone_image(full_basin, lc)
     # Compute region: coarse outline of the lake zone (everything else is masked anyway).
