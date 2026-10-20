@@ -74,6 +74,8 @@ Probabilistic score QS (3-quantile CRPS approximation, m3/s; lower is better), c
 
 - Persistence is best at 1 day (significantly better than the LSTM); at 7 days GBM and persistence are statistically indistinguishable; at 30 days learned models are better on average but block-bootstrap CIs against climatology include zero.
 - Monsoon intervals undercover (0.47-0.69); 2025 flows exceed the training range. The gate rejected every candidate on coverage. A registered per-season CQR re-run raised monsoon coverage (to 0.60-0.68 for GBM) but still missed the gate at 30 d (0.689 < 0.70).
+- **Fresh 2026 test** (registered before data, scored once; `docs/protocol_fresh2026.md`): GBM NSE 0.994 / 0.980 / 0.962 at 1 / 7 / 30 d, but intervals over-cover (0.938 and 0.955 > 0.90) because calibration on the extreme 2025 flows widened them for a low-flow 2026. Gate failed in the opposite direction. The VQC was again worse than all classical baselines.
+- The GloFAS target is reanalysis only to 2023-08-04; later values are forecast-derived (median 2.4% lower, July 11% lower). Corrected in all docs.
 - Season-blind drift detection alarms on 99.8% of weekly checks; the season-aware monitor on 4.9%.
 - The simulated VQC (QS 28.9) is worse than a 15-parameter linear model on the same 4 inputs (10.1) and than climatology. No quantum advantage is claimed or testable on a simulator.
 
