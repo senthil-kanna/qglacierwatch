@@ -79,6 +79,55 @@ def tune_sar(vv, label, weight, vv_grid) -> tuple[float, float]:
     return best
 
 
+# --- v2 variants (docs/protocol_lakes_v2.md) ------------------------------------------------------
+# Listed in order of complexity; selection prefers the earlier one within VARIANT_TIE_IOU of the best.
+VARIANTS: dict[str, dict] = {
+    "A": {"index": "ndwi", "max_slope": 12, "swir_guard": False, "sar_union": False},
+    "B": {"index": "mndwi", "max_slope": 12, "swir_guard": False, "sar_union": False},
+    "C": {"index": "mndwi", "max_slope": 20, "swir_guard": False, "sar_union": False},
+    "D": {"index": "mndwi", "max_slope": 12, "swir_guard": True, "sar_union": False},
+    "E": {"index": "mndwi", "max_slope": 20, "swir_guard": True, "sar_union": False},
+    "F": {"index": "mndwi", "max_slope": 20, "swir_guard": True, "sar_union": True},
+}
+VARIANT_TIE_IOU = 0.01
+
+
+def variant_water(d: dict, spec: dict, p: dict) -> np.ndarray:
+    """Water prediction for sampled pixels. d holds arrays ndwi, mndwi, nir, swir, slope, vv
+    (0 = no SAR) and opt_valid; p holds t_idx, t_nir, t_swir (if guarded) and t_vv."""
+    valid = np.asarray(d["opt_valid"], bool)
+    vv = np.asarray(d["vv"], float)
+    opt = (np.asarray(d[spec["index"]], float) > p["t_idx"]) & (np.asarray(d["nir"], float) < p["t_nir"])
+    if spec["swir_guard"]:
+        opt &= np.asarray(d["swir"], float) < p["t_swir"]
+    sar = (vv != 0) & (vv < p["t_vv"])
+    water = np.where(valid, opt, sar)
+    if spec["sar_union"]:
+        water |= valid & sar & (np.asarray(d["mndwi"], float) > 0)
+    return water & (np.asarray(d["slope"], float) < spec["max_slope"])
+
+
+def tune_variant(d: dict, label, weight, spec: dict, grids: dict, t_vv: float) -> tuple[dict, float]:
+    """Grid-search the optical thresholds for weighted F1 of the variant's full prediction."""
+    best: tuple[dict, float] = ({}, -1.0)
+    swir_grid = grids["swir"] if spec["swir_guard"] else [None]
+    for a in grids["idx"]:
+        for b in grids["nir"]:
+            for s in swir_grid:
+                p = {"t_idx": float(a), "t_nir": float(b), "t_vv": float(t_vv)} | ({"t_swir": float(s)} if s is not None else {})
+                f1 = seg_metrics(weighted_confusion(variant_water(d, spec, p), label, weight))["dice_f1"]
+                if np.isfinite(f1) and f1 > best[1]:
+                    best = (p, float(f1))
+    return best
+
+
+def select_variant(val_iou: dict, tie: float = VARIANT_TIE_IOU) -> str:
+    """Highest validation IoU; within `tie` of the best, the earliest (simplest) variant in VARIANTS."""
+    finite = {k: v for k, v in val_iou.items() if np.isfinite(v)}
+    best = max(finite.values())
+    return next(k for k in VARIANTS if k in finite and finite[k] >= best - tie)
+
+
 def block_split(block_ids, seed: int = 0, fractions=(0.5, 0.25, 0.25)) -> dict:
     """Assign spatial blocks to train/val/test so no block contributes to two splits."""
     ids = np.unique(block_ids)
