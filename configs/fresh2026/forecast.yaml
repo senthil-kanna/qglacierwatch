@@ -1,0 +1,7 @@
+# Overlay for the registered fresh 2026 evaluation (docs/protocol_fresh2026.md).
+# Only splits and CV years change; everything else comes from configs/forecast.yaml.
+splits:
+  train: ["2015-01-01", "2023-12-31"]
+  calibration: ["2024-01-01", "2025-12-31"]
+  test: ["2026-01-01", "2026-09-30"]          # scored once
+cv_validation_years: [2020, 2021, 2022, 2023]
