@@ -71,7 +71,7 @@ Probabilistic score QS (3-quantile CRPS approximation, m3/s; lower is better), c
 | 30 d | 22.44 | 18.57 | 16.91 | **16.13** |
 
 - Persistence is best at 1 day (significantly better than the LSTM); at 7 days GBM and persistence are statistically indistinguishable; at 30 days learned models are better on average but block-bootstrap CIs against climatology include zero.
-- Monsoon intervals undercover (0.47-0.69); 2025 flows exceed the training range. The gate rejected every candidate on coverage.
+- Monsoon intervals undercover (0.47-0.69); 2025 flows exceed the training range. The gate rejected every candidate on coverage. A registered per-season CQR re-run raised monsoon coverage (to 0.60-0.68 for GBM) but still missed the gate at 30 d (0.689 < 0.70).
 - Season-blind drift detection alarms on 99.8% of weekly checks; the season-aware monitor on 4.9%.
 - The simulated VQC (QS 28.9) is worse than a 15-parameter linear model on the same 4 inputs (10.1) and than climatology. No quantum advantage is claimed or testable on a simulator.
 
@@ -104,7 +104,7 @@ Errors are JSON `{"error", "detail"}` with 401/404/422/429/503. Set `QGW_API_KEY
 
 - **Observed discharge**: obtain CWC/HP data (or a nearby open gauge) and rerun; the pipeline switches automatically and reports `target_is_observed: true`.
 - **Weather forecasts**: add ECMWF/GEFS precipitation and temperature forecasts for 7-30 day leads; current long-lead skill relies on basin state only.
-- **Calibration under shift**: monsoon undercoverage suggests season-conditional or adaptive conformal methods (e.g. per-season CQR, ACI) — to be pre-registered before testing.
+- **Calibration under shift**: per-season CQR was tried once (registered, 2026-10-20) and still missed the gate at 30 d. Adaptive conformal inference (ACI) or a longer calibration window needs a fresh, unseen test year before it can be judged fairly.
 - **Spatial detail**: elevation-band snow cover and temperature lapse rates instead of basin means.
 - **Lakes**: authoritative labels (Hi-MAG/ICIMOD after licence check, or manual annotation) instead of JRC silver labels; per-lake uncertainty.
 - **Quantum**: trainable input scaling, longer schedules and noise models; a hardware run would test feasibility only.

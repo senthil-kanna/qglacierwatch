@@ -22,7 +22,7 @@ from src import config
 from src.evaluate.metrics import score_all
 from src.evaluate.splits import Period, issue_mask
 from src.features.build import load_latest
-from src.models.calibration import CQR
+from src.models.calibration import make_cqr
 from src.pipeline.train import git_sha, make_factories
 from src.registry.registry import registry_for
 
@@ -33,9 +33,9 @@ def _idx(table, period, h, embargo=True):
     return sub[table.loc[sub, f"y_h{h}"].notna().to_numpy()]
 
 
-def _predict(members, cqr, table, idx):
+def _predict(members, cqr, table, idx, h):
     q = np.sort(np.mean([m.predict(table, idx) for m in members], axis=0), axis=1)
-    return cqr.apply(q)
+    return cqr.apply(q, idx + pd.Timedelta(days=h))
 
 
 def score_bundle(bundle, table, window: Period, clim) -> dict:
@@ -43,7 +43,7 @@ def score_bundle(bundle, table, window: Period, clim) -> dict:
     for h in bundle["horizons"]:
         idx = _idx(table, window, h, embargo=False)
         y = table.loc[idx, f"y_h{h}"]
-        s = score_all(y, _predict(bundle["models"][h], bundle["cqr"][h], table, idx))
+        s = score_all(y, _predict(bundle["models"][h], bundle["cqr"][h], table, idx, h))
         by_h[f"h{h}"] = {**s, "qs_climatology": score_all(y, clim[h].predict(table, idx))["qs"]}
     return {"window": [str(window.start.date()), str(window.end.date())], "by_horizon": by_h, "mean_qs": float(np.mean([v["qs"] for v in by_h.values()]))}
 
@@ -88,7 +88,7 @@ def main() -> None:
     for h in inc["horizons"]:
         idx = _idx(table, cal, h)
         q = np.sort(np.mean([m.predict(table, idx) for m in models[h]], axis=0), axis=1)
-        cqr[h] = CQR(cfg["calibration"]["target_coverage"]).fit(table.loc[idx, f"y_h{h}"], q)
+        cqr[h] = make_cqr(cfg).fit(table.loc[idx, f"y_h{h}"], q, idx + pd.Timedelta(days=h))
 
     bundle = {**inc, "family": family, "models": models, "cqr": cqr}
     cand_eval = score_bundle(bundle, table, window, clim)
