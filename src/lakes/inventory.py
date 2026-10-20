@@ -131,13 +131,16 @@ def markdown(rep: dict) -> str:
 
 
 def main() -> None:
-    argparse.ArgumentParser().parse_args()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--version", default="", choices=["", "v2"], help="'v2' compares lake_objects_v2.geojson (frozen v2 rule)")
+    args = ap.parse_args()
+    suffix = f"_{args.version}" if args.version else ""
     if not HIMAG_DIR.exists():
         raise SystemExit(f"Hi-MAG shapefiles not found in {HIMAG_DIR}; see docs/lakes.md for the download.")
     basin = shape(json.loads((config.raw_dir("real") / "basin.geojson").read_text()))
     by_year = {y: load_himag(HIMAG_DIR, y, basin) for y in range(2008, 2018)}
     crs = by_year[2017].crs
-    ours = gpd.read_file(config.artifact_dir("real") / "lakes" / "lake_objects.geojson").to_crs(crs)
+    ours = gpd.read_file(config.artifact_dir("real") / "lakes" / f"lake_objects{suffix}.geojson").to_crs(crs)
     ever = gpd.GeoDataFrame(geometry=list(gpd.GeoSeries(np.concatenate([g.geometry.values for g in by_year.values()]), crs=crs).union_all().geoms), crs=crs)
     ever["GL_ID"] = [f"ever-{i}" for i in range(len(ever))]
     rep = {
@@ -148,8 +151,9 @@ def main() -> None:
         "ever_2008_2017": compare(ours, ever),
     }
     out = config.reports_dir("real")
-    (out / "himag_comparison.json").write_text(json.dumps(rep, indent=2))
-    (out / "himag_comparison.md").write_text(markdown(rep), encoding="utf-8")
+    rep["objects_file"] = f"lake_objects{suffix}.geojson"
+    (out / f"himag_comparison{suffix}.json").write_text(json.dumps(rep, indent=2))
+    (out / f"himag_comparison{suffix}.md").write_text(markdown(rep), encoding="utf-8")
     print(markdown(rep))
 
 
