@@ -63,6 +63,15 @@ random. Wet blocks per split: train 6, val 4, test 3.
 - Annual zone water area (all 7 years comparable): 0.64-1.15 km2, no trend (Theil-Sen -0.005 km2/yr, 95% CI -0.16..+0.17, Kendall p = 1.0). Given the test precision, absolute areas are likely overestimated; year-to-year swings of ~40% include segmentation noise.
 - 34 lake objects >= 0.01 km2 (largest ~0.08 km2). **No object is flagged** after Benjamini-Hochberg correction (smallest q = 0.09). Under the earlier uncorrected rule one object (+9.7%/yr, p = 0.03, q = 0.34) was flagged; that flag was a likely chance result.
 
+## Segmentation improvement attempt (v2, registered; `docs/protocol_lakes_v2.md`)
+
+Six variants (NDWI vs MNDWI, slope limit 12 vs 20 deg, SWIR guard, SAR union) were tuned on 2019
+train blocks and compared on 2020 validation blocks in a wider domain (slope < 25 deg). **None beat
+the current rule** (validation IoU 0.156 vs 0.029-0.094); the current rule was kept unchanged. Test
+2021 in the wider domain: IoU 0.077. The over-mapping (precision ~0.1-0.16) and the small lake
+extents vs Hi-MAG remain unsolved; a learned classifier trained on a post-2021 reference, or manual
+labels, would be the next step.
+
 ## Inventory comparison: Hi-MAG
 
 ### Source (verified 2026-10-20)

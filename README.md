@@ -24,7 +24,7 @@ for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532
 | Season-aware drift monitors, replay 2016-2025, synthetic perturbations | yes | yes | - | `reports/real/drift_replay.md` |
 | Tier-2/3 retraining | yes | Tier 3 once (gate failed) | - | `reports/real/retraining_runs.json` |
 | VQC benchmark (PennyLane simulator) + matched classical models | yes | yes, 7 models x 5 seeds | - | `reports/real/quantum_benchmark.md` |
-| Glacial-lake segmentation (S2/S1, JRC silver labels) | yes | yes (20 m, 2019-2025): water-stratified split: val IoU 0.37, **test IoU 0.11 (low skill, over-maps water)**; 34 lakes, no area trend, 0 growth flags after BH; **vs Hi-MAG 2017: 17/21 lakes found (88% of area), but matched lake areas ~0.5x Hi-MAG** | EE account | better water/shadow separation; no common year with Hi-MAG (ends 2017) |
+| Glacial-lake segmentation (S2/S1, JRC silver labels) | yes | yes (20 m, 2019-2025): water-stratified split: val IoU 0.37, **test IoU 0.11 (low skill, over-maps water)**; 34 lakes, no area trend, 0 growth flags after BH; **vs Hi-MAG 2017: 17/21 lakes found (88% of area), but matched lake areas ~0.5x Hi-MAG** | EE account | registered v2 attempt (MNDWI, slope, SWIR, SAR variants) did not beat the current rule; no common year with Hi-MAG (ends 2017) |
 | REST API (FastAPI, /v1) | yes | locally, on real artifacts | - | `docs/openapi.json` |
 | Dashboard (Streamlit, 7 pages) | yes | headless render tests on real artifacts | - | |
 | Docker image, compose | yes | **not built locally** (no Docker) | Docker | built and smoke-tested in CI |

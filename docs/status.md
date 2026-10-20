@@ -23,7 +23,7 @@ Research validation (do not let cloud work replace these):
 
 - [x] **Hi-MAG comparison** (2026-10-20): v3.0, CC BY 4.0, MD5 verified; method committed before scoring (aa18713); 17/21 Hi-MAG 2017 lakes >= 0.01 km2 found (88% of area), matched areas ~0.5x Hi-MAG, 11 extra objects; no common year (Hi-MAG ends 2017). `reports/real/himag_comparison.md`.
 - [x] **Fresh 2026 forecast evaluation** (2026-10-20): protocol 2a9c688 before data; test scored once. gbm NSE 0.994/0.980/0.962; gate failed on over-coverage (0.938 at 1 d, 0.955 at 30 d); VQC worse than all classical models. Found and corrected the target provenance (forecast-derived after 2023-08-04). 2026 consumed. `docs/protocol_fresh2026.md`.
-- [ ] **Lake-segmentation improvement**: SWIR (MNDWI), terrain-shadow and slope filters, S1 features, selected on validation only, frozen before one test evaluation; disclose that the JRC reference ends in 2021 and the test split was seen before.
+- [x] **Lake-segmentation improvement** (2026-10-20, registered e1dbdd2): 6 variants (MNDWI, slope 20 deg, SWIR guard, SAR union) selected on validation; none beat the current rule (val IoU 0.156 vs <= 0.094), so the rule is unchanged; test 2021 once, IoU 0.077 in the wider domain. JRC ends 2021; test not untouched. Negative result documented.
 
 Cloud (blocked on the student subscription):
 
