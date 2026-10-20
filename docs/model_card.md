@@ -7,7 +7,7 @@ All numbers below are copied from `reports/real/forecast_results.md` (run 2026-1
 
 Probabilistic daily discharge guidance (P10/P50/P90) for the Beas above Bhuntar at 1, 7 and 30
 days, for research on snowmelt-driven forecasting and for monitoring/governance experiments.
-**Not for flood warning or operational decisions**: the target is GloFAS reanalysis (modelled), no
+**Not for flood warning or operational decisions**: the target is GloFAS v4 modelled discharge (reanalysis to 2023-08-04, forecast-derived after), no
 weather forecasts are used, and no production model has passed the promotion gate.
 
 ## Models
@@ -45,6 +45,7 @@ Paired block bootstrap: at 1 day the LSTM is significantly worse than persistenc
 
 - Monsoon (JJAS) intervals are too narrow on test: coverage 0.47-0.69 for learned models with pooled CQR; 0.60-0.77 with per-season CQR (deviation 2026-10-20 in `docs/protocol.md`).
 - With per-season CQR (one registered re-run) the GBM candidate still **failed the gate**: coverage 0.727 / 0.701 / **0.689** at 1 / 7 / 30 d. Pre- and post-monsoon coverage (~0.60) is now the weak spot.
+- Fresh 2026 test (registered; train 2015-2023, calibrate 2024-2025): NSE 0.994 / 0.980 / 0.962, coverage **0.938** / 0.887 / **0.955**, so the gate fails on over-coverage. Calibration years (extreme 2025) and the test year (low flow) differ, and conformal offsets do not transfer across such regimes.
 - 2025 is outside the training range (GloFAS annual max 366 m3/s vs <= 316 in training years); residual drift alerts fire through 2025.
 - The registered GBM candidate **failed the gate** (coverage 0.698 at 7 d and 0.685 at 30 d, below 0.70). A Tier-3 retrain (train 2015-2023, calibrate 2024, evaluate 2025) lowered mean QS on 2025 from 17.71 to 13.17 but still failed (coverage 0.633 at 30 d). No model is in production; the API serves the newest candidate and labels it `unpromoted_candidate`.
 - Basin-mean remote-sensing variables hide elevation-dependent melt; ERA5-Land's coarse grid misrepresents the steep terrain.

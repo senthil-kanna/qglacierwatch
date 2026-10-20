@@ -1,0 +1,14 @@
+variant: A
+spec:
+  index: ndwi
+  max_slope: 12
+  swir_guard: false
+  sar_union: false
+params:
+  t_idx: 0.2
+  t_nir: 0.3
+  t_vv: -20.0
+domain_max_slope: 25
+selected_on: val blocks 2020 IoU
+frozen_utc: '2026-10-20T08:20:45+00:00'
+protocol: docs/protocol_lakes_v2.md

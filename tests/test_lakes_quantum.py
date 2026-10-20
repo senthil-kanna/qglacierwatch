@@ -81,6 +81,39 @@ def test_bh_adjust_matches_reference():
     assert np.isnan(q[3]) and q[4] == pytest.approx(0.5)
 
 
+def v2_pixels():
+    """SYNTHETIC pixels: lake (0), lake margin on a 15 deg DEM slope (1), wet snow (2: bright SWIR),
+    shadow (3: dark, MNDWI ~0), cloud-covered lake seen by SAR (4)."""
+    return {
+        "ndwi": np.array([0.5, 0.4, 0.4, 0.3, -9]), "mndwi": np.array([0.7, 0.6, 0.6, 0.0, -9]),
+        "nir": np.array([0.03, 0.05, 0.10, 0.04, -9]), "swir": np.array([0.01, 0.02, 0.20, 0.03, -9]),
+        "slope": np.array([2, 15, 5, 8, 3]), "vv": np.array([-24, -23, -12, -15, -24]),
+        "opt_valid": np.array([1, 1, 1, 1, 0]),
+    }
+
+
+def test_variant_rules_slope_swir_and_sar():
+    d = v2_pixels()
+    p = {"t_idx": 0.2, "t_nir": 0.12, "t_swir": 0.05, "t_vv": -20}
+    v = core.VARIANTS
+    assert core.variant_water(d, v["B"], p).tolist() == [True, False, True, False, True]   # 12 deg cuts the margin
+    assert core.variant_water(d, v["C"], p).tolist() == [True, True, True, False, True]    # 20 deg keeps it
+    assert core.variant_water(d, v["E"], p).tolist() == [True, True, False, False, True]   # SWIR guard drops wet snow
+    # NDWI keeps the shadow pixel that MNDWI rejects.
+    assert core.variant_water(d, v["A"], p)[3] and not core.variant_water(d, v["B"], p)[3]
+
+
+def test_tune_variant_and_selection_tie_rule():
+    d = v2_pixels()
+    label = np.array([1, 1, 0, 0, 1], bool)
+    grids = {"idx": [0.0, 0.2], "nir": [0.08, 0.12], "swir": [0.05, 0.12]}
+    p, f1 = core.tune_variant(d, label, np.ones(5), core.VARIANTS["E"], grids, t_vv=-20)
+    assert f1 == pytest.approx(1.0) and p["t_swir"] == 0.05
+    assert core.select_variant({"A": 0.30, "B": 0.40, "C": 0.405, "E": 0.45, "F": 0.455}) == "E"
+    assert core.select_variant({"A": 0.30, "B": 0.40, "C": 0.405}) == "B"
+    assert core.select_variant({"A": float("nan"), "B": 0.2}) == "B"
+
+
 def test_comparable_years_and_growth():
     assert core.comparable_years({2019: 0.95, 2020: 0.7, 2021: None, 2022: 0.91}, 0.9) == [2019, 2022]
     g = core.growth([2019, 2020, 2021, 2022, 2023, 2024], [0.10, 0.11, 0.12, 0.13, 0.14, 0.15])

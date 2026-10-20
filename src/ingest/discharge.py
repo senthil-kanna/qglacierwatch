@@ -1,8 +1,10 @@
 """Daily river discharge (target variable).
 
 Primary source is a gauge CSV at data/raw/discharge_gauge.csv (columns: date, discharge_m3s),
-used automatically if present. Otherwise GloFAS v4 reanalysis is pulled from the Open-Meteo
-Flood API (free, no key; data CC BY 4.0, Copernicus Emergency Management Service).
+used automatically if present. Otherwise GloFAS v4 is pulled from the Open-Meteo Flood API (free,
+no key; data CC BY 4.0, Copernicus Emergency Management Service). The default `seamless_v4`
+product at this cell is consolidated reanalysis up to 2023-08-04 and operational forecast-derived
+from 2023-08-05; it also contains future seasonal-forecast values, so always cap the end date.
 
 Usage:
     python -m src.ingest.discharge

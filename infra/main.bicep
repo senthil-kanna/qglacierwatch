@@ -4,9 +4,12 @@
 //   az group create -n rg-qglacierwatch -l centralindia
 //   az deployment group create -g rg-qglacierwatch -f infra/main.bicep -p infra/main.parameters.json
 //
-// Resources: Log Analytics (daily cap), ACR Basic, Storage (Azure Files share for data/artifacts/reports),
-// Key Vault (RBAC), user-assigned identity, Container Apps environment (Consumption), API and
-// dashboard apps (min replicas 0), scheduled jobs, and a monthly budget with e-mail alerts.
+// Resources: Log Analytics (daily cap), optional ACR Basic (default off: public GHCR image),
+// Storage (Azure Files share for data/artifacts/reports), Key Vault (RBAC), user-assigned identity,
+// Container Apps environment (Consumption only: no Dedicated profile, private endpoint or planned
+// maintenance, which carry an hourly management charge), API and dashboard apps (min replicas 0),
+// scheduled jobs, metric alerts for API 5xx and restarts, and a monthly budget with e-mail alerts.
+// Every resource carries the tag project=qglacierwatch; scripts/azure/cleanup.ps1 relies on it.
 
 targetScope = 'resourceGroup'
 
@@ -24,7 +27,7 @@ param imageTag string = 'bootstrap'
 param deployApps bool = false
 
 @description('true: private Azure Container Registry Basic (~USD 5/month). false: pull a PUBLIC image from externalImage (e.g. GitHub Container Registry, free) and skip ACR.')
-param useAcr bool = true
+param useAcr bool = false
 
 @description('Public image repository used when useAcr = false, without tag.')
 param externalImage string = 'ghcr.io/senthil-kanna/qglacierwatch'
@@ -41,6 +44,13 @@ param budgetStartDate string
 @description('Earth Engine project id used by ingestion jobs.')
 param eeProject string = 'ee-senthil-hydro'
 
+@description('Object id of the person deploying; gets Key Vault Secrets Officer so they can set secrets. Empty = no assignment.')
+param adminPrincipalId string = ''
+
+@description('Metric alerts (API 5xx responses, container restarts) e-mailed to alertEmail. Evaluated on platform metrics, so they never wake a scaled-to-zero app.')
+param enableAlerts bool = true
+
+var tags = { project: 'qglacierwatch' }
 var suffix = uniqueString(resourceGroup().id)
 var acrName = toLower('${prefix}acr${suffix}')
 var storageName = toLower(take('${prefix}st${suffix}', 24))
@@ -56,11 +66,14 @@ var commonEnv = [
   { name: 'MLFLOW_DISABLE_AGENT_HINT', value: '1' }
 ]
 var volumeMounts = [ { volumeName: 'qgw', mountPath: '/mnt/qgw' } ]
-var volumes = [ { name: 'qgw', storageType: 'AzureFile', storageName: 'qgwfiles' } ]
+// SMB mounts have no POSIX owners; map them to the image's non-root user (uid/gid 10001, see
+// docker/Dockerfile) or writes fail. nobrl: no byte-range locks (the code uses temp-file + rename).
+var volumes = [ { name: 'qgw', storageType: 'AzureFile', storageName: 'qgwfiles', mountOptions: 'uid=10001,gid=10001,dir_mode=0750,file_mode=0640,nobrl,mfsymlinks,cache=strict' } ]
 
 resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${prefix}-logs-${suffix}'
   location: location
+  tags: tags
   properties: {
     sku: { name: 'PerGB2018' }
     retentionInDays: 30
@@ -71,6 +84,7 @@ resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = if (useAcr) {
   name: acrName
   location: location
+  tags: tags
   sku: { name: 'Basic' }
   properties: { adminUserEnabled: false }
 }
@@ -78,6 +92,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = if (useAcr) {
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageName
   location: location
+  tags: tags
   sku: { name: 'Standard_LRS' }
   kind: 'StorageV2'
   properties: {
@@ -101,6 +116,7 @@ resource share 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-05-01
 resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: kvName
   location: location
+  tags: tags
   properties: {
     tenantId: subscription().tenantId
     sku: { family: 'A', name: 'standard' }
@@ -113,6 +129,7 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
 resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: '${prefix}-id-${suffix}'
   location: location
+  tags: tags
 }
 
 // AcrPull and Key Vault Secrets User for the apps' identity (no registry passwords anywhere).
@@ -123,6 +140,17 @@ resource acrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (useA
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
+  }
+}
+
+// Key Vault Secrets Officer for the deploying person, so `az keyvault secret set` works under RBAC.
+resource kvAdmin 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(adminPrincipalId)) {
+  scope: kv
+  name: guid(kv.id, adminPrincipalId, 'kvsecretsofficer')
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7')
+    principalId: adminPrincipalId
+    principalType: 'User'
   }
 }
 
@@ -139,6 +167,7 @@ resource kvSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 resource env 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: '${prefix}-env-${suffix}'
   location: location
+  tags: tags
   properties: {
     appLogsConfiguration: {
       destination: 'log-analytics'
@@ -174,6 +203,7 @@ var kvSecrets = [
 resource api 'Microsoft.App/containerApps@2024-03-01' = if (deployApps) {
   name: '${prefix}-api'
   location: location
+  tags: tags
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${identity.id}': {} } }
   dependsOn: [ acrPull, kvSecretsUser, envStorage ]
   properties: {
@@ -208,6 +238,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = if (deployApps) {
 resource dashboard 'Microsoft.App/containerApps@2024-03-01' = if (deployApps) {
   name: '${prefix}-dashboard'
   location: location
+  tags: tags
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${identity.id}': {} } }
   dependsOn: [ acrPull, envStorage ]
   properties: {
@@ -246,6 +277,7 @@ var jobs = [
 resource jobRes 'Microsoft.App/jobs@2024-03-01' = [for j in jobs: if (deployApps) {
   name: '${prefix}-job-${j.name}'
   location: location
+  tags: tags
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${identity.id}': {} } }
   dependsOn: [ acrPull, kvSecretsUser, envStorage ]
   properties: {
@@ -273,6 +305,56 @@ resource jobRes 'Microsoft.App/jobs@2024-03-01' = [for j in jobs: if (deployApps
       ]
       volumes: volumes
     }
+  }
+}]
+
+// Alerts: e-mail action group (no charge for e-mail) and two metric alert rules on the API. Metric
+// alerts are billed per monitored time series (about USD 0.10/month each or less; see
+// docs/deployment.md). A synthetic availability ping is deliberately NOT used: pinging every 15 min
+// would keep the scale-to-zero app awake most of the day and cost far more than the test itself.
+resource actionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = if (enableAlerts) {
+  name: '${prefix}-alerts'
+  location: 'global'
+  tags: tags
+  properties: {
+    groupShortName: 'qgwalerts'
+    enabled: true
+    emailReceivers: [ { name: 'owner', emailAddress: alertEmail, useCommonAlertSchema: true } ]
+  }
+}
+
+var alertRules = [
+  { name: 'api-5xx', description: 'API returned 5xx responses (more than 5 in 15 minutes).', metric: 'Requests', dims: [ { name: 'statusCodeCategory', operator: 'Include', values: [ '5xx' ] } ], threshold: 5 }
+  { name: 'api-restarts', description: 'API container restarted (crash loop or failed probes).', metric: 'RestartCount', dims: [], threshold: 2 }
+]
+
+resource metricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [for r in alertRules: if (enableAlerts && deployApps) {
+  name: '${prefix}-${r.name}'
+  location: 'global'
+  tags: tags
+  properties: {
+    description: r.description
+    severity: 2
+    enabled: true
+    scopes: [ api.id ]
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT15M'
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
+      allOf: [
+        {
+          name: r.name
+          criterionType: 'StaticThresholdCriterion'
+          metricNamespace: 'Microsoft.App/containerApps'
+          metricName: r.metric
+          dimensions: r.dims
+          operator: 'GreaterThan'
+          threshold: r.threshold
+          timeAggregation: 'Total'
+        }
+      ]
+    }
+    actions: [ { actionGroupId: actionGroup.id } ]
   }
 }]
 

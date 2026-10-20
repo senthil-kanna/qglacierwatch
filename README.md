@@ -5,7 +5,9 @@ monitoring, drift-triggered retraining governance and a fair simulated quantum-c
 for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532 km2).
 
 > **Read this first.** Observed discharge for this gauge is not publicly available, so the forecast
-> target is **GloFAS v4 reanalysis (modelled)**. Every skill score measures how well GloFAS is
+> target is **GloFAS v4 modelled discharge**: consolidated reanalysis up to 2023-08-04, and
+> operational forecast-derived values from 2023-08-05 (Open-Meteo `seamless_v4`; see
+> `docs/protocol_fresh2026.md`). Every skill score measures how well GloFAS is
 > reproduced, not the real river. No model has passed the promotion gate, nothing is deployed to
 > Azure, and nothing here is a live feed. Synthetic data are used only in tests and `demo` mode.
 
@@ -22,7 +24,7 @@ for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532
 | Season-aware drift monitors, replay 2016-2025, synthetic perturbations | yes | yes | - | `reports/real/drift_replay.md` |
 | Tier-2/3 retraining | yes | Tier 3 once (gate failed) | - | `reports/real/retraining_runs.json` |
 | VQC benchmark (PennyLane simulator) + matched classical models | yes | yes, 7 models x 5 seeds | - | `reports/real/quantum_benchmark.md` |
-| Glacial-lake segmentation (S2/S1, JRC silver labels) | yes | yes (20 m, 2019-2025): water-stratified split: val IoU 0.37, **test IoU 0.11 (low skill, over-maps water)**; 34 lakes, no area trend, 0 growth flags after BH | EE account | better water/shadow separation; Hi-MAG not ingested |
+| Glacial-lake segmentation (S2/S1, JRC silver labels) | yes | yes (20 m, 2019-2025): water-stratified split: val IoU 0.37, **test IoU 0.11 (low skill, over-maps water)**; 34 lakes, no area trend, 0 growth flags after BH; **vs Hi-MAG 2017: 17/21 lakes found (88% of area), but matched lake areas ~0.5x Hi-MAG** | EE account | registered v2 attempt (MNDWI, slope, SWIR, SAR variants) did not beat the current rule; no common year with Hi-MAG (ends 2017) |
 | REST API (FastAPI, /v1) | yes | locally, on real artifacts | - | `docs/openapi.json` |
 | Dashboard (Streamlit, 7 pages) | yes | headless render tests on real artifacts | - | |
 | Docker image, compose | yes | **not built locally** (no Docker) | Docker | built and smoke-tested in CI |
@@ -72,6 +74,8 @@ Probabilistic score QS (3-quantile CRPS approximation, m3/s; lower is better), c
 
 - Persistence is best at 1 day (significantly better than the LSTM); at 7 days GBM and persistence are statistically indistinguishable; at 30 days learned models are better on average but block-bootstrap CIs against climatology include zero.
 - Monsoon intervals undercover (0.47-0.69); 2025 flows exceed the training range. The gate rejected every candidate on coverage. A registered per-season CQR re-run raised monsoon coverage (to 0.60-0.68 for GBM) but still missed the gate at 30 d (0.689 < 0.70).
+- **Fresh 2026 test** (registered before data, scored once; `docs/protocol_fresh2026.md`): GBM NSE 0.994 / 0.980 / 0.962 at 1 / 7 / 30 d, but intervals over-cover (0.938 and 0.955 > 0.90) because calibration on the extreme 2025 flows widened them for a low-flow 2026. Gate failed in the opposite direction. The VQC was again worse than all classical baselines.
+- The GloFAS target is reanalysis only to 2023-08-04; later values are forecast-derived (median 2.4% lower, July 11% lower). Corrected in all docs.
 - Season-blind drift detection alarms on 99.8% of weekly checks; the season-aware monitor on 4.9%.
 - The simulated VQC (QS 28.9) is worse than a 15-parameter linear model on the same 4 inputs (10.1) and than climatology. No quantum advantage is claimed or testable on a simulator.
 
@@ -106,6 +110,6 @@ Errors are JSON `{"error", "detail"}` with 401/404/422/429/503. Set `QGW_API_KEY
 - **Weather forecasts**: add ECMWF/GEFS precipitation and temperature forecasts for 7-30 day leads; current long-lead skill relies on basin state only.
 - **Calibration under shift**: per-season CQR was tried once (registered, 2026-10-20) and still missed the gate at 30 d. Adaptive conformal inference (ACI) or a longer calibration window needs a fresh, unseen test year before it can be judged fairly.
 - **Spatial detail**: elevation-band snow cover and temperature lapse rates instead of basin means.
-- **Lakes**: authoritative labels (Hi-MAG/ICIMOD after licence check, or manual annotation) instead of JRC silver labels; per-lake uncertainty.
+- **Lakes**: Hi-MAG (CC BY 4.0) is now compared (`reports/real/himag_comparison.md`) but ends in 2017; a post-2019 reference (manual annotation or a newer inventory) is still needed for pixel-level validation; per-lake uncertainty.
 - **Quantum**: trainable input scaling, longer schedules and noise models; a hardware run would test feasibility only.
 - **Operations**: rolling data versions for operational updates beyond 2025; deploy and monitor on Azure.

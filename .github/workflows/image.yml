@@ -1,0 +1,28 @@
+name: image
+
+# Build and publish the container image to GitHub Container Registry (no Azure access needed).
+# Tag = full commit SHA. The first push creates a PRIVATE package: make it public once in
+# GitHub > Packages > qglacierwatch > Package settings > Change visibility, or Container Apps
+# cannot pull it anonymously (scripts/azure/preflight.ps1 -ImageTag <sha> checks this).
+on:
+  push:
+    branches: [main]
+    paths: ["src/**", "api/**", "dashboard/**", "configs/**", "docker/**", "requirements.txt"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and push
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          img=ghcr.io/${GITHUB_REPOSITORY,,}
+          docker build -f docker/Dockerfile -t "$img:${{ github.sha }}" .
+          docker push "$img:${{ github.sha }}"
+          echo "Published $img:${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
