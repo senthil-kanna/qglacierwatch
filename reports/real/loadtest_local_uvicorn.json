@@ -1,0 +1,61 @@
+{
+  "generated_utc": "2026-10-20T09:33:31+00:00",
+  "label": "local_uvicorn",
+  "url": "http://localhost:8002",
+  "client": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.6",
+  "sequential_health": {
+    "n": 200,
+    "p50_ms": 1.5892000010353513,
+    "p95_ms": 2.706964996468741,
+    "p99_ms": 3.419922998436955,
+    "mean_ms": 1.8345130002853693,
+    "errors": 0
+  },
+  "sequential_forecast": {
+    "n": 200,
+    "p50_ms": 61.0508999961894,
+    "p95_ms": 74.8290050025389,
+    "p99_ms": 79.3930439997348,
+    "mean_ms": 61.862260999987484,
+    "errors": 0
+  },
+  "concurrent_forecast": [
+    {
+      "workers": 1,
+      "seconds": 20.0,
+      "requests": 270,
+      "throughput_rps": 13.481452083406804,
+      "p50_ms": 64.50955000036629,
+      "p95_ms": 78.65181499801109,
+      "errors": 0
+    },
+    {
+      "workers": 4,
+      "seconds": 20.2,
+      "requests": 224,
+      "throughput_rps": 11.113789777012649,
+      "p50_ms": 283.51364999980433,
+      "p95_ms": 418.93053500316455,
+      "errors": 0
+    },
+    {
+      "workers": 16,
+      "seconds": 20.7,
+      "requests": 223,
+      "throughput_rps": 10.755642486010466,
+      "p50_ms": 1160.575299989432,
+      "p95_ms": 3136.8687600042904,
+      "errors": 0
+    },
+    {
+      "workers": 32,
+      "seconds": 21.4,
+      "requests": 215,
+      "throughput_rps": 10.06498944961494,
+      "p50_ms": 2484.658799992758,
+      "p95_ms": 4676.741739995485,
+      "errors": 0
+    }
+  ]
+}
