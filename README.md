@@ -22,7 +22,7 @@ for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532
 | Season-aware drift monitors, replay 2016-2025, synthetic perturbations | yes | yes | - | `reports/real/drift_replay.md` |
 | Tier-2/3 retraining | yes | Tier 3 once (gate failed) | - | `reports/real/retraining_runs.json` |
 | VQC benchmark (PennyLane simulator) + matched classical models | yes | yes, 7 models x 5 seeds | - | `reports/real/quantum_benchmark.md` |
-| Glacial-lake segmentation (S2/S1, JRC silver labels) | yes | yes (20 m, 2019-2025): water-stratified split: val IoU 0.37, **test IoU 0.11 (low skill, over-maps water)**; 34 lakes, no area trend, 0 growth flags after BH | EE account | better water/shadow separation; Hi-MAG not ingested |
+| Glacial-lake segmentation (S2/S1, JRC silver labels) | yes | yes (20 m, 2019-2025): water-stratified split: val IoU 0.37, **test IoU 0.11 (low skill, over-maps water)**; 34 lakes, no area trend, 0 growth flags after BH; **vs Hi-MAG 2017: 17/21 lakes found (88% of area), but matched lake areas ~0.5x Hi-MAG** | EE account | better water/shadow separation; no common year with Hi-MAG (ends 2017) |
 | REST API (FastAPI, /v1) | yes | locally, on real artifacts | - | `docs/openapi.json` |
 | Dashboard (Streamlit, 7 pages) | yes | headless render tests on real artifacts | - | |
 | Docker image, compose | yes | **not built locally** (no Docker) | Docker | built and smoke-tested in CI |
@@ -106,6 +106,6 @@ Errors are JSON `{"error", "detail"}` with 401/404/422/429/503. Set `QGW_API_KEY
 - **Weather forecasts**: add ECMWF/GEFS precipitation and temperature forecasts for 7-30 day leads; current long-lead skill relies on basin state only.
 - **Calibration under shift**: per-season CQR was tried once (registered, 2026-10-20) and still missed the gate at 30 d. Adaptive conformal inference (ACI) or a longer calibration window needs a fresh, unseen test year before it can be judged fairly.
 - **Spatial detail**: elevation-band snow cover and temperature lapse rates instead of basin means.
-- **Lakes**: authoritative labels (Hi-MAG/ICIMOD after licence check, or manual annotation) instead of JRC silver labels; per-lake uncertainty.
+- **Lakes**: Hi-MAG (CC BY 4.0) is now compared (`reports/real/himag_comparison.md`) but ends in 2017; a post-2019 reference (manual annotation or a newer inventory) is still needed for pixel-level validation; per-lake uncertainty.
 - **Quantum**: trainable input scaling, longer schedules and noise models; a hardware run would test feasibility only.
 - **Operations**: rolling data versions for operational updates beyond 2025; deploy and monitor on Azure.

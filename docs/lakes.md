@@ -101,3 +101,31 @@ random. Wet blocks per split: train 6, val 4, test 3.
    a multi-year union, so polygon IoU is biased towards over-coverage; the per-year area
    comparison is the fairer area check.
 6. Run once with `python -m src.lakes.inventory`; results in `reports/real/himag_comparison.{json,md}`.
+
+### Results (run 2026-10-20, once)
+
+| reference | Hi-MAG lakes (all) | Hi-MAG >= 0.01 km2 | recall (count) | recall (area) | our objects matched | polygon IoU of unions |
+|---|---|---|---|---|---|---|
+| Hi-MAG 2017 | 24 (0.692 km2) | 21 | 0.81 | 0.88 | 19 / 34 | 0.35 |
+| Hi-MAG ever mapped 2008-2017 | 33 (1.055 km2) | 29 | 0.72 | 0.75 | 23 / 34 | 0.35 |
+
+- **Detection:** we find 17 of the 21 Hi-MAG 2017 lakes >= 0.01 km2 (88% of their area). The 4
+  missed lakes are listed in the report.
+- **Extent of the lakes we find is too small:** for the 19 matched groups, our 2019 area totals
+  0.338 km2 against 0.604 km2 in Hi-MAG 2017 (median ratio 0.51). Four matched objects have zero
+  area in 2019 although they hold water in other years (lake ice, snow or turbidity in the 2019
+  composite are possible causes; not verified). Exploratory check, not part of the fixed method:
+  using each object's mean area over 2019-2025 instead of 2019 gives 0.394 km2 (median ratio
+  0.60), so under-mapping of real lakes is not specific to 2019.
+- **Extra water:** 11 objects (0.069 km2 in 2019) match no Hi-MAG lake in any year. They may be
+  non-glacial ponds (outside Hi-MAG's scope), lakes formed after 2017, or false positives such as
+  shadow; Hi-MAG cannot separate these.
+- **Combined picture with the JRC evaluation:** the detector both misses the margins of real lakes
+  (vs Hi-MAG) and adds false water elsewhere (vs JRC, test precision 0.13). Both point to the
+  threshold rule being too blunt; see the planned segmentation improvement.
+- **Hi-MAG itself varies a lot between years** in this basin (5-24 lakes, 0.20-0.69 km2 in
+  2008-2017), so single-year comparisons carry large reference uncertainty.
+
+Limitations: no common year (2017 vs 2019); different lake definitions (glacial only vs any
+persistent water); our footprint is a multi-year union, which favours matching; resolution 20 m
+(ours) vs 30 m Landsat (Hi-MAG) with manual refinement; 34 vs 24 lakes is a small sample.
