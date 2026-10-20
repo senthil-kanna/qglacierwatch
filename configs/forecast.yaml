@@ -47,6 +47,8 @@ lstm:
 calibration:
   method: cqr        # conformalized quantile regression on the calibration period
   target_coverage: 0.8
+  by_season: true    # Mondrian CQR: one offset per target-date season (deviation 2026-10-20, docs/protocol.md)
+  min_season_samples: 60
 
 bootstrap:
   block_days: 30     # moving-block bootstrap to respect autocorrelation
