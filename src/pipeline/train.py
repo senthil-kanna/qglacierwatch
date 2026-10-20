@@ -196,7 +196,7 @@ def results_markdown(test: dict, cv_sel: pd.DataFrame, comps: list[dict], meta: 
     lines = [
         f"# Forecast results ({meta['mode']} mode)",
         "",
-        f"Target: `{meta['target_source']}` ({'observed gauge' if meta['target_is_observed'] else 'MODELLED reanalysis, not observed discharge'}).",
+        f"Target: `{meta['target_source']}` ({'observed gauge' if meta['target_is_observed'] else 'MODELLED GloFAS v4: reanalysis to 2023-08-04, forecast-derived after; not observed discharge'}).",
         f"Dataset `{meta['dataset_id']}`, generated {meta['generated_utc']}, code `{meta['git_sha']}`.",
         "",
         "## Held-out test period (calibrated intervals)",

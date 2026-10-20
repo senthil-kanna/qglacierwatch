@@ -2,7 +2,7 @@
 
 ## Observed vs modelled discharge
 
-| | CWC gauge (Beas at Bhuntar) | GloFAS v4 reanalysis (used now) |
+| | CWC gauge (Beas at Bhuntar) | GloFAS v4 (used now; reanalysis to 2023-08-04, forecast-derived after) |
 |---|---|---|
 | what it is | measured river flow at a gauging station | output of a hydrological model (LISFLOOD) driven by ERA5 weather |
 | access | restricted (Indus-basin data are classified on India-WRIS) | open, CC BY 4.0, via Open-Meteo Flood API |

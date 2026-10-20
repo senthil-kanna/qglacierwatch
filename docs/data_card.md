@@ -6,7 +6,7 @@
 | rows | 3,943 issue dates, 2015-03-17 .. 2025-12-31 (75-day warm-up dropped) |
 | raw files | `data/raw/{basin.geojson, modis_snow.parquet, era5_land.parquet, discharge.parquet}`; SHA-256 in `data/raw/MANIFEST.json` |
 | processed | `data/processed/real/features_<id>.parquet` + `.json` metadata (validation report included) |
-| target | `y_h{1,7,30}` = GloFAS v4 discharge on t+h, m3/s (modelled reanalysis) |
+| target | `y_h{1,7,30}` = GloFAS v4 discharge on t+h, m3/s (modelled: GloFAS v4 reanalysis to 2023-08-04, forecast-derived from 2023-08-05) |
 | provenance | `src/ingest/provenance.py` (licences and product IDs per file); see `docs/data_access.md` |
 | regenerate | `python -m src.ingest.earth_engine && python -m src.ingest.discharge && python -m src.features.build` |
 
