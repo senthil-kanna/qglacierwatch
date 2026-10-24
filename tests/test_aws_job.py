@@ -1,5 +1,6 @@
 """Scheduled-job handler (src.aws_job) and the API's optional S3 hydration; no AWS access."""
 
+import os
 import subprocess
 import sys
 import types
@@ -62,6 +63,20 @@ def test_drift_job_and_failure_does_not_push(calls, monkeypatch):
     assert calls["push"] == []
     with pytest.raises(ValueError):
         aws_job.handler({"job": "train"}, None)
+
+
+def test_ssm_placeholder_means_unset(monkeypatch):
+    from src import ssm
+
+    assert ssm.get(None) is None
+    fake_ssm(monkeypatch, "not-configured")
+    assert ssm.get("/qgw/api-key") is None
+    monkeypatch.delenv("QGW_API_KEY", raising=False)
+    monkeypatch.setenv("QGW_API_KEY_PARAM", "/qgw/api-key")
+    assert ssm.load_env("QGW_API_KEY", "QGW_API_KEY_PARAM") is False and "QGW_API_KEY" not in os.environ
+    fake_ssm(monkeypatch, "s3cret")
+    assert ssm.load_env("QGW_API_KEY", "QGW_API_KEY_PARAM") is True and os.environ["QGW_API_KEY"] == "s3cret"
+    monkeypatch.delenv("QGW_API_KEY")
 
 
 def test_api_hydrates_from_s3_only_when_configured(monkeypatch, tmp_path):

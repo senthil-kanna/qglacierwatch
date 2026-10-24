@@ -15,7 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from src import storage
+from src import ssm, storage
 
 WORK = Path(os.getenv("QGW_JOB_DIR", "/tmp/qgw"))
 _READS = ["data/raw", "data/processed/real", "artifacts/real/hindcasts.parquet", "reports/real"]
@@ -29,13 +29,8 @@ JOBS: dict[str, dict] = {
 
 def ee_key() -> str | None:
     """The Earth Engine key from SSM, or None while the parameter holds a placeholder."""
-    name = os.getenv("QGW_EE_KEY_PARAM")
-    if not name:
-        return None
-    import boto3
-
-    value = boto3.client("ssm").get_parameter(Name=name, WithDecryption=True)["Parameter"]["Value"].strip()
-    return value if value.startswith("{") else None
+    value = ssm.get(os.getenv("QGW_EE_KEY_PARAM"))
+    return value if value and value.startswith("{") else None
 
 
 def run(job: str, skip_ingest: bool = False) -> dict:
