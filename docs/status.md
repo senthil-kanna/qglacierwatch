@@ -27,11 +27,12 @@ Research validation (do not let cloud work replace these):
 
 Cloud, AWS (primary since 2026-10-24; target: working 2026-10-30, stable 2026-11-07; `docs/aws-deployment.md`):
 
-- [x] Terraform `infra/aws`, S3 storage layer, Lambda job handler, slim API image, CI deploy job (OIDC), scripts, guide.
-- [ ] User installs AWS CLI + Terraform, `aws login`, runs `bootstrap.ps1 -CheckOnly`, then `bootstrap.ps1`.
-- [ ] `seed-data.ps1`; `gh variable set AWS_DEPLOY_ROLE_ARN`; push branch; CI `aws-deploy` pushes images.
+- [x] Terraform `infra/aws`, S3 storage layer, Lambda job handler, slim API image, CI deploy job, scripts, guide.
+- [x] 2026-10-24 `aws login --profile qgw` works (account 078901481128, Free plan, USD 120 credit). Project SCP forces ap-southeast-2 and denies GitHub OIDC: moved to ap-southeast-2, CI uses a scoped IAM user (`github-keys.ps1`).
+- [ ] `bootstrap.ps1 -CheckOnly`, then `bootstrap.ps1`; install `gh` (`winget install -e --id GitHub.cli`).
+- [ ] `seed-data.ps1`; `github-keys.ps1`; push branch; CI `aws-deploy` pushes images.
 - [ ] `deploy.ps1 -ImageTag <sha>`; verify checklist (section 6 of the guide).
-- [ ] From 2026-11-05 dashboard kept running (stable IP); demo-day checklist; destroy after mid-November.
+- [ ] From 2026-11-05 dashboard kept running (stable IP); demo-day checklist; `github-keys.ps1 -Revoke` and destroy after mid-November.
 
 Cloud, Azure (alternative; abandoned 2026-10-24, subscription never approved):
 
