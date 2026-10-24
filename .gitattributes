@@ -1,3 +1,7 @@
 *.sh text eol=lf
 Dockerfile text eol=lf
 *.bicep text eol=lf
+*.tf text eol=lf
+*.tfvars.example text eol=lf
+.terraform.lock.hcl text eol=lf
+Dockerfile.* text eol=lf
