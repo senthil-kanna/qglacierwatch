@@ -182,6 +182,13 @@ data "aws_iam_policy_document" "github_deploy" {
     actions   = ["ecr:GetAuthorizationToken"]
     resources = ["*"]
   }
+  # Signed-in pulls of public.ecr.aws base images (the Lambda adapter): anonymous pulls from the
+  # shared GitHub runner IPs hit "429 toomanyrequests: Data limit exceeded".
+  statement {
+    sid       = "EcrPublicPull"
+    actions   = ["ecr-public:GetAuthorizationToken", "sts:GetServiceBearerToken"]
+    resources = ["*"]
+  }
   statement {
     sid = "EcrPush"
     actions = [

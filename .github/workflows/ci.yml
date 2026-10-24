@@ -113,6 +113,8 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - id: ecr
         uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+      - name: Sign in to public ECR (anonymous base-image pulls get rate-limited on shared runners)
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
