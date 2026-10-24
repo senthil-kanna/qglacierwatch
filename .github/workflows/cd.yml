@@ -1,5 +1,8 @@
 name: cd
 
+# ALTERNATIVE TARGET (Azure Container Apps, infra/azure/). The primary deployment is AWS: the
+# aws-deploy job in ci.yml and docs/aws-deployment.md.
+
 # Manual deployment to Azure via OpenID Connect (no stored cloud secrets).
 # Required repository variables: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID,
 # AZURE_RESOURCE_GROUP, ALERT_EMAIL. See docs/deployment.md for the one-time setup.

@@ -81,3 +81,17 @@ def test_api_image_is_slim_non_root_and_pinned():
     assert re.search(r"aws-lambda-adapter:\d+\.\d+\.\d+ ", d), "pin the Lambda Web Adapter version"
     assert "requirements-api.txt" in d and "USER qgw" in d and "AWS_LWA_READINESS_CHECK_PATH=/health" in d
     assert "!build/api-bundle/**" in (ROOT / ".dockerignore").read_text(encoding="utf-8")
+
+
+# --- CI/CD ---------------------------------------------------------------------------------------
+
+def test_workflows_pin_third_party_actions_by_sha_and_store_no_aws_keys():
+    for wf in (ROOT / ".github" / "workflows").glob("*.yml"):
+        text = wf.read_text(encoding="utf-8")
+        for ref in re.findall(r"uses:\s*([^\s#]+)", text):
+            if not ref.startswith("actions/"):
+                assert re.search(r"@[0-9a-f]{40}$", ref), f"{wf.name}: pin {ref} to a commit SHA"
+        assert "AWS_SECRET_ACCESS_KEY" not in text and "aws-access-key-id" not in text
+    ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25" in ci and "0.28.0 were removed" in ci
+    assert "id-token: write" in ci and "environment:" not in ci.split("aws-deploy:")[1]

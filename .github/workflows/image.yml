@@ -1,5 +1,7 @@
 name: image
 
+# Used by the Azure alternative (public GHCR image). The AWS pipeline pushes to ECR from ci.yml.
+
 # Build and publish the container image to GitHub Container Registry (no Azure access needed).
 # Tag = full commit SHA. The first push creates a PRIVATE package: make it public once in
 # GitHub > Packages > qglacierwatch > Package settings > Change visibility, or Container Apps
