@@ -58,7 +58,12 @@ def test_ci_identity_fits_the_project_scp_and_keeps_keys_out_of_state():
     user = re.search(r'resource "aws_iam_user" "github_deploy" \{(.*?)\n\}', TF, re.S)
     assert user and "force_destroy = true" in user.group(1)
     policy = re.search(r'data "aws_iam_policy_document" "github_deploy" \{(.*?)\n\}\n', TF, re.S).group(1)
-    assert '"*"' not in policy.replace('resources = ["*"]', "", 1), "only ecr:GetAuthorizationToken may use *"
+    # Only the sign-in token actions (which AWS cannot scope to a resource) may use "*".
+    token_only = {"ecr:GetAuthorizationToken", "ecr-public:GetAuthorizationToken", "sts:GetServiceBearerToken"}
+    for stmt in policy.split("statement {")[1:]:
+        if '"*"' in stmt:
+            actions = set(re.findall(r'"([a-z0-9-]+:[A-Za-z*]+)"', stmt))
+            assert actions and actions <= token_only, f"only {sorted(token_only)} may use *, got {sorted(actions)}"
     assert not re.search(r'"(iam|ssm|s3:PutObject|s3:Delete|lambda:CreateFunction|lambda:Delete)', policy)
 
 
