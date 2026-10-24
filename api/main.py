@@ -24,7 +24,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
 
 from api.schemas import ErrorResponse, ForecastResponse, Health
-from src import config, storage
+from src import config, ssm, storage
 from src.serving.store import Store
 
 API_VERSION = "1.0.0"
@@ -50,6 +50,8 @@ if not log.handlers:
 async def lifespan(app: FastAPI):
     # AWS Lambda: refresh small, frequently rewritten parts (reports, features) from S3 into /tmp;
     # the model and a fallback copy of everything are baked into the image.
+    # AWS: the optional API key lives in SSM (QGW_API_KEY_PARAM); a placeholder keeps the API open.
+    ssm.load_env("QGW_API_KEY", "QGW_API_KEY_PARAM")
     if os.getenv("QGW_S3_PULL"):
         parts = [x.strip() for x in os.environ["QGW_S3_PULL"].split(",") if x.strip()]
         storage.hydrate(parts, Path(os.getenv("QGW_S3_PULL_DIR", "/tmp/qgw")))
