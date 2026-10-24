@@ -14,7 +14,7 @@ resource "aws_lambda_function" "api" {
   image_uri     = "${aws_ecr_repository.repo["api"].repository_url}:${var.api_image_tag}"
   architectures = ["x86_64"]
   memory_size   = var.api_memory_mb
-  timeout       = 30
+  timeout       = 60 # the first /v1/forecast per container loads the model bundle (~25 s)
 
   environment {
     variables = {

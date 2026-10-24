@@ -6,7 +6,8 @@
   Sets dashboard_enabled=true and schedules_enabled=true, applies, waits until the Fargate task is
   RUNNING and healthy, then prints DASHBOARD URL http://<public ip>:8501 in a banner. The IP is new
   after every resume; it stays the same as long as the task keeps running (do not pause during
-  presentation week). Also warms the API with one /health call.
+  presentation week). Its /health call does not load the model; run ./scripts/aws/warmup.ps1
+  before a demo so the first /v1/forecast is fast.
 
 .EXAMPLE
   ./scripts/aws/resume.ps1

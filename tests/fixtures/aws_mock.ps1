@@ -17,6 +17,11 @@ function global:Invoke-MockCli {
 }
 function global:aws { Invoke-MockCli ("aws " + ($args -join ' ')) }
 function global:terraform { Invoke-MockCli ("terraform " + ($args -join ' ')) }
-# No real HTTP from tests: /health and the Streamlit health check answer as if healthy.
-function global:Invoke-RestMethod { [pscustomobject]@{ status = 'ok'; model_id = 'gbm-test'; model_status = 'unpromoted_candidate'; problems = @() } }
+# No real HTTP from tests: /health and the Streamlit health check answer as if healthy. API calls
+# are logged as "http GET <uri> headers=<names>" (header values are never logged).
+function global:Invoke-RestMethod {
+    param([string]$Uri, [hashtable]$Headers = @{}, [int]$TimeoutSec)
+    Add-Content -Path $env:AWS_MOCK_LOG -Value ("http GET $Uri headers=" + (@($Headers.Keys) -join ','))
+    [pscustomobject]@{ status = 'ok'; model_id = 'gbm-test'; model_status = 'unpromoted_candidate'; problems = @() }
+}
 function global:Invoke-WebRequest { [pscustomobject]@{ StatusCode = 200 } }

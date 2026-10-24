@@ -217,6 +217,25 @@ def test_status_prints_api_and_dashboard_urls(tmp_path):
 
 
 @needs_ps
+def test_warmup_sends_the_ssm_key_without_printing_it(tmp_path):
+    rules = [mock(r"^aws sts get-caller-identity", IDENT),
+             mock(r"^aws lambda get-function-url-config", {"FunctionUrl": "https://abc.lambda-url.ap-southeast-2.on.aws/"}),
+             mock(r"^aws ssm get-parameter --name /qgw/api-key --with-decryption", {"Parameter": {"Value": "s3cr3t-key-value"}})]
+    code, out, log, _ = run_ps(tmp_path, "warmup.ps1", "", rules)
+    assert code == 0, out
+    assert "s3cr3t" not in out and not any("s3cr3t" in line for line in log)
+    http = [line for line in log if line.startswith("http")]
+    assert http == ["http GET https://abc.lambda-url.ap-southeast-2.on.aws/health headers="] + \
+        ["http GET https://abc.lambda-url.ap-southeast-2.on.aws/v1/forecast headers=X-API-Key"] * 2
+    assert not any(re.search(r"create|put-|update-|delete", line) for line in log), "warmup must be read-only"
+
+
+def test_api_timeout_covers_the_cold_model_load():
+    api = re.search(r'resource "aws_lambda_function" "api" \{(.*?)\n\}', TF, re.S).group(1)
+    assert int(re.search(r"\btimeout\s*=\s*(\d+)", api).group(1)) >= 60
+
+
+@needs_ps
 def test_pause_writes_tfvars_and_applies_only_the_saved_plan(tmp_path):
     rules = [mock(r"^aws sts get-caller-identity", IDENT), mock(r"^terraform .* plan ", ""), mock(r"^terraform .* apply ", "")]
     (tmp_path / "tf").mkdir()

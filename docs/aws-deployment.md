@@ -208,6 +208,7 @@ before everything else, and local state lets `destroy` run from your laptop.
 | Show both URLs and health | `./scripts/aws/status.ps1` |
 | Stop the dashboard and schedules between demos (saves ~USD 0.75/day) | `./scripts/aws/pause.ps1` |
 | Start again and print the new URL | `./scripts/aws/resume.ps1` |
+| Warm the API so the next request is fast (first forecast per container takes ~25 s) | `./scripts/aws/warmup.ps1` |
 | Roll back to an older image | `./scripts/aws/deploy.ps1 -ImageTag <older sha>` (last 3 kept) |
 | Upload changed local results | `./scripts/aws/seed-data.ps1` |
 
@@ -228,11 +229,16 @@ Expect the refresh to stop on purpose if GloFAS rewrote past values. That is the
 - [ ] **One day before:** `./scripts/aws/resume.ps1` (if paused), then `status.ps1`: API ok and
       the dashboard loads every page. Note the DASHBOARD URL.
 - [ ] Check the budget and credits page, so there are no surprises.
-- [ ] **One hour before:** open the dashboard and click through all 7 pages. Call `/health`,
-      `/v1/forecast` and `/docs` once each to warm the Lambda (cold start is a few seconds).
-- [ ] Keep `status.ps1` output, screenshots of every page, and a short screen recording
-      (`docs/figures/screens/` has local ones) ready offline in case the venue network blocks
-      port 8501 or the Wi-Fi fails. A phone hotspot is a good backup.
+- [ ] **Use a mobile hotspot for the demo laptop.** The college network may block the bare
+      `http://<ip>:8501` dashboard URL: its FortiGuard web filter answers with a 403
+      "Web Filter Violation" page (category "Unrated"). Test the URL on the hotspot beforehand.
+- [ ] **One hour before:** `./scripts/aws/resume.ps1` (if paused), then `./scripts/aws/warmup.ps1`.
+      The first `/v1/forecast` on a new Lambda container loads the model (~25 s); after warmup it
+      answers in about half a second. Open the dashboard and click through all 7 pages. Re-run
+      `warmup.ps1` just before presenting if the API sat idle for a long time.
+- [ ] **Keep a backup screen recording** of the live dashboard and API (plus `status.ps1` output
+      and screenshots of every page; `docs/figures/screens/` has local ones) ready offline, in
+      case the network or the hotspot fails.
 - [ ] Do not push to `main` or run `deploy.ps1`/`pause.ps1` on the day, because they change the dashboard IP.
 - [ ] After the presentation (mid-November): download anything you want
       (`aws s3 sync s3://<bucket> ./s3-backup`), then `./scripts/aws/github-keys.ps1 -Revoke` and
@@ -258,4 +264,6 @@ own zero-spend budget and account settings are not touched.
 | deploy: `Image ... not in ECR` | the `aws-deploy` job did not run or failed. Check `AWS_DEPLOY_ENABLED` and the run log |
 | GitHub `The security token included in the request is invalid` | the key was revoked or rotated: `./scripts/aws/github-keys.ps1 -Rotate` |
 | Dashboard URL does not open | the task is still starting (wait 2 min, `status.ps1 -WaitForDashboard`), or the network blocks port 8501 |
+| Dashboard answers 403 "Web Filter Violation" (FortiGuard, category "Unrated") | the local network's web filter blocks bare IP URLs, not AWS. Use a mobile hotspot |
+| First API request slow (~25-30 s) | cold container loading the model bundle. Run `./scripts/aws/warmup.ps1` before demos |
 | A refresh/drift alarm e-mail | read `/aws/lambda/qglacierwatch-<job>` in CloudWatch. S3 kept the last good outputs |
