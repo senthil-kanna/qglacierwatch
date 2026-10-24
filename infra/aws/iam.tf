@@ -167,36 +167,13 @@ resource "aws_iam_role_policy" "scheduler" {
   policy = data.aws_iam_policy_document.scheduler.json
 }
 
-# --- GitHub Actions deploy role (OIDC, no stored keys) -----------------------------------------
-resource "aws_iam_openid_connect_provider" "github" {
-  url            = "https://token.actions.githubusercontent.com"
-  client_id_list = ["sts.amazonaws.com"]
-}
-
-data "aws_iam_policy_document" "github_trust" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    principals {
-      type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.github.arn]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "token.actions.githubusercontent.com:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "token.actions.githubusercontent.com:sub"
-      values   = [for b in var.github_branches : "repo:${var.github_repo}:ref:refs/heads/${b}"]
-    }
-  }
-}
-
-resource "aws_iam_role" "github_deploy" {
-  name                 = "${var.project}-github-deploy"
-  assume_role_policy   = data.aws_iam_policy_document.github_trust.json
-  max_session_duration = 3600
+# --- GitHub Actions deploy user --------------------------------------------------------------
+# The project's managed SCP denies iam:*Provider*, so GitHub OIDC is impossible here. CI signs in
+# as this user instead. Its access key is created OUTSIDE Terraform (scripts/aws/github-keys.ps1)
+# so the secret never lands in the state file; force_destroy lets `destroy` remove that key too.
+resource "aws_iam_user" "github_deploy" {
+  name          = "${var.project}-github-deploy"
+  force_destroy = true
 }
 
 data "aws_iam_policy_document" "github_deploy" {
@@ -240,7 +217,7 @@ data "aws_iam_policy_document" "github_deploy" {
   }
 }
 
-resource "aws_iam_role_policy" "github_deploy" {
-  role   = aws_iam_role.github_deploy.id
+resource "aws_iam_user_policy" "github_deploy" {
+  user   = aws_iam_user.github_deploy.name
   policy = data.aws_iam_policy_document.github_deploy.json
 }

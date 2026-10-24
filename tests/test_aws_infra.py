@@ -37,7 +37,7 @@ def test_no_costly_or_unneeded_resources(forbidden):
 
 
 def test_region_tags_and_log_retention():
-    assert re.search(r'variable "region" \{[^}]*default\s*=\s*"ap-south-1"', TF)
+    assert re.search(r'variable "region" \{[^}]*default\s*=\s*"ap-southeast-2"', TF)
     assert "default_tags" in TF and re.search(r"project\s*=\s*var\.project", TF)
     assert re.search(r'variable "log_retention_days" \{[^}]*default\s*=\s*7\b', TF)
     groups = re.findall(r'resource "aws_cloudwatch_log_group"[^{]*\{(.*?)\n\}', TF, re.S)
@@ -49,6 +49,17 @@ def test_single_dashboard_task_with_public_ip_and_no_secrets_in_terraform():
     assert 'resource "aws_ssm_parameter"' not in TF, "SSM values would land in the state file; bootstrap.ps1 creates them"
     # Literal values only (parameter names like "/qgw/api-key" and interpolations are fine).
     assert not re.search(r"(?i)(secret|password|api_key)\s*=\s*\"[^\"$/][^\"]*\"", TF)
+
+
+def test_ci_identity_fits_the_project_scp_and_keeps_keys_out_of_state():
+    # The managed SCP denies iam:*Provider* (no GitHub OIDC); an access key made by Terraform
+    # would put the secret in terraform.tfstate.
+    assert "aws_iam_openid_connect_provider" not in TF and 'resource "aws_iam_access_key"' not in TF
+    user = re.search(r'resource "aws_iam_user" "github_deploy" \{(.*?)\n\}', TF, re.S)
+    assert user and "force_destroy = true" in user.group(1)
+    policy = re.search(r'data "aws_iam_policy_document" "github_deploy" \{(.*?)\n\}\n', TF, re.S).group(1)
+    assert '"*"' not in policy.replace('resources = ["*"]', "", 1), "only ecr:GetAuthorizationToken may use *"
+    assert not re.search(r'"(iam|ssm|s3:PutObject|s3:Delete|lambda:CreateFunction|lambda:Delete)', policy)
 
 
 def test_budget_and_job_retries():
@@ -85,16 +96,22 @@ def test_api_image_is_slim_non_root_and_pinned():
 
 # --- CI/CD ---------------------------------------------------------------------------------------
 
-def test_workflows_pin_third_party_actions_by_sha_and_store_no_aws_keys():
+def test_workflows_pin_third_party_actions_by_sha_and_hold_no_literal_aws_keys():
     for wf in (ROOT / ".github" / "workflows").glob("*.yml"):
         text = wf.read_text(encoding="utf-8")
         for ref in re.findall(r"uses:\s*([^\s#]+)", text):
             if not ref.startswith("actions/"):
                 assert re.search(r"@[0-9a-f]{40}$", ref), f"{wf.name}: pin {ref} to a commit SHA"
-        assert "AWS_SECRET_ACCESS_KEY" not in text and "aws-access-key-id" not in text
+        assert not re.search(r"\b(AKIA|ASIA)[0-9A-Z]{16}\b", text), f"{wf.name}: literal AWS key id"
+        assert not re.search(r"aws-(access-key-id|secret-access-key):[ \t]*(?![ \t]|\$\{\{ secrets\.)", text), \
+            f"{wf.name}: AWS keys must come from repository secrets"
     ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     assert "trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25" in ci and "0.28.0 were removed" in ci
-    assert "id-token: write" in ci and "environment:" not in ci.split("aws-deploy:")[1]
+    deploy = ci.split("aws-deploy:")[1]
+    assert "vars.AWS_DEPLOY_ENABLED == 'true'" in deploy and "secrets.AWS_SECRET_ACCESS_KEY" in deploy
+    assert "AWS_REGION: ap-southeast-2" in ci
+    # Secrets only in the deploy job, which never runs for pull requests.
+    assert "secrets.AWS_" not in ci.split("aws-deploy:")[0] and "pull_request" not in deploy
 
 
 # --- deploy scripts (PowerShell, against tests/fixtures/aws_mock.ps1) ------------------------------
@@ -135,9 +152,9 @@ def test_aws_scripts_parse(script):
 
 
 def destroy_rules():
-    tagged = {"ResourceTagMappingList": [{"ResourceARN": "arn:aws:s3:::qglacierwatch-111122223333-ap-south-1"}]}
+    tagged = {"ResourceTagMappingList": [{"ResourceARN": "arn:aws:s3:::qglacierwatch-111122223333-ap-southeast-2"}]}
     return [mock(r"^aws sts get-caller-identity", IDENT), mock(r"^aws resourcegroupstaggingapi", tagged),
-            mock(r"^terraform .*output -raw bucket", "qglacierwatch-111122223333-ap-south-1"),
+            mock(r"^terraform .*output -raw bucket", "qglacierwatch-111122223333-ap-southeast-2"),
             mock(r"^aws s3api list-object-versions", {"Versions": []}), mock(r"^aws s3api delete-objects", "{}"),
             mock(r"^terraform .*destroy", ""), mock(r"^aws ssm delete-parameter", "{}")]
 
@@ -149,7 +166,7 @@ def destructive(log):
 @needs_ps
 def test_destroy_needs_exact_project_name_and_dry_run_deletes_nothing(tmp_path):
     code, out, log, _ = run_ps(tmp_path, "destroy.ps1", "-DryRun", destroy_rules())
-    assert code == 0 and "qglacierwatch-111122223333-ap-south-1" in out and not destructive(log)
+    assert code == 0 and "qglacierwatch-111122223333-ap-southeast-2" in out and not destructive(log)
     code, out, log, _ = run_ps(tmp_path, "destroy.ps1", "-ConfirmName wrong", destroy_rules())
     assert code == 2 and not destructive(log)
     code, out, log, _ = run_ps(tmp_path, "destroy.ps1", "-Orphans", destroy_rules())
@@ -176,7 +193,7 @@ def test_deploy_refuses_missing_image_before_touching_terraform(tmp_path):
 def test_status_prints_api_and_dashboard_urls(tmp_path):
     rules = [
         mock(r"^aws sts get-caller-identity", IDENT),
-        mock(r"^aws lambda get-function-url-config", {"FunctionUrl": "https://abc.lambda-url.ap-south-1.on.aws/"}),
+        mock(r"^aws lambda get-function-url-config", {"FunctionUrl": "https://abc.lambda-url.ap-southeast-2.on.aws/"}),
         mock(r"^aws ecs describe-services", {"services": [{"status": "ACTIVE", "desiredCount": 1, "runningCount": 1}]}),
         mock(r"^aws ecs list-tasks", {"taskArns": ["arn:task/1"]}),
         mock(r"^aws ecs describe-tasks", {"tasks": [{"lastStatus": "RUNNING", "attachments": [{"details": [{"name": "networkInterfaceId", "value": "eni-1"}]}]}]}),
@@ -184,7 +201,7 @@ def test_status_prints_api_and_dashboard_urls(tmp_path):
     ]
     code, out, log, _ = run_ps(tmp_path, "status.ps1", "", rules)
     assert code == 0, out
-    assert "API URL       : https://abc.lambda-url.ap-south-1.on.aws/" in out
+    assert "API URL       : https://abc.lambda-url.ap-southeast-2.on.aws/" in out
     assert "http://203.0.113.7:8501" in out
     assert not any(re.search(r"create|put-|update-|delete", line) for line in log), "status must be read-only"
 

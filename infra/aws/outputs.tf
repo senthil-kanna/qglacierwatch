@@ -20,9 +20,9 @@ output "ecr_app" {
   value = aws_ecr_repository.repo["app"].repository_url
 }
 
-output "github_deploy_role_arn" {
-  description = "Set as GitHub repository variable AWS_DEPLOY_ROLE_ARN (not a secret)."
-  value       = aws_iam_role.github_deploy.arn
+output "github_deploy_user" {
+  description = "CI deploy user; scripts/aws/github-keys.ps1 creates its access key and stores it as GitHub secrets."
+  value       = aws_iam_user.github_deploy.name
 }
 
 output "ecs_cluster" {
