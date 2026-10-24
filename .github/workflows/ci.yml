@@ -97,7 +97,7 @@ jobs:
       vars.AWS_DEPLOY_ROLE_ARN != '' &&
       ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    # No `environment:` here: it would change the OIDC subject claim the deploy role trusts.
+    # No deployment environment on this job: it would change the OIDC subject the deploy role trusts.
     concurrency: {group: aws-deploy, cancel-in-progress: false}
     permissions:
       id-token: write
