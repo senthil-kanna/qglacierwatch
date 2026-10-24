@@ -1,0 +1,15 @@
+# Serving subset of requirements.txt for the slim API image (docker/Dockerfile.api, AWS Lambda).
+# Same pins as requirements.txt; tests/test_aws_infra.py checks they stay in sync.
+fastapi==0.148.0
+uvicorn==0.54.0
+pydantic==2.14.1
+pydantic-settings==2.16.0
+pandas==3.0.6
+numpy==2.5.4
+pyarrow==25.0.1
+pandera==0.34.1
+lightgbm==4.7.0
+scikit-learn==1.9.1
+joblib==1.6.0
+PyYAML==6.0.3
+boto3==1.43.114

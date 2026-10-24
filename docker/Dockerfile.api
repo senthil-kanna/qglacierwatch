@@ -1,0 +1,38 @@
+# Slim API image for AWS Lambda (container image + Function URL) via the Lambda Web Adapter, which
+# forwards Lambda invocations to uvicorn unchanged. Also runs as a plain container on :8000.
+# The serving model, features and reports are baked in first:
+#   python scripts/aws/bake_api_bundle.py      # -> build/api-bundle/
+#   docker build -f docker/Dockerfile.api -t qglacierwatch-api:dev .
+FROM python:3.12-slim
+
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.1.0 /lambda-adapter /opt/extensions/lambda-adapter
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PORT=8000 \
+    AWS_LWA_READINESS_CHECK_PATH=/health \
+    QGW_MODE=real \
+    QGW_DATA=/app/baked/data \
+    QGW_ARTIFACTS=/app/baked/artifacts \
+    QGW_REPORTS=/app/baked/reports
+
+# libgomp1: LightGBM OpenMP runtime.
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements-api.txt .
+RUN pip install -r requirements-api.txt
+
+COPY src ./src
+COPY api ./api
+COPY configs ./configs
+COPY build/api-bundle ./baked
+RUN groupadd --gid 10001 qgw && useradd --create-home --uid 10001 --gid 10001 qgw
+USER qgw
+
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://localhost:${PORT}/health || exit 1
+CMD ["sh", "-c", "exec uvicorn api.main:app --host 0.0.0.0 --port ${PORT} --proxy-headers"]
