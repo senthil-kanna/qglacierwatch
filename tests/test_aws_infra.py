@@ -95,3 +95,108 @@ def test_workflows_pin_third_party_actions_by_sha_and_store_no_aws_keys():
     ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     assert "trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25" in ci and "0.28.0 were removed" in ci
     assert "id-token: write" in ci and "environment:" not in ci.split("aws-deploy:")[1]
+
+
+# --- deploy scripts (PowerShell, against tests/fixtures/aws_mock.ps1) ------------------------------
+
+SCRIPTS = ROOT / "scripts" / "aws"
+SHELL = shutil.which("pwsh") or shutil.which("powershell")
+needs_ps = pytest.mark.skipif(SHELL is None, reason="PowerShell not available")
+IDENT = {"Account": "111122223333", "Arn": "arn:aws:iam::111122223333:user/student", "UserId": "x"}
+
+
+def mock(match, out=None, code=0):
+    return {"match": match, "out": None if out is None else out if isinstance(out, str) else __import__("json").dumps(out), "exit": code}
+
+
+def run_ps(tmp_path, script, args, rules):
+    import json
+
+    (tmp_path / "rules.json").write_text(json.dumps(rules))
+    log = tmp_path / "cli.log"
+    log.write_text("")
+    tf = tmp_path / "tf"
+    tf.mkdir(exist_ok=True)
+    cmd = f". '{ROOT / 'tests' / 'fixtures' / 'aws_mock.ps1'}'; & '{SCRIPTS / script}' {args}; exit $LASTEXITCODE"
+    env = {**os.environ, "AWS_MOCK_RULES": str(tmp_path / "rules.json"), "AWS_MOCK_LOG": str(log),
+           "QGW_TF_DIR": str(tf), "QGW_TFSTATE_BACKUPS": str(tmp_path / "bak")}
+    p = subprocess.run([SHELL, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", cmd],
+                       capture_output=True, text=True, env=env, timeout=120)
+    return p.returncode, p.stdout + p.stderr, log.read_text().splitlines(), tf
+
+
+@needs_ps
+@pytest.mark.parametrize("script", sorted(p.name for p in SCRIPTS.glob("*.ps1")))
+def test_aws_scripts_parse(script):
+    cmd = (f"$e=$null; [System.Management.Automation.Language.Parser]::ParseFile('{SCRIPTS / script}', [ref]$null, [ref]$e) | Out-Null; "
+           "if ($e.Count) { $e | % { $_.ToString() }; exit 1 }")
+    p = subprocess.run([SHELL, "-NoProfile", "-NonInteractive", "-Command", cmd], capture_output=True, text=True)
+    assert p.returncode == 0, p.stdout + p.stderr
+
+
+def destroy_rules():
+    tagged = {"ResourceTagMappingList": [{"ResourceARN": "arn:aws:s3:::qglacierwatch-111122223333-ap-south-1"}]}
+    return [mock(r"^aws sts get-caller-identity", IDENT), mock(r"^aws resourcegroupstaggingapi", tagged),
+            mock(r"^terraform .*output -raw bucket", "qglacierwatch-111122223333-ap-south-1"),
+            mock(r"^aws s3api list-object-versions", {"Versions": []}), mock(r"^aws s3api delete-objects", "{}"),
+            mock(r"^terraform .*destroy", ""), mock(r"^aws ssm delete-parameter", "{}")]
+
+
+def destructive(log):
+    return [line for line in log if re.search(r"destroy|delete-objects|delete-parameter", line)]
+
+
+@needs_ps
+def test_destroy_needs_exact_project_name_and_dry_run_deletes_nothing(tmp_path):
+    code, out, log, _ = run_ps(tmp_path, "destroy.ps1", "-DryRun", destroy_rules())
+    assert code == 0 and "qglacierwatch-111122223333-ap-south-1" in out and not destructive(log)
+    code, out, log, _ = run_ps(tmp_path, "destroy.ps1", "-ConfirmName wrong", destroy_rules())
+    assert code == 2 and not destructive(log)
+    code, out, log, _ = run_ps(tmp_path, "destroy.ps1", "-Orphans", destroy_rules())
+    assert code == 0 and not destructive(log) and "Nothing was deleted" in out
+    code, out, log, _ = run_ps(tmp_path, "destroy.ps1", "-ConfirmName qglacierwatch", destroy_rules())
+    assert code == 0, out
+    assert any("terraform" in line and "destroy" in line for line in log)
+    assert sum("ssm delete-parameter" in line for line in log) == 2
+
+
+@needs_ps
+def test_deploy_refuses_missing_image_before_touching_terraform(tmp_path):
+    rules = [mock(r"^aws sts get-caller-identity", IDENT), mock(r"^aws ecr describe-images .*imageTag=live", {"imageDetails": [{}]}),
+             mock(r"^aws ecr describe-images", None, 254)]
+    (tmp_path / "tf").mkdir()
+    (tmp_path / "tf" / "terraform.tfvars").write_text('alert_email = "a@b.c"\ncreate_compute = false\n')
+    code, out, log, tf = run_ps(tmp_path, "deploy.ps1", "-ImageTag abc1234 -Yes", rules)
+    assert code != 0 and "not in ECR" in out
+    assert not any(line.startswith("terraform") for line in log)
+    assert "create_compute = false" in (tf / "terraform.tfvars").read_text()
+
+
+@needs_ps
+def test_status_prints_api_and_dashboard_urls(tmp_path):
+    rules = [
+        mock(r"^aws sts get-caller-identity", IDENT),
+        mock(r"^aws lambda get-function-url-config", {"FunctionUrl": "https://abc.lambda-url.ap-south-1.on.aws/"}),
+        mock(r"^aws ecs describe-services", {"services": [{"status": "ACTIVE", "desiredCount": 1, "runningCount": 1}]}),
+        mock(r"^aws ecs list-tasks", {"taskArns": ["arn:task/1"]}),
+        mock(r"^aws ecs describe-tasks", {"tasks": [{"lastStatus": "RUNNING", "attachments": [{"details": [{"name": "networkInterfaceId", "value": "eni-1"}]}]}]}),
+        mock(r"^aws ec2 describe-network-interfaces", {"NetworkInterfaces": [{"Association": {"PublicIp": "203.0.113.7"}}]}),
+    ]
+    code, out, log, _ = run_ps(tmp_path, "status.ps1", "", rules)
+    assert code == 0, out
+    assert "API URL       : https://abc.lambda-url.ap-south-1.on.aws/" in out
+    assert "http://203.0.113.7:8501" in out
+    assert not any(re.search(r"create|put-|update-|delete", line) for line in log), "status must be read-only"
+
+
+@needs_ps
+def test_pause_writes_tfvars_and_applies_only_the_saved_plan(tmp_path):
+    rules = [mock(r"^aws sts get-caller-identity", IDENT), mock(r"^terraform .* plan ", ""), mock(r"^terraform .* apply ", "")]
+    (tmp_path / "tf").mkdir()
+    (tmp_path / "tf" / "terraform.tfvars").write_text('alert_email = "a@b.c"\ncreate_compute = true\napi_image_tag = "abc1234"\n')
+    code, out, log, tf = run_ps(tmp_path, "pause.ps1", "-Yes", rules)
+    assert code == 0, out
+    v = (tf / "terraform.tfvars").read_text()
+    assert "dashboard_enabled = false" in v and "schedules_enabled = false" in v and 'api_image_tag = "abc1234"' in v
+    tf_calls = [line for line in log if line.startswith("terraform")]
+    assert " plan -input=false -out=tfplan" in tf_calls[0] and tf_calls[1].endswith("apply -input=false tfplan")
