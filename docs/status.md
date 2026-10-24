@@ -14,7 +14,7 @@ Engine credentials present (project `ee-senthil-hydro`), internet access. Last u
 | F. lake segmentation and areas | ran and evaluated | 20 m, water-stratified split; val IoU 0.37, test IoU 0.11 (over-maps water vs JRC); no growth flags after BH correction |
 | G. season-aware drift, tiered retraining, registry | done | replay 522 checks; 72 synthetic events; Tier-3 run; registry tests; weekly `--latest` check now persisted |
 | H. API and dashboard | done | API tests incl. auth/rate limit/validation; 7 pages render; snow-cover map added |
-| I. Docker, Azure IaC, CI/CD | prepared, **not deployed** | CI green (tests, Trivy, Bicep); `scripts/azure/*` tested against a fake `az`; no Azure resources exist |
+| I. Docker, cloud IaC, CI/CD | AWS prepared (branch `feat/aws-deployment`), **not applied**; Azure kept as alternative | Terraform validate + cost guards, slim API image served from a clean venv, `scripts/aws/*` and `scripts/azure/*` tested against fake CLIs; no cloud resources exist |
 | J. end-to-end validation, docs | done | e2e test runs synthetic -> features -> train -> registry -> retrain -> API |
 
 ## Pending checklist
@@ -25,7 +25,15 @@ Research validation (do not let cloud work replace these):
 - [x] **Fresh 2026 forecast evaluation** (2026-10-20): protocol 2a9c688 before data; test scored once. gbm NSE 0.994/0.980/0.962; gate failed on over-coverage (0.938 at 1 d, 0.955 at 30 d); VQC worse than all classical models. Found and corrected the target provenance (forecast-derived after 2023-08-04). 2026 consumed. `docs/protocol_fresh2026.md`.
 - [x] **Lake-segmentation improvement** (2026-10-20, registered e1dbdd2): 6 variants (MNDWI, slope 20 deg, SWIR guard, SAR union) selected on validation; none beat the current rule (val IoU 0.156 vs <= 0.094), so the rule is unchanged; test 2021 once, IoU 0.077 in the wider domain. JRC ends 2021; test not untouched. Negative result documented.
 
-Cloud (blocked on the student subscription):
+Cloud, AWS (primary since 2026-10-24; target: working 2026-10-30, stable 2026-11-07; `docs/aws-deployment.md`):
+
+- [x] Terraform `infra/aws`, S3 storage layer, Lambda job handler, slim API image, CI deploy job (OIDC), scripts, guide.
+- [ ] User installs AWS CLI + Terraform, `aws login`, runs `bootstrap.ps1 -CheckOnly`, then `bootstrap.ps1`.
+- [ ] `seed-data.ps1`; `gh variable set AWS_DEPLOY_ROLE_ARN`; push branch; CI `aws-deploy` pushes images.
+- [ ] `deploy.ps1 -ImageTag <sha>`; verify checklist (section 6 of the guide).
+- [ ] From 2026-11-05 dashboard kept running (stable IP); demo-day checklist; destroy after mid-November.
+
+Cloud, Azure (alternative; abandoned 2026-10-24, subscription never approved):
 
 - [x] Pre-flight, deploy, verify and cleanup scripts; GHCR image workflow; env template; metric alerts; cost documentation (`docs/deployment.md`).
 - [ ] Student subscription active (user: check the Azure portal, then `az login`).
@@ -43,7 +51,7 @@ External:
 ## Blockers and external dependencies
 
 - Observed discharge (CWC Bhuntar) not publicly available; GloFAS used. Supply `data/raw/discharge_gauge.csv` to switch.
-- Azure: student subscription verification pending; then `az login` and the steps in `docs/deployment.md`.
+- AWS: user credentials and the steps in `docs/aws-deployment.md` (nothing is created without the user's go-ahead).
 - Docker: needed to build/run the image locally (CI builds it).
-- Earth Engine service account: needed for scheduled ingestion in Azure (`deploy.ps1 -EeKeyFile`).
+- Earth Engine service account: optional; until it is stored in SSM `/qgw/ee-service-account-json` the weekly AWS refresh runs `--skip-ingest`.
 - Lake reference data after 2017/2021: Hi-MAG ends 2017 and JRC GSW 1.4 ends 2021; no post-2021 reference exists in this project.

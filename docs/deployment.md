@@ -1,5 +1,8 @@
 # Deployment (Azure for Students) and local operation
 
+> **Alternative target.** The primary deployment is AWS: see [aws-deployment.md](aws-deployment.md).
+> This page and `infra/azure/` are kept unchanged as the Azure Container Apps option.
+
 ## Status (2026-10-20)
 
 | component | state |
