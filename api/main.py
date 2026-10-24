@@ -16,6 +16,7 @@ import time
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from datetime import date
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
@@ -23,7 +24,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
 
 from api.schemas import ErrorResponse, ForecastResponse, Health
-from src import config
+from src import config, storage
 from src.serving.store import Store
 
 API_VERSION = "1.0.0"
@@ -47,6 +48,11 @@ if not log.handlers:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # AWS Lambda: refresh small, frequently rewritten parts (reports, features) from S3 into /tmp;
+    # the model and a fallback copy of everything are baked into the image.
+    if os.getenv("QGW_S3_PULL"):
+        parts = [x.strip() for x in os.environ["QGW_S3_PULL"].split(",") if x.strip()]
+        storage.hydrate(parts, Path(os.getenv("QGW_S3_PULL_DIR", "/tmp/qgw")))
     app.state.store = Store(config.mode())
     app.state.buckets = defaultdict(lambda: [float(os.getenv("QGW_RATE_PER_MIN", "60")), time.monotonic()])
     yield
