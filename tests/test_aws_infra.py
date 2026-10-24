@@ -75,7 +75,12 @@ def test_budget_and_job_retries():
 
 @pytest.mark.skipif(TERRAFORM is None, reason="terraform not installed (set TERRAFORM=path to run)")
 def test_terraform_fmt_and_validate(tmp_path):
-    fmt = subprocess.run([TERRAFORM, "fmt", "-check", "-recursive", str(TF_DIR)], capture_output=True, text=True)
+    # Tracked files only, like CI: the scripts write a git-ignored terraform.tfvars that fmt would flag.
+    tracked = subprocess.run(["git", "ls-files", "--", str(TF_DIR)], capture_output=True, text=True, cwd=ROOT,
+                             check=True).stdout.split()
+    files = [f for f in tracked if f.endswith((".tf", ".tfvars", ".tftest.hcl"))]
+    assert files
+    fmt = subprocess.run([TERRAFORM, "fmt", "-check", *files], capture_output=True, text=True, cwd=ROOT)
     assert fmt.returncode == 0, "run: terraform fmt -recursive infra/aws\n" + fmt.stdout
     if not (TF_DIR / ".terraform").exists():
         pytest.skip("run `terraform -chdir=infra/aws init -backend=false` first")
