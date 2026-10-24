@@ -77,6 +77,17 @@ def test_pull_downloads_only_missing_or_changed(roots, s3):
     assert storage.pull(["reports/real"]) == 1
 
 
+def test_single_file_part_and_no_prefix_bleed(roots, s3):
+    s3.objects = {"artifacts/real/hindcasts.parquet": b"pq", "artifacts/real/registry/models/m/bundle.joblib": b"big",
+                  "reports/real2/x.json": b"x"}
+    assert storage.pull(["artifacts/real/hindcasts.parquet", "reports/real"]) == 1
+    f = roots / "local" / "artifacts" / "real" / "hindcasts.parquet"
+    assert f.read_bytes() == b"pq" and not (roots / "local" / "artifacts" / "real" / "registry").exists()
+    f.write_bytes(b"pq2")
+    s3.uploads.clear()
+    assert storage.push(["artifacts/real/hindcasts.parquet"]) == 1 and s3.uploads == ["artifacts/real/hindcasts.parquet"]
+
+
 def test_push_uploads_only_what_changed_since_snapshot(roots, s3):
     d = roots / "local" / "reports" / "real"
     d.mkdir(parents=True)

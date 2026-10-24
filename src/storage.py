@@ -4,8 +4,8 @@ All code reads and writes the local filesystem. In AWS, containers pull what the
 bucket at start and jobs push what they changed when they finish. Without QGW_S3_BUCKET every call
 is a no-op, so local development is unchanged.
 
-A "part" is a path relative to the roots: its first segment names the root and becomes the S3 key
-prefix, e.g. "data/raw", "data/processed/real", "artifacts/real", "reports/real".
+A "part" is a directory or file path relative to the roots: its first segment names the root and
+it becomes the S3 key prefix, e.g. "data/raw", "artifacts/real", "artifacts/real/hindcasts.parquet".
 
 Usage:
     python -m src.storage pull data/raw data/processed/real artifacts/real reports/real
@@ -87,13 +87,16 @@ def pull(parts: list[str], dest_root: Path | None = None) -> int:
     s3, n = _client(), 0
     for part in parts:
         name, rest = _split(part)
-        prefix = part.strip("/") + "/"
+        key0 = part.strip("/")
         base = (dest_root / name if dest_root else root_of(name)) / rest
-        for obj in _objects(s3, b, prefix):
-            rel = obj["Key"][len(prefix):]
-            if not rel or rel.endswith("/"):
+        for obj in _objects(s3, b, key0):
+            key = obj["Key"]
+            if key == key0:  # the part is a single file
+                target = base
+            elif key.startswith(key0 + "/") and not key.endswith("/"):
+                target = base / key[len(key0) + 1:]
+            else:
                 continue
-            target = base / rel
             if _same(target, obj["Size"], obj["ETag"]):
                 continue
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -108,7 +111,7 @@ def snapshot(parts: list[str]) -> dict[str, tuple[int, int]]:
     out = {}
     for part in parts:
         d = local_dir(part)
-        for p in d.rglob("*") if d.exists() else []:
+        for p in [d] if d.is_file() else d.rglob("*") if d.exists() else []:
             if p.is_file():
                 st = p.stat()
                 out[str(p)] = (st.st_size, st.st_mtime_ns)
@@ -132,7 +135,7 @@ def push(parts: list[str], since: dict[str, tuple[int, int]] | None = None) -> i
             p = Path(path)
             if not p.is_relative_to(base) or (since is not None and since.get(path) == sig):
                 continue
-            key = f"{part.strip('/')}/{p.relative_to(base).as_posix()}"
+            key = part.strip("/") if p == base else f"{part.strip('/')}/{p.relative_to(base).as_posix()}"
             s3.upload_file(str(p), b, key, Config=tc)
             n += 1
     print(f"pushed {n} file(s) to s3://{b} for {parts}", flush=True)
