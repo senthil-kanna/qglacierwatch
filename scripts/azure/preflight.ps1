@@ -108,8 +108,8 @@ if ($LASTEXITCODE -eq 0 -and $oid) { Write-Check PASS "Signed-in object id (for 
 else { Write-Check WARN "Could not read your object id; Key Vault secrets must then be set by an Owner" }
 
 # 6. Template compiles
-& az bicep build --file "$PSScriptRoot/../../infra/main.bicep" --stdout *> $null
-if ($LASTEXITCODE -eq 0) { Write-Check PASS "infra/main.bicep compiles" } else { Fail "infra/main.bicep does not compile (run: az bicep build --file infra/main.bicep)" }
+& az bicep build --file "$PSScriptRoot/../../infra/azure/main.bicep" --stdout *> $null
+if ($LASTEXITCODE -eq 0) { Write-Check PASS "infra/azure/main.bicep compiles" } else { Fail "infra/azure/main.bicep does not compile (run: az bicep build --file infra/azure/main.bicep)" }
 
 # 7. Existing resource group (informational; deploy is idempotent)
 $rg = Invoke-AzJson -Arguments @('group', 'show', '-n', $ResourceGroup) -AllowFail
