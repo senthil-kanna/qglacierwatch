@@ -25,7 +25,7 @@ COPY dashboard ./dashboard
 COPY configs ./configs
 COPY docs ./docs
 COPY docker/entrypoint.sh /entrypoint.sh
-# uid/gid 10001 must match the Azure Files mountOptions in infra/main.bicep (SMB has no POSIX owners).
+# uid/gid 10001 must match the Azure Files mountOptions in infra/azure/main.bicep (SMB has no POSIX owners).
 RUN chmod +x /entrypoint.sh \
     && groupadd --gid 10001 qgw \
     && useradd --create-home --uid 10001 --gid 10001 qgw \

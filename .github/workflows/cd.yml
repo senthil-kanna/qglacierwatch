@@ -33,8 +33,8 @@ jobs:
       - name: Base infrastructure (no apps yet)
         id: base
         run: |
-          out=$(az deployment group create -g "${{ vars.AZURE_RESOURCE_GROUP }}" -f infra/main.bicep \
-            -p infra/main.parameters.json -p alertEmail="${{ vars.ALERT_EMAIL }}" \
+          out=$(az deployment group create -g "${{ vars.AZURE_RESOURCE_GROUP }}" -f infra/azure/main.bicep \
+            -p infra/azure/main.parameters.json -p alertEmail="${{ vars.ALERT_EMAIL }}" \
                useAcr=${{ inputs.registry == 'acr' }} deployApps=false --query properties.outputs -o json)
           echo "acr=$(echo "$out" | jq -r .acrName.value)" >> "$GITHUB_OUTPUT"
 
@@ -52,8 +52,8 @@ jobs:
 
       - name: Deploy apps and jobs
         run: |
-          az deployment group create -g "${{ vars.AZURE_RESOURCE_GROUP }}" -f infra/main.bicep \
-            -p infra/main.parameters.json -p alertEmail="${{ vars.ALERT_EMAIL }}" \
+          az deployment group create -g "${{ vars.AZURE_RESOURCE_GROUP }}" -f infra/azure/main.bicep \
+            -p infra/azure/main.parameters.json -p alertEmail="${{ vars.ALERT_EMAIL }}" \
                useAcr=${{ inputs.registry == 'acr' }} deployApps=true imageTag=${{ github.sha }} \
                externalImage=ghcr.io/${GITHUB_REPOSITORY,,} \
             --query properties.outputs -o json
