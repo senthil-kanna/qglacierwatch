@@ -179,7 +179,16 @@ before everything else, and local state lets `destroy` run from your laptop.
 - [ ] `./scripts/aws/status.ps1` shows `API ok` (or `degraded` with the two expected problems:
       "serving an unpromoted candidate" and "data is N days old"), and a DASHBOARD URL.
 - [ ] `curl <API URL>health` and `curl <API URL>v1/forecast` return JSON with
-      `model_status: unpromoted_candidate`. Send `-H "X-API-Key: ..."` if you set a key.
+      `model_status: unpromoted_candidate`. `/health` and `/docs` are open; every `/v1` route needs
+      the `X-API-Key` header (a random key is set in SSM `/qgw/api-key`). The dashboard does not use
+      the API (it reads S3 directly), so it needs no key. Get the key without showing it:
+      ```powershell
+      $k = aws ssm get-parameter --name /qgw/api-key --with-decryption --query Parameter.Value --output text
+      Invoke-RestMethod "<API URL>v1/forecast" -Headers @{ 'X-API-Key' = $k }
+      python scripts/loadtest.py --url <API URL> --label aws_lambda --api-key $k
+      $k | Set-Clipboard   # for the /docs "Authorize" button
+      ```
+      To change it, put a new value with `put-parameter --overwrite`; the API reads it at the next cold start.
 - [ ] `<API URL>docs` opens the OpenAPI page.
 - [ ] The dashboard opens at `http://<ip>:8501`. The Forecast, Skill, Basin (map), Lakes, Drift,
       Governance and Quantum pages show real data. The banner says GloFAS, not observations.
