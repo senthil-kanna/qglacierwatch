@@ -5,12 +5,12 @@
 set -euo pipefail
 EMAIL="${1:?usage: bootstrap.sh <alert-email>}"
 PROJECT=qglacierwatch
-REGION=ap-south-1
+REGION=ap-southeast-2   # the project's selected Region; the managed SCP denies all others
 TF_DIR="$(cd "$(dirname "$0")/../../infra/aws" && pwd)"
 aws() { command aws --region "$REGION" "$@"; }
 
 for t in aws terraform; do command -v "$t" >/dev/null || { echo "missing tool: $t"; exit 1; }; done
-ACCOUNT=$(aws sts get-caller-identity --query Account --output text) || { echo "Not signed in: run aws login"; exit 1; }
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text) || { echo "Not signed in: run aws login --region $REGION --profile qgw; export AWS_PROFILE=qgw"; exit 1; }
 echo "Account: $ACCOUNT  Region: $REGION  Project: $PROJECT"
 
 fail=0
@@ -22,7 +22,7 @@ check ECS ecs list-clusters --max-items 1
 check Scheduler scheduler list-schedules --max-results 1
 check Logs logs describe-log-groups --limit 1
 check SSM ssm describe-parameters --max-results 1
-check IAM iam list-open-id-connect-providers
+check IAM iam list-users --max-items 1
 check Budgets budgets describe-budgets --account-id "$ACCOUNT" --max-results 1
 [ "$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'length(Vpcs)' --output text)" -ge 1 ] \
   && echo "[PASS] default VPC" || { echo "[FAIL] no default VPC (aws ec2 create-default-vpc)"; fail=1; }
@@ -45,4 +45,4 @@ for p in /qgw/api-key /qgw/ee-service-account-json; do
     echo "[PASS] $p created (placeholder)"; }
 done
 echo "Next: confirm the SNS e-mail, run seed-data, then:"
-echo "  gh variable set AWS_DEPLOY_ROLE_ARN --body $(terraform -chdir="$TF_DIR" output -raw github_deploy_role_arn)"
+echo "  ./scripts/aws/github-keys.ps1   (stores the deploy user's key as GitHub secrets; Windows PowerShell or pwsh)"

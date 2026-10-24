@@ -5,26 +5,14 @@ variable "project" {
 }
 
 variable "region" {
-  description = "All resources live in one region."
+  description = "All resources live in one region: the project's selected Region (the managed SCP denies others)."
   type        = string
-  default     = "ap-south-1"
+  default     = "ap-southeast-2"
 }
 
 variable "alert_email" {
   description = "Receives the budget alerts and the CloudWatch alarm e-mails (confirm the SNS subscription mail)."
   type        = string
-}
-
-variable "github_repo" {
-  description = "owner/name of the GitHub repository allowed to deploy through OIDC."
-  type        = string
-  default     = "senthil-kanna/qglacierwatch"
-}
-
-variable "github_branches" {
-  description = "Branches whose workflows may assume the deploy role."
-  type        = list(string)
-  default     = ["main", "feat/aws-deployment"]
 }
 
 variable "create_compute" {

@@ -6,7 +6,7 @@
   1. Checks tools, sign-in, region and READ-ONLY access to every service the project uses
      (nothing is created by the checks).
   2. terraform init + plan/apply with create_compute=false: S3 bucket, 2 ECR repositories, IAM roles,
-     GitHub OIDC provider + deploy role, ECS cluster, security group, log group, SNS topic, budget.
+     GitHub deploy user (no key yet; github-keys.ps1), ECS cluster, security group, log group, SNS topic, budget.
      None of these costs money while empty/idle (S3/ECR bill only for stored bytes).
   3. Creates the SSM SecureStrings /qgw/api-key and /qgw/ee-service-account-json with the
      placeholder "not-configured" (open API, --skip-ingest refresh). Optionally sets an API key
@@ -38,7 +38,7 @@ $checks = [ordered]@{
     'CloudWatch alarms'    = @('cloudwatch', 'describe-alarms', '--max-records', '1')
     'SNS'                  = @('sns', 'list-topics')
     'SSM Parameter Store'  = @('ssm', 'describe-parameters', '--max-results', '1')
-    'IAM'                  = @('iam', 'list-open-id-connect-providers')
+    'IAM'                  = @('iam', 'list-users', '--max-items', '1')
     'Budgets'              = @('budgets', 'describe-budgets', '--account-id', $id.Account, '--max-results', '1')
 }
 $failed = 0
@@ -49,7 +49,7 @@ foreach ($name in $checks.Keys) {
 }
 $vpc = Invoke-Aws -Arguments @('ec2', 'describe-vpcs', '--filters', 'Name=isDefault,Values=true') -AllowFail
 if ($vpc -and @($vpc.Vpcs).Count -ge 1) { Write-Check PASS "Default VPC $(@($vpc.Vpcs)[0].VpcId) (dashboard runs in its public subnets)" }
-else { Write-Check FAIL 'No default VPC in ap-south-1. Create one: aws ec2 create-default-vpc --region ap-south-1'; $failed++ }
+else { Write-Check FAIL "No default VPC in $script:Region (or the Region is not your project's). Create one: aws ec2 create-default-vpc --region $script:Region"; $failed++ }
 if ($failed) { Write-Check FAIL "$failed check(s) failed; fix them before continuing."; exit 1 }
 if ($CheckOnly) { Write-Check INFO 'Checks only (-CheckOnly). Nothing was created.'; exit 0 }
 
@@ -88,12 +88,10 @@ if (-not $Yes) {
     }
 }
 
-$role = Get-TfOutput 'github_deploy_role_arn'
 Write-Banner 'Bootstrap done. Next steps:' 'Cyan'
 Write-Host "1. Confirm the SNS subscription e-mail AWS just sent to $AlertEmail."
 Write-Host '2. Upload data, models and reports:   ./scripts/aws/seed-data.ps1'
-Write-Host '3. Let GitHub deploy without keys (repository VARIABLE, not a secret):'
-Write-Host "     gh variable set AWS_DEPLOY_ROLE_ARN --body $role"
+Write-Host "3. Give GitHub the deploy user's key (stored as secrets, never shown):   ./scripts/aws/github-keys.ps1"
 Write-Host '4. Build and push the images:   gh workflow run ci.yml --ref feat/aws-deployment'
 Write-Host '   (wait for the aws-deploy job; its summary shows the image tag = commit SHA)'
 Write-Host '5. Create the API, jobs and dashboard:   ./scripts/aws/deploy.ps1 -ImageTag <sha>'

@@ -4,7 +4,7 @@
 
 $ErrorActionPreference = 'Stop'
 $script:Project = 'qglacierwatch'
-$script:Region = 'ap-south-1'
+$script:Region = 'ap-southeast-2'  # the project's selected Region; the managed SCP denies all others
 $script:RepoRoot = (Resolve-Path "$PSScriptRoot/../..").Path
 $script:TfDir = if ($env:QGW_TF_DIR) { $env:QGW_TF_DIR } else { Join-Path $script:RepoRoot 'infra/aws' }  # tests override
 $script:TfVars = Join-Path $script:TfDir 'terraform.tfvars'
@@ -72,7 +72,7 @@ function Assert-Tools {
 
 function Get-Identity {
     $id = Invoke-Aws -Arguments @('sts', 'get-caller-identity') -AllowFail
-    if (-not $id) { throw 'Not signed in to AWS. Run: aws login   (or: aws sso login --profile <name>), then re-run.' }
+    if (-not $id) { throw "Not signed in to AWS. Run: aws login --region $script:Region --profile qgw; `$env:AWS_PROFILE = 'qgw'; then re-run." }
     return $id
 }
 
@@ -82,6 +82,7 @@ function Show-Target {
     Write-Host "Account : $($Identity.Account)"
     Write-Host "Caller  : $($Identity.Arn)"
     Write-Host "Region  : $script:Region"
+    Write-Host "Profile : $(if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { 'default (set $env:AWS_PROFILE to use another)' })"
     Write-Host "Project : $script:Project (every resource is tagged project=$script:Project)"
 }
 

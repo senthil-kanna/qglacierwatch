@@ -3,7 +3,7 @@
   Full teardown after the presentation: deletes every QGlacierWatch resource, and nothing else.
 
 .DESCRIPTION
-  1. Lists every resource tagged project=qglacierwatch in ap-south-1 (plus global IAM/budget).
+  1. Lists every resource tagged project=qglacierwatch in the project Region (plus global IAM/budget).
   2. You must type the project name exactly (or pass -ConfirmName qglacierwatch).
   3. Empties the versioned S3 bucket (all object versions), then `terraform destroy` (asks again).
   4. Deletes the /qgw/* SSM parameters, then lists anything still tagged (should be empty).
@@ -32,10 +32,10 @@ Write-Host "`n=== Resources tagged project=$script:Project ($($tagged.Count)) ==
 $tagged | ForEach-Object { Write-Host "  $_" }
 if ($DryRun) { Write-Check INFO 'Dry run: nothing deleted.'; exit 0 }
 if ($Orphans) {
-    Write-Host "`nDelete these in the console (ap-south-1): Lambda, ECS (cluster $script:Project), ECR, S3 (empty first),"
+    Write-Host "`nDelete these in the console ($script:Region): Lambda, ECS (cluster $script:Project), ECR, S3 (empty first),"
     Write-Host 'EventBridge Scheduler, CloudWatch (log groups /aws/lambda/qglacierwatch-*, /ecs/qglacierwatch-*, alarms),'
-    Write-Host 'SNS, SSM /qgw/*, VPC security group qglacierwatch-dashboard, IAM roles qglacierwatch-*, the GitHub OIDC'
-    Write-Host 'provider, and Budgets qglacierwatch-monthly. Nothing was deleted.'
+    Write-Host 'SNS, SSM /qgw/*, VPC security group qglacierwatch-dashboard, IAM roles qglacierwatch-*, IAM user'
+    Write-Host 'qglacierwatch-github-deploy (and its access keys), and Budgets qglacierwatch-monthly. Nothing was deleted.'
     exit 0
 }
 
