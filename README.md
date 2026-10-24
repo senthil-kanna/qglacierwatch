@@ -33,7 +33,7 @@ for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532
 | REST API (FastAPI, /v1) | yes | locally, on real artifacts | - | `docs/openapi.json` |
 | Dashboard (Streamlit, 7 pages) | yes | headless render tests on real artifacts | - | |
 | Docker image, compose | yes | **not built locally** (no Docker) | Docker | built and smoke-tested in CI |
-| **AWS Terraform** (Lambda API + Function URL, Fargate dashboard, Lambda + EventBridge jobs, S3, ECR, OIDC, SSM, CloudWatch, Budgets) | yes | `terraform validate` + cost-guard tests; **not applied yet** | AWS account | `docs/aws-deployment.md` (primary) |
+| **AWS Terraform** (Lambda API + Function URL, Fargate dashboard, Lambda + EventBridge jobs, S3, ECR, CI IAM user, SSM, CloudWatch, Budgets; ap-southeast-2) | yes | `terraform validate` + cost-guard tests; **not applied yet** | AWS account | `docs/aws-deployment.md` (primary) |
 | Azure Bicep (Container Apps, ACR/GHCR, Files, Key Vault, budget) | yes, alternative | compiled + linted only; not deployed | Azure subscription | `infra/azure/`, `docs/deployment.md` |
 | CI/CD (GitHub Actions) | yes | **not run yet** (needs a push) | GitHub | |
 

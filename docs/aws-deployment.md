@@ -1,7 +1,18 @@
 # Deploying QGlacierWatch on AWS (beginner guide)
 
-Primary cloud target: **AWS, region ap-south-1 (Mumbai)**, on a Free plan account with credits.
+Primary cloud target: **AWS, region ap-southeast-2 (Sydney)**, on a Free plan account with credits.
 The Azure Bicep in `infra/azure/` is kept as an alternative (`docs/deployment.md`).
+
+**Why Sydney, and why no OIDC.** The account uses AWS's new experience (a *project*, signed in with
+`aws login`). AWS manages its service control policies (SCPs), and they cannot be changed:
+- A project gets one Region from the contact-address country (India: ap-southeast-2). The
+  `RegionFloor` SCP denies every other Region except us-east-1/us-west-2 (global services).
+  Checked on 2026-10-24: `ec2:DescribeVpcs` in ap-south-1 returns "explicit deny in a service control policy".
+- The Free plan SCP denies `iam:*Provider*`, so a GitHub OIDC provider cannot be created. CI signs in
+  as a scoped IAM user instead (section 4, step 4).
+- Both limits go away only with "Activate advanced features" in AWS Settings, which we do not use.
+Every other service used here (S3, ECR, Lambda, ECS Fargate, IAM roles/users, EventBridge Scheduler,
+CloudWatch, SNS, SSM, Budgets) is on the Free plan list.
 
 Nothing in this guide is done for you automatically. Every script shows what it will create or
 change and waits until you type `yes`. Secrets are never typed into chat, committed, or stored in
@@ -13,7 +24,7 @@ Terraform state.
 flowchart LR
     user([Browser / curl])
     gh[GitHub Actions<br/>test, build, Trivy scan]
-    subgraph aws[AWS ap-south-1]
+    subgraph aws[AWS ap-southeast-2]
         url[Lambda Function URL<br/>HTTPS]
         api[Lambda: API<br/>FastAPI + Web Adapter<br/>slim image, baked model]
         ecs[ECS Fargate task<br/>Streamlit dashboard<br/>public IP :8501]
@@ -33,7 +44,7 @@ flowchart LR
     jobs -- read + write --> s3
     jobs -. Earth Engine key .-> ssm
     api -. API key .-> ssm
-    gh -- OIDC, no keys --> ecr
+    gh -- scoped IAM user key --> ecr
     ecr --> api & ecs & jobs
     api & ecs & jobs --> cw
 ```
@@ -46,7 +57,7 @@ flowchart LR
 | 4 | S3 | data, model artifacts, forecast/drift/benchmark/lake reports | replaces the Azure Files share; versioned, private |
 | 5 | Lambda + EventBridge Scheduler | weekly refresh and drift check | a run takes minutes, well inside Lambda's 15-minute limit |
 | 6 | CloudWatch | logs (7-day retention), 3 alarms (API 5xx, refresh failed, drift failed) | built in; small volumes are free |
-| 7 | IAM + GitHub OIDC | keyless CI/CD deploys | no AWS keys in GitHub; role limited to this repo's `main` and `feat/aws-deployment` |
+| 7 | IAM user for GitHub Actions | CI/CD deploys | OIDC is denied by the project SCP; the user can only push the 2 images and roll the 3 functions and the dashboard; key only in GitHub secrets, revoked after the presentation |
 | 8 | SSM Parameter Store (Standard) | API key, Earth Engine key | free; replaces Key Vault |
 | 9 | AWS Budgets | USD 20/month, alerts at 50/80/100 % (+ forecast) | early warning; the first 2 budgets are free |
 
@@ -68,19 +79,19 @@ or SageMaker resource is added to `infra/aws/`.
   unchanged pipeline module, and push the files they changed, but only when the job succeeds.
 - **Locally nothing changes**: without `QGW_S3_BUCKET` all of this is a no-op (`src/storage.py`).
 
-## 2. Cost (ap-south-1, 24 Oct to 15 Nov 2026)
+## 2. Cost (ap-southeast-2, 24 Oct to 15 Nov 2026)
 
 | Service | Per month | Until mid-November |
 |---|---|---|
-| Fargate dashboard 0.5 vCPU / 1 GB (~USD 0.026/h) | ~USD 19 if always on | ~USD 9-13 (paused until 5 Nov, then always on) |
+| Fargate dashboard 0.5 vCPU / 1 GB (USD 0.0296/h: 0.04856/vCPU-h, 0.00532/GB-h) | ~USD 22 if always on | ~USD 8-12 (paused until 5 Nov, then always on) |
 | Public IPv4 on the task (USD 0.005/h) | ~USD 3.6 | ~USD 1.5-2.5 |
 | Lambda (API + jobs) | ~USD 0 (free tier) | ~USD 0 |
 | ECR (~3-4 GB stored, USD 0.10/GB) | ~USD 0.40 | ~USD 0.30 |
 | S3 (~150 MB + requests) | < USD 0.05 | < USD 0.05 |
 | CloudWatch, SNS, EventBridge Scheduler, SSM Standard, IAM, Budgets | ~USD 0 | ~USD 0 |
-| **Total** | | **about USD 11-16 of credits** |
+| **Total** | | **about USD 10-15 of credits** (USD 120 available) |
 
-These prices are estimates, not a live check of the AWS price list. The USD 20 budget e-mails you
+Fargate prices are from the AWS Price List API (2026-10-24, APS2); the rest are estimates. The USD 20 budget e-mails you
 before this is exceeded. `./scripts/aws/status.ps1 -Cost` shows month-to-date spend; each call
 costs USD 0.01, so the flag is opt-in.
 
@@ -93,11 +104,14 @@ costs USD 0.01, so the flag is opt-in.
    winget install -e --id GitHub.cli
    aws --version; terraform -version; gh --version
    ```
-2. Sign in to AWS from the CLI. **Do not create access keys for the root user.**
-   - Easiest: `aws login`. A browser opens, you sign in with your console user, and the CLI gets
-     short-lived credentials. Then set the region with `aws configure set region ap-south-1`.
-   - Or, with IAM Identity Center: `aws configure sso`, then `aws sso login`.
-   - Check it worked: `aws sts get-caller-identity` shows your 12-digit account.
+2. Sign in to AWS from the CLI. **Do not create access keys for yourself.**
+   ```powershell
+   aws configure set region ap-southeast-2 --profile qgw
+   aws login --region ap-southeast-2 --profile qgw   # browser sign-in; valid 12 h, renewable for 90 days
+   $env:AWS_PROFILE = 'qgw'                          # every script and Terraform then use this profile
+   aws sts get-caller-identity                       # shows your 12-digit account
+   ```
+   Set `$env:AWS_PROFILE` again in every new PowerShell window.
 3. Sign in to GitHub: `gh auth login`.
 
 ## 4. Deploy (first time)
@@ -109,8 +123,8 @@ Run all commands from the repository root.
    ./scripts/aws/bootstrap.ps1 -AlertEmail you@example.com -CheckOnly   # read-only checks, creates nothing
    ./scripts/aws/bootstrap.ps1 -AlertEmail you@example.com
    ```
-   This creates the S3 bucket, 2 ECR repositories, IAM roles, the GitHub OIDC provider and deploy
-   role, the ECS cluster (empty), a security group, the SNS topic and the budget. Nothing here costs
+   This creates the S3 bucket, 2 ECR repositories, IAM roles, the GitHub deploy user (no key yet),
+   the ECS cluster (empty), a security group, the SNS topic and the budget. Nothing here costs
    money while idle. It also creates the SSM placeholders. When asked, you can choose to require an
    API key (typed hidden).
 2. **Confirm the e-mail** that AWS SNS sends you ("AWS Notification - Subscription Confirmation").
@@ -120,12 +134,15 @@ Run all commands from the repository root.
    ./scripts/aws/seed-data.ps1
    ```
    It shows a dry run first. `data/external` (private gauge data) is never uploaded.
-4. **Let GitHub deploy without keys.** Copy the command printed by bootstrap:
+4. **Give GitHub the deploy user's key.**
    ```powershell
-   gh variable set AWS_DEPLOY_ROLE_ARN --body arn:aws:iam::<account>:role/qglacierwatch-github-deploy
+   ./scripts/aws/github-keys.ps1
    ```
-   This is a repository *variable*, not a secret. The role can only push images and roll the
-   functions and the dashboard.
+   It creates one access key for `qglacierwatch-github-deploy` and pipes it straight into the
+   repository secrets `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (never printed, never on disk,
+   never in Terraform state), then sets the variable `AWS_DEPLOY_ENABLED=true`. The user can only
+   push the two images and roll the functions and the dashboard. `-Rotate` replaces the key;
+   `-Revoke` deletes it and the secrets (do this after the presentation, or at once if it may have leaked).
 5. **Build and push the images.** Push the branch (ask yourself: is it ready to be public on
    GitHub?), then start the pipeline:
    ```powershell
@@ -168,7 +185,7 @@ before everything else, and local state lets `destroy` run from your laptop.
       Governance and Quantum pages show real data. The banner says GloFAS, not observations.
 - [ ] Jobs: run one by hand, then check the log:
       ```powershell
-      aws lambda invoke --function-name qglacierwatch-drift --payload '{\"job\":\"drift\"}' --cli-binary-format raw-in-base64-out out.json --region ap-south-1; Get-Content out.json
+      aws lambda invoke --function-name qglacierwatch-drift --payload '{\"job\":\"drift\"}' --cli-binary-format raw-in-base64-out out.json --region ap-southeast-2; Get-Content out.json
       ```
       `exit_code 0` and `files_pushed >= 1`. The dashboard's Drift page shows the new check within 15 min.
 - [ ] Logs visible: CloudWatch, then Log groups: `/aws/lambda/qglacierwatch-*` and `/ecs/qglacierwatch-dashboard`.
@@ -192,7 +209,7 @@ push to `main`. Both restart the task and change the dashboard IP. Write down th
 **Turning on full Earth Engine ingest later:** store the service-account key, and the next
 scheduled refresh ingests instead of `--skip-ingest`. No code or infrastructure change is needed:
 ```powershell
-aws ssm put-parameter --name /qgw/ee-service-account-json --type SecureString --overwrite --value file://ee-key.json --region ap-south-1
+aws ssm put-parameter --name /qgw/ee-service-account-json --type SecureString --overwrite --value file://ee-key.json --region ap-southeast-2
 ```
 Expect the refresh to stop on purpose if GloFAS rewrote past values. That is the manifest guard in
 `src/pipeline/refresh.py`, which records a new data version instead of overwriting.
@@ -209,7 +226,8 @@ Expect the refresh to stop on purpose if GloFAS rewrote past values. That is the
       port 8501 or the Wi-Fi fails. A phone hotspot is a good backup.
 - [ ] Do not push to `main` or run `deploy.ps1`/`pause.ps1` on the day, because they change the dashboard IP.
 - [ ] After the presentation (mid-November): download anything you want
-      (`aws s3 sync s3://<bucket> ./s3-backup`), then `./scripts/aws/destroy.ps1`, and check
+      (`aws s3 sync s3://<bucket> ./s3-backup`), then `./scripts/aws/github-keys.ps1 -Revoke` and
+      `./scripts/aws/destroy.ps1`, and check
       Billing a few days later.
 
 ## 9. Teardown
@@ -225,10 +243,10 @@ own zero-spend budget and account settings are not touched.
 
 | Symptom | Fix |
 |---|---|
-| `Not signed in to AWS` | `aws login` (sessions expire after some hours) |
-| bootstrap check FAIL for a service | Free plan restriction or a missing permission. Use an administrator user, not a limited one |
-| `No default VPC` | `aws ec2 create-default-vpc --region ap-south-1` |
-| deploy: `Image ... not in ECR` | the `aws-deploy` job did not run or failed. Check `AWS_DEPLOY_ROLE_ARN` and the run log |
-| GitHub `Not authorized to perform sts:AssumeRoleWithWebIdentity` | wrong branch (only `main` and `feat/aws-deployment` are trusted) or a wrong repository variable |
+| `Not signed in to AWS` | `aws login --region ap-southeast-2 --profile qgw` (12 h sessions), and `$env:AWS_PROFILE = 'qgw'` in this window |
+| bootstrap check FAIL for a service, or `explicit deny in a service control policy` | wrong Region (only ap-southeast-2 works) or a Free plan restriction: `aws freetier get-account-plan-state --region us-east-1`. If it worked before, check the spend limit in AWS Settings, then Billing |
+| `No default VPC` | `aws ec2 create-default-vpc --region ap-southeast-2` |
+| deploy: `Image ... not in ECR` | the `aws-deploy` job did not run or failed. Check `AWS_DEPLOY_ENABLED` and the run log |
+| GitHub `The security token included in the request is invalid` | the key was revoked or rotated: `./scripts/aws/github-keys.ps1 -Rotate` |
 | Dashboard URL does not open | the task is still starting (wait 2 min, `status.ps1 -WaitForDashboard`), or the network blocks port 8501 |
 | A refresh/drift alarm e-mail | read `/aws/lambda/qglacierwatch-<job>` in CloudWatch. S3 kept the last good outputs |
