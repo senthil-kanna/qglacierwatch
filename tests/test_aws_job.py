@@ -1,5 +1,6 @@
 """Scheduled-job handler (src.aws_job) and the API's optional S3 hydration; no AWS access."""
 
+import json
 import os
 import subprocess
 import sys
@@ -93,3 +94,26 @@ def test_api_hydrates_from_s3_only_when_configured(monkeypatch, tmp_path):
     with TestClient(app):
         pass
     assert seen == [(["reports/real", "data/processed/real"], tmp_path)]
+
+
+@pytest.mark.parametrize(("tier", "sent"), [(3, True), (2, False), (0, False)])
+def test_drift_job_emails_only_tier3(calls, monkeypatch, tier, sent):
+    published = []
+    sns = types.SimpleNamespace(publish=lambda **kw: published.append(kw))
+    monkeypatch.setitem(sys.modules, "boto3", types.SimpleNamespace(client=lambda name: sns))
+    monkeypatch.setenv("QGW_ALERT_TOPIC_ARN", "arn:aws:sns:ap-southeast-2:000000000000:qglacierwatch-alerts")
+    latest = aws_job.WORK / "reports" / "real" / "drift_latest.json"
+    latest.parent.mkdir(parents=True)
+    rec = {"tier": tier, "action": "retrain candidate", "reasons": ["QS ratio 4.10 at h7"]}
+    latest.write_text(json.dumps({"check_date": "2025-12-31", "severity": "critical", "recommendation": rec}))
+    out = aws_job.handler({"job": "drift"}, None)
+    assert out["alert_sent"] is sent and len(published) == int(sent)
+    if sent:
+        assert "Tier 3" in published[0]["Subject"] and "QS ratio 4.10 at h7" in published[0]["Message"]
+
+
+def test_alerts_are_a_no_op_without_a_topic(monkeypatch):
+    from src import alerts
+
+    monkeypatch.delenv("QGW_ALERT_TOPIC_ARN", raising=False)
+    assert not alerts.enabled() and alerts.notify("s", "m") is False

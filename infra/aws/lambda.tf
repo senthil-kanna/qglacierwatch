@@ -78,6 +78,7 @@ resource "aws_lambda_function" "job" {
       QGW_MODE                  = "real"
       QGW_S3_BUCKET             = aws_s3_bucket.data.bucket
       QGW_EE_KEY_PARAM          = local.ssm_ee_key
+      QGW_ALERT_TOPIC_ARN       = aws_sns_topic.alerts.arn
       HOME                      = "/tmp"
       MPLCONFIGDIR              = "/tmp/matplotlib"
       MLFLOW_DISABLE_AGENT_HINT = "1"

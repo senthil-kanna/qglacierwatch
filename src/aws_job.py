@@ -7,6 +7,9 @@ unchanged, then push only the files it created or changed. EventBridge Scheduler
 refresh runs the full Earth Engine + GloFAS ingest only when a real service-account key is stored
 in SSM (QGW_EE_KEY_PARAM); with the placeholder it rebuilds features and drift from the raw data
 already in S3 (--skip-ingest). {"skip_ingest": true} forces the latter.
+
+drift e-mails the alert topic when the check recommends Tier 3 (retraining); lower tiers stay on
+the dashboard only.
 """
 
 import json
@@ -15,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from src import ssm, storage
+from src import alerts, ssm, storage
 
 WORK = Path(os.getenv("QGW_JOB_DIR", "/tmp/qgw"))
 _READS = ["data/raw", "data/processed/real", "artifacts/real/hindcasts.parquet", "reports/real"]
@@ -54,10 +57,24 @@ def run(job: str, skip_ingest: bool = False) -> dict:
     # A failed step may leave half-written outputs, so S3 keeps the last good copy.
     pushed = storage.push(spec["push"], since=before) if code == 0 else 0
     result = {"job": job, "args": args, "exit_code": code, "files_pushed": pushed}
+    if code == 0 and job == "drift":
+        result["alert_sent"] = notify_drift(WORK / "reports" / "real" / "drift_latest.json")
     print(json.dumps(result), flush=True)
     if code != 0:
         raise RuntimeError(f"{spec['module']} exited with {code}; see the log above")
     return result
+
+
+def notify_drift(path: Path) -> bool:
+    """E-mail a Tier 3 recommendation from the operational drift check."""
+    if not path.exists():
+        return False
+    latest = json.loads(path.read_text())
+    rec = latest["recommendation"]
+    if rec["tier"] != 3:
+        return False
+    subject, body = alerts.drift_message(rec, latest["check_date"], "weekly drift job (real data)", [f"Severity: {latest['severity']}"])
+    return alerts.notify(subject, body)
 
 
 def handler(event, _context) -> dict:

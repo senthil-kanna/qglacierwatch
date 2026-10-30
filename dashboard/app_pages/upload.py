@@ -1,3 +1,4 @@
+import hashlib
 from datetime import UTC, datetime
 
 import altair as alt
@@ -5,7 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from dashboard import data
-from src import config
+from src import alerts, config
 
 SAMPLES = config.ROOT / "dashboard" / "samples"
 LIGHTS = {
@@ -72,6 +73,17 @@ with st.container(border=True):
         "Tier 0: no alert or inputs outside past seasons only | Tier 1: input problem | Tier 2: interval coverage dropped, "
         "recalibrate | Tier 3: forecast error degraded persistently, retrain a candidate. Same rules as the weekly job."
     )
+    if rec["tier"] == 3 and alerts.enabled():
+        sent = st.session_state.setdefault("upload_alerts_sent", set())
+        key = hashlib.sha256(file.getvalue()).hexdigest()
+        if key in sent:
+            st.caption(":material/mark_email_read: Alert e-mail sent for this file.")
+        elif st.button("Send alert e-mail", icon=":material/mail:", help="One e-mail per file and session, to the project's alert address."):
+            subject, body = alerts.drift_message(rec, r["check_date"], f"dashboard upload '{file.name}' (what-if check, not the live data)",
+                                                 [f"Uploaded window: {r['window'][0]} to {r['window'][1]}"])
+            if alerts.notify("[Upload] " + subject, body):
+                sent.add(key)
+                st.success("Alert e-mail sent.", icon=":material/mark_email_read:")
 
 with st.container(border=True):
     st.subheader("3. Evidence")

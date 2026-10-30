@@ -246,3 +246,9 @@ def test_pause_writes_tfvars_and_applies_only_the_saved_plan(tmp_path):
     assert "dashboard_enabled = false" in v and "schedules_enabled = false" in v and 'api_image_tag = "abc1234"' in v
     tf_calls = [line for line in log if line.startswith("terraform")]
     assert " plan -input=false -out=tfplan" in tf_calls[0] and tf_calls[1].endswith("apply -input=false tfplan")
+
+
+def test_alert_publish_is_scoped_to_the_project_topic():
+    publish = re.findall(r'actions\s*=\s*\["sns:Publish"\]\s*\n\s*resources\s*=\s*\[([^\]]*)\]', TF)
+    assert publish == ["aws_sns_topic.alerts.arn"] * 2, publish
+    assert TF.count("QGW_ALERT_TOPIC_ARN") == 2

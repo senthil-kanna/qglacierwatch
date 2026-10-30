@@ -92,6 +92,11 @@ data "aws_iam_policy_document" "job" {
     actions   = ["ssm:GetParameter"]
     resources = ["${local.ssm_prefix}${local.ssm_ee_key}"]
   }
+  statement {
+    sid       = "DriftAlert"
+    actions   = ["sns:Publish"]
+    resources = [aws_sns_topic.alerts.arn]
+  }
 }
 
 resource "aws_iam_role_policy" "job" {
@@ -125,6 +130,11 @@ data "aws_iam_policy_document" "dashboard" {
     sid       = "ReadRoots"
     actions   = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.data.arn}/*"]
+  }
+  statement {
+    sid       = "UploadAlert"
+    actions   = ["sns:Publish"]
+    resources = [aws_sns_topic.alerts.arn]
   }
 }
 
