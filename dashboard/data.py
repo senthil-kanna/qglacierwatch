@@ -67,6 +67,21 @@ def raw_daily() -> pd.DataFrame:
     return merge_daily(frames, str(start.date()), str(end.date()))
 
 
+@st.cache_data(ttl="10m", max_entries=20, show_spinner=False)
+def upload_check(content: bytes) -> dict:
+    """Drift check on uploaded CSV bytes; same file -> same (cached) result. Nothing is persisted."""
+    import io
+
+    from src.drift.upload import check
+
+    try:
+        raw = pd.read_csv(io.BytesIO(content), comment="#")
+    except (pd.errors.ParserError, pd.errors.EmptyDataError, UnicodeDecodeError) as e:
+        return {"ok": False, "errors": [f"not a readable CSV file: {e}"], "warnings": []}
+    model_id, status, bundle = store().serving_bundle()
+    return {**check(raw, config.mode(), bundle, model_id), "model_status": status}
+
+
 def provenance_banner() -> None:
     _, meta = features()
     if config.mode() == "demo":

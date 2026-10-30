@@ -24,6 +24,7 @@ page = st.navigation(
         ],
         "Operations": [
             st.Page("app_pages/drift.py", title="Drift monitoring", icon=":material/monitor_heart:"),
+            st.Page("app_pages/upload.py", title="Upload and check", icon=":material/upload_file:"),
             st.Page("app_pages/governance.py", title="Models and retraining", icon=":material/verified:"),
             st.Page("app_pages/quantum.py", title="Quantum benchmark", icon=":material/memory:"),
         ],
