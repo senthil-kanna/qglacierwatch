@@ -32,7 +32,8 @@ MIN_REFERENCE_YEARS_BEFORE = 4  # season-aware covariate test needs this many pa
 
 def validate(raw: pd.DataFrame, window_days: int, archive: tuple[pd.Timestamp, pd.Timestamp]) -> tuple[pd.DataFrame | None, list[str], list[str]]:
     """Returns (clean frame indexed by date, errors, warnings). Any error means no check is run."""
-    errors, warnings = [], []
+    errors: list[str] = []
+    warnings: list[str] = []
     raw = raw.rename(columns=lambda c: str(c).strip().lower())
     missing = [c for c in ("date", *COLUMNS) if c not in raw.columns]
     if missing:
