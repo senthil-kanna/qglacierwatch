@@ -11,3 +11,5 @@ mlruns
 .mypy_cache
 .env
 *.joblib
+# The slim API image bakes the serving model (scripts/aws/bake_api_bundle.py).
+!build/api-bundle/**

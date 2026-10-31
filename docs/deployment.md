@@ -1,11 +1,14 @@
 # Deployment (Azure for Students) and local operation
 
+> **Alternative target.** The primary deployment is AWS: see [aws-deployment.md](aws-deployment.md).
+> This page and `infra/azure/` are kept unchanged as the Azure Container Apps option.
+
 ## Status (2026-10-20)
 
 | component | state |
 |---|---|
 | Container image | built and scanned in CI (`ci` workflow, green); published to GHCR by the `image` workflow (not yet run on `main`) |
-| Infrastructure as code | `infra/main.bicep` compiles with Bicep CLI 0.48.1, no warnings |
+| Infrastructure as code | `infra/azure/main.bicep` compiles with Bicep CLI 0.48.1, no warnings |
 | Deployment scripts | `scripts/azure/{preflight,deploy,verify,cleanup}.ps1`; safety logic tested against a fake `az` (`tests/test_azure_scripts.py`) |
 | Azure subscription | **not yet available** (student verification pending) |
 | Azure resources, URLs, alerts | **not created, not verified** |

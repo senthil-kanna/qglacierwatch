@@ -32,8 +32,8 @@ param(
 
 . "$PSScriptRoot/common.ps1"
 $root = Resolve-Path "$PSScriptRoot/../.."
-$template = Join-Path $root 'infra/main.bicep'
-$params = Join-Path $root 'infra/main.parameters.json'
+$template = Join-Path $root 'infra/azure/main.bicep'
+$params = Join-Path $root 'infra/azure/main.parameters.json'
 Assert-AzCli
 $acct = Get-CurrentAccount
 if (-not $BaseOnly -and -not $ImageTag) { throw 'Pass -ImageTag <git-sha> (from the GitHub "image" workflow), or -BaseOnly.' }

@@ -1,4 +1,6 @@
-# One image, several roles (api | dashboard | job <module>), so ACR stores a single artifact.
+# One image, several roles (api | dashboard | job <module>), so the registry stores a single artifact.
+# AWS: the dashboard runs on ECS Fargate and the scheduled jobs on Lambda (awslambdaric entry point,
+# set by infra/aws); the API uses the slimmer docker/Dockerfile.api.
 # Build from the repository root:  docker build -f docker/Dockerfile -t qglacierwatch:dev .
 FROM python:3.12-slim AS base
 
@@ -17,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 curl \
 
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt awslambdaric==4.1.0
 
 COPY src ./src
 COPY api ./api
@@ -25,7 +27,7 @@ COPY dashboard ./dashboard
 COPY configs ./configs
 COPY docs ./docs
 COPY docker/entrypoint.sh /entrypoint.sh
-# uid/gid 10001 must match the Azure Files mountOptions in infra/main.bicep (SMB has no POSIX owners).
+# uid/gid 10001 must match the Azure Files mountOptions in infra/azure/main.bicep (SMB has no POSIX owners).
 RUN chmod +x /entrypoint.sh \
     && groupadd --gid 10001 qgw \
     && useradd --create-home --uid 10001 --gid 10001 qgw \

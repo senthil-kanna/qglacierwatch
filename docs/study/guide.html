@@ -1,0 +1,442 @@
+<title>QGlacierWatch Study Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Literata:opsz,wght@7..72,400;7..72,600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky chapter rail on the left (desktop), one reading column; collapses to a single column on phones. */
+:root {
+  --paper: #f5f8f9;        /* snowfield, slightly cool */
+  --sheet: #ffffff;
+  --ink: #132330;          /* deep river slate */
+  --muted: #55707f;
+  --line: #d6e1e6;
+  --glacier: #1f6f8b;      /* accent: glacial meltwater blue */
+  --glacier-soft: #e3f0f4;
+  --ok: #1d7a4f; --warn: #a45f00; --bad: #b42318;
+  --ok-soft: #e4f4ec; --warn-soft: #fbf0dc; --bad-soft: #fbe6e4;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Literata", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0d171d; --sheet: #13212a; --ink: #e3edf1; --muted: #93aab6; --line: #24394450;
+    --glacier: #6cc3df; --glacier-soft: #16303a;
+    --ok: #5fd39a; --warn: #f0b45a; --bad: #ff8a80; --ok-soft: #12302a; --warn-soft: #33270f; --bad-soft: #3a1a18;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0d171d; --sheet: #13212a; --ink: #e3edf1; --muted: #93aab6; --line: #24394450;
+  --glacier: #6cc3df; --glacier-soft: #16303a;
+  --ok: #5fd39a; --warn: #f0b45a; --bad: #ff8a80; --ok-soft: #12302a; --warn-soft: #33270f; --bad-soft: #3a1a18;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 48px; padding-block: 40px 80px; }
+nav.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; max-height: calc(100vh - 48px); overflow-y: auto;
+  font-family: var(--display); font-size: 13px; }
+nav.rail .label { text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-size: 11px; margin-bottom: 10px; }
+nav.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: ch; }
+nav.rail a { display: grid; grid-template-columns: 26px 1fr; padding: 5px 8px; border-radius: 6px; color: var(--ink); text-decoration: none; }
+nav.rail a span { color: var(--muted); font-variant-numeric: tabular-nums; }
+nav.rail a:hover, nav.rail a:focus-visible { background: var(--glacier-soft); outline: none; }
+main { min-width: 0; }
+header.hero { padding-bottom: 28px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.eyebrow { font-family: var(--display); text-transform: uppercase; letter-spacing: .14em; font-size: 12px; color: var(--glacier); }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(34px, 5vw, 54px); line-height: 1.05; margin: 10px 0 16px; text-wrap: balance; }
+.lede { font-size: 20px; max-width: 62ch; color: var(--ink); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+section { padding-block: 34px 6px; border-bottom: 1px solid var(--line); }
+h2 { font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1.15; margin: 0 0 14px; text-wrap: balance; display: flex; gap: 14px; align-items: baseline; }
+h2 .n { font-family: var(--mono); font-size: 15px; color: var(--glacier); font-weight: 600; }
+h3 { font-family: var(--display); font-weight: 600; font-size: 19px; margin: 26px 0 8px; }
+p, li { max-width: 68ch; }
+a { color: var(--glacier); }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+pre { font-family: var(--mono); font-size: 13.5px; background: var(--sheet); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; line-height: 1.5; }
+.callout { background: var(--glacier-soft); border-radius: 10px; padding: 14px 18px; margin: 18px 0; max-width: 72ch; }
+.callout.warn { background: var(--warn-soft); }
+.callout.bad { background: var(--bad-soft); }
+.callout strong:first-child { font-family: var(--display); }
+figure { margin: 22px 0; }
+figure img { width: 100%; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; display: block; }
+figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; max-width: 80ch; }
+.shot figcaption { color: var(--ink); }
+.tbl { overflow-x: auto; margin: 16px 0; }
+table { border-collapse: collapse; font-size: 14.5px; min-width: 520px; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--display); font-weight: 600; font-size: 13px; color: var(--muted); }
+td.num, th.num { text-align: right; font-family: var(--mono); font-size: 13px; }
+.pill { display: inline-block; font-family: var(--display); font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); } .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.steps { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 10px; counter-reset: s; max-width: 72ch; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 10px; }
+.steps li::before { content: counter(s); font-family: var(--mono); font-weight: 600; color: var(--glacier); border: 1.5px solid var(--glacier); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; font-size: 13px; margin-top: 2px; }
+.reading { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 18px 0; }
+.reading div { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.reading .big { font-family: var(--mono); font-size: 26px; font-weight: 600; color: var(--glacier); }
+.reading .cap { font-size: 14px; color: var(--muted); }
+details { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 10px 0; max-width: 78ch; }
+details summary { cursor: pointer; font-family: var(--display); font-weight: 600; }
+details summary:focus-visible { outline: 2px solid var(--glacier); outline-offset: 3px; }
+details p { margin: 10px 0 2px; }
+dl.gloss { display: grid; grid-template-columns: minmax(150px, 220px) 1fr; gap: 10px 22px; max-width: 80ch; }
+dl.gloss dt { font-family: var(--display); font-weight: 600; }
+dl.gloss dt .l { font-family: var(--mono); color: var(--glacier); margin-right: 8px; }
+dl.gloss dd { margin: 0; }
+svg text { fill: var(--ink); font-family: var(--mono); font-size: 12px; }
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: 1fr; gap: 0; padding-block: 24px 60px; }
+  nav.rail { position: static; max-height: none; margin-bottom: 18px; }
+  nav.rail ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  dl.gloss { grid-template-columns: 1fr; gap: 2px 0; } dl.gloss dd { margin-bottom: 10px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+<nav class="rail" aria-label="Chapters">
+  <div class="label">Chapters</div>
+  <ol>
+    <li><a href="#big"><span>01</span>The big picture</a></li>
+    <li><a href="#river"><span>02</span>The river and the problem</a></li>
+    <li><a href="#data"><span>03</span>The data</a></li>
+    <li><a href="#features"><span>04</span>From data to features</a></li>
+    <li><a href="#models"><span>05</span>The models</a></li>
+    <li><a href="#uncertainty"><span>06</span>Uncertainty ranges</a></li>
+    <li><a href="#fair"><span>07</span>Testing fairly</a></li>
+    <li><a href="#results"><span>08</span>Forecast results</a></li>
+    <li><a href="#gauge"><span>09</span>The real-river check</a></li>
+    <li><a href="#drift"><span>10</span>Drift and retraining</a></li>
+    <li><a href="#registry"><span>11</span>Registry and gate</a></li>
+    <li><a href="#quantum"><span>12</span>Quantum benchmark</a></li>
+    <li><a href="#lakes"><span>13</span>Glacial lakes</a></li>
+    <li><a href="#screens"><span>14</span>Every screen explained</a></li>
+    <li><a href="#cloud"><span>15</span>The Azure cloud design</a></li>
+    <li><a href="#cicd"><span>16</span>Testing and CI/CD</a></li>
+    <li><a href="#files"><span>17</span>Project folder map</a></li>
+    <li><a href="#run"><span>18</span>Run it yourself</a></li>
+    <li><a href="#limits"><span>19</span>What is not done</a></li>
+    <li><a href="#viva"><span>20</span>Viva questions</a></li>
+    <li><a href="#glossary"><span>21</span>Glossary A to Z</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">Study guide Â· Beas River above Bhuntar, Himachal Pradesh</div>
+  <h1>QGlacierWatch, from A to Z</h1>
+  <p class="lede">Everything you need to understand, explain and defend the project: what it does, why each part exists, what the outputs mean, and what the honest limits are. Read it top to bottom once; use the viva section before your presentation.</p>
+  <div class="meta"><span>Catchment 3,532 km2</span><span>Forecasts at 1, 7 and 30 days</span><span>Data 2015 to Sep 2026</span><span>112 automated tests</span></div>
+</header>
+
+<section id="big">
+<h2><span class="n">01</span>The big picture</h2>
+<p>QGlacierWatch forecasts <strong>how much water will flow in the Beas River</strong> 1, 7 and 30 days ahead. Instead of a single number it gives a <strong>range</strong>: a low value (P10), a middle value (P50) and a high value (P90). Around that forecasting model, the project builds the "operations" machinery that keeps a model trustworthy after it is deployed. That machinery is called <strong>MLOps</strong> (machine learning operations).</p>
+<p>In one sentence: <em>collect data automatically, check it, train and test models fairly, only allow a model into use if it passes strict checks and a human approves, watch for changes in the data, retrain when needed, and serve the forecasts through an API and a dashboard, ready to run on the Azure cloud.</em></p>
+<figure><img src="{{IMG:fig_architecture.png}}" alt="Pipeline diagram: data sources, ingest and validate, features, train and evaluate, registry and gate, serve, monitor drift, retrain policy, and the Azure delivery layer."><figcaption>The whole system on one page. Read the top row left to right (building a model), then the bottom row right to left (using and watching it). The grey band is the cloud part.</figcaption></figure>
+<p>Two extra research modules sit beside the main pipeline: a <strong>quantum versus classical</strong> model comparison, and <strong>glacial lake mapping</strong> from satellite images.</p>
+</section>
+
+<section id="river">
+<h2><span class="n">02</span>The river and the problem</h2>
+<p>The Beas above Bhuntar drains a high Himalayan valley. Its water comes from three sources that change through the year: <strong>winter snow</strong> that melts in spring, <strong>glaciers</strong> that melt in summer, and <strong>monsoon rain</strong> from June to September. Floods hit the valley in July 2023. Forecasts matter for hydropower, flood preparation and water planning.</p>
+<p>Why a model alone is not enough: a model trained once and left alone breaks quietly when seasons, weather or the input data change. Real examples from this project:</p>
+<ul>
+  <li>The uncertainty ranges were too narrow in some years and too wide in others, because each year's weather is different.</li>
+  <li>The river data used as the target changed its source on 2023-08-05 without any error message (chapter 9).</li>
+  <li>Satellite snow data has gaps on cloudy days.</li>
+</ul>
+<p>MLOps is the answer to these problems: checks, versioning, monitoring, governance and repeatable deployment.</p>
+<figure class="shot"><img src="{{IMG:screens/dash_3_basin.png}}" alt="Dashboard basin page with catchment map, snow fraction chart and monthly snow-cover map."><figcaption><strong>Basin page.</strong> Top left: the catchment outline (blue) with the two red points, the outlet near Bhuntar and the GloFAS grid cell. Middle: snow-covered share of the basin each day (dots are fainter when clouds hid more of the basin). Bottom: the monthly snow map; dark blue cells are almost always snow-covered in that month, pale cells rarely.</figcaption></figure>
+</section>
+
+<section id="data">
+<h2><span class="n">03</span>The data</h2>
+<div class="tbl"><table>
+<thead><tr><th>Data</th><th>What it measures</th><th>Source</th><th>Used for</th></tr></thead>
+<tbody>
+<tr><td>MODIS MOD10A1</td><td>Snow cover, daily, 500 m</td><td>NASA, via Google Earth Engine</td><td>Model input (how much snow is left)</td></tr>
+<tr><td>ERA5-Land</td><td>Temperature, rain, snowfall, snowmelt, snow water</td><td>ECMWF reanalysis, via Earth Engine</td><td>Model input (weather)</td></tr>
+<tr><td>GloFAS v4</td><td>River discharge (m3/s), modelled</td><td>Copernicus, via Open-Meteo</td><td>The <strong>target</strong> the models learn to predict</td></tr>
+<tr><td>Sentinel-1 and Sentinel-2</td><td>Radar and optical satellite images</td><td>Copernicus, via Earth Engine</td><td>Finding lakes</td></tr>
+<tr><td>JRC Global Surface Water, Hi-MAG</td><td>Reference maps of water and glacial lakes</td><td>EU JRC; Chen et al. 2021</td><td>Checking the lake finder</td></tr>
+<tr><td>Bajoura Bridge telemetry</td><td>Measured river flow, 15-minute readings</td><td>HP Water Department, National Water Data Portal</td><td>Checking GloFAS against the real river</td></tr>
+</tbody></table></div>
+<div class="callout"><strong>Why GloFAS and not a real gauge?</strong> Measured daily flow at Bhuntar belongs to the Central Water Commission and is classified for Indus-basin rivers. GloFAS is a computer model of river flow, freely available. So the project predicts GloFAS, and says so everywhere.</div>
+<h3>How the data is kept trustworthy</h3>
+<ul>
+  <li><strong>Validation:</strong> every file is checked for the right columns, dates and value ranges.</li>
+  <li><strong>Fingerprints:</strong> each raw file gets a SHA-256 hash, a unique fingerprint. If a file's bytes ever change, the refresh job stops instead of silently replacing data a model was trained on.</li>
+  <li><strong>Versioning with DVC:</strong> big data files are versioned (like Git for data) and pushed to a remote store (DagsHub).</li>
+  <li><strong>Append-only:</strong> to add 2026, the project copied the old files byte for byte and only added new days.</li>
+</ul>
+</section>
+
+<section id="features">
+<h2><span class="n">04</span>From data to features</h2>
+<p>A model does not see raw files; it sees a table where each row is one day (the <em>issue date</em>) and each column is a <strong>feature</strong>: yesterday's flow, the last week's rain, the snow share, the temperature trend, the day of year, and so on.</p>
+<p>The key rule is <strong>no peeking into the future</strong>. Data arrives late in real life: river flow is known a day later, MODIS a day later, ERA5-Land about 5 days later. Each feature is built only from values that would really have been available on the issue date. Breaking this rule (called <em>leakage</em>) makes a model look far better in tests than it will be in practice. Automated tests check for leakage.</p>
+</section>
+
+<section id="models">
+<h2><span class="n">05</span>The models</h2>
+<div class="tbl"><table>
+<thead><tr><th>Model</th><th>Idea in plain words</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td>Persistence</td><td>"Tomorrow will be like today."</td><td>Baseline. Hard to beat at 1 day because rivers change slowly.</td></tr>
+<tr><td>Climatology</td><td>"Typical flow for this date in past years."</td><td>Baseline. Good for long horizons when today's state matters less.</td></tr>
+<tr><td>LightGBM quantile</td><td>Many small decision trees that learn rules like "if snow is high and temperature rises, flow goes up". Trained three times, once each for P10, P50 and P90.</td><td>Main model (selected).</td></tr>
+<tr><td>Quantile LSTM</td><td>A neural network that reads the last 60 days in order and remembers patterns over time.</td><td>Second learned model.</td></tr>
+<tr><td>VQC (simulated)</td><td>A small variational quantum circuit, simulated on a normal computer.</td><td>Research comparison only (chapter 12).</td></tr>
+</tbody></table></div>
+<p>A learned model is only worth using if it beats both baselines. That comparison is always reported.</p>
+</section>
+
+<section id="uncertainty">
+<h2><span class="n">06</span>Uncertainty ranges: P10, P50, P90</h2>
+<p>A real forecast from the system (issued 2025-12-31, for 2026-01-07, 7 days ahead):</p>
+<div class="reading">
+  <div><div class="big">58.7</div><div class="cap">P10 (m3/s). Only a 10% chance the flow is lower than this.</div></div>
+  <div><div class="big">61.4</div><div class="cap">P50 (m3/s). The middle estimate; half above, half below.</div></div>
+  <div><div class="big">63.7</div><div class="cap">P90 (m3/s). Only a 10% chance the flow is higher than this.</div></div>
+</div>
+<p>So the range from P10 to P90 should contain the real value <strong>80% of the time</strong>. That share is called <strong>coverage</strong>. If coverage is much lower than 80%, the model is over-confident (range too narrow). If it is much higher, the range is too wide to be useful. The project accepts 70% to 90%.</p>
+<h3>Conformal calibration (CQR)</h3>
+<p>Raw model ranges are usually too narrow. <strong>Conformalized quantile regression</strong> fixes this with a simple trick: run the model on a separate "calibration" period, measure how far the real values fell outside the ranges, and widen (or narrow) all future ranges by that amount. The project does this <strong>separately for each season</strong>, because monsoon errors are much bigger than winter errors.</p>
+<div class="callout warn"><strong>The catch.</strong> Calibration assumes the future looks like the calibration period. In 2026 that failed: calibration used 2024-2025, which included the extreme high-flow year 2025, so ranges were widened a lot; 2026 was a calm year, so the ranges became too wide.</div>
+</section>
+
+<section id="fair">
+<h2><span class="n">07</span>Testing fairly</h2>
+<ol class="steps">
+  <li><span><strong>Split by time.</strong> Train on older years, calibrate on the next years, test on the newest years. Never shuffle days, because neighbouring days are almost identical.</span></li>
+  <li><span><strong>Choose settings without the test.</strong> Model settings are chosen by rolling-origin cross-validation: train up to year X, check on year X+1, repeat for four years.</span></li>
+  <li><span><strong>Write the plan before running.</strong> Each major test has a protocol file committed to Git before any result is seen. This is called <em>pre-registration</em>. It stops "trying until it looks good".</span></li>
+  <li><span><strong>Score the test once.</strong> A log file records every time the test period is scored.</span></li>
+  <li><span><strong>Report failures too.</strong> Results that did not work are written up with the same care.</span></li>
+</ol>
+<div class="tbl"><table>
+<thead><tr><th>Experiment</th><th>Train</th><th>Calibrate</th><th>Test</th></tr></thead>
+<tbody>
+<tr><td>Main</td><td>2015-2020</td><td>2021-2022</td><td>2023-2025</td></tr>
+<tr><td>Fresh test</td><td>2015-2023</td><td>2024-2025</td><td>Jan-Sep 2026 (new data, registered first)</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="results">
+<h2><span class="n">08</span>Forecast results</h2>
+<p>Two numbers matter most. <strong>NSE</strong> (Nash-Sutcliffe efficiency) measures accuracy: 1 is perfect, 0 is no better than always guessing the average. <strong>Coverage</strong> is explained in chapter 6.</p>
+<figure><img src="{{IMG:fig_skill_2026.png}}" alt="Bar charts of NSE and coverage by model and horizon for the 2026 test."><figcaption>Fresh 2026 test. Left: accuracy is very high for the learned models (blue, teal). Right: the shaded band is the allowed coverage range; GBM is above it at 1 and 30 days.</figcaption></figure>
+<figure><img src="{{IMG:fig_forecast_2026.png}}" alt="Time series of 2026: GloFAS target line inside a shaded P10 to P90 band with the P50 forecast."><figcaption>7-day forecasts through 2026. The black line (target) stays inside the blue band almost all the time, which is why coverage came out too high.</figcaption></figure>
+<div class="tbl"><table>
+<thead><tr><th>Selected model (GBM)</th><th class="num">1 day</th><th class="num">7 days</th><th class="num">30 days</th><th>Gate</th></tr></thead>
+<tbody>
+<tr><td>2023-2025: NSE / coverage</td><td class="num">0.974 / 0.727</td><td class="num">0.939 / 0.701</td><td class="num">0.797 / 0.689</td><td><span class="pill bad">fail: too narrow at 30 d</span></td></tr>
+<tr><td>2026: NSE / coverage</td><td class="num">0.994 / 0.938</td><td class="num">0.980 / 0.887</td><td class="num">0.962 / 0.955</td><td><span class="pill bad">fail: too wide at 1 and 30 d</span></td></tr>
+</tbody></table></div>
+<p>What to say: the models are <strong>very accurate at reproducing GloFAS</strong> and beat the baselines at 7 days; at 1 day nothing beats persistence. <strong>No model passed the gate</strong> because the uncertainty ranges are not reliable across very different years. That is a real, documented scientific result.</p>
+</section>
+
+<section id="gauge">
+<h2><span class="n">09</span>The real-river check</h2>
+<p>An open telemetry gauge was found 3.7 km downstream of the outlet (Bajoura Bridge, Himachal Pradesh Water Department, published on the National Water Data Portal). Over 737 days between July 2023 and September 2026 it was compared with GloFAS and with the forecasts.</p>
+<figure><img src="{{IMG:fig_gauge_check.png}}" alt="Bar charts: GloFAS to observed ratio by season, and forecast NSE against GloFAS versus against the gauge."><figcaption>Left: a value of 1 would mean GloFAS matches the gauge. It is about 2 times too high in winter and after the monsoon and about half in spring. Right: forecasts score 0.8-0.9 against GloFAS but only 0.2-0.3 against the gauge.</figcaption></figure>
+<div class="callout bad"><strong>The most important finding.</strong> The forecasts are an accurate copy of GloFAS, not an accurate forecast of the real river. GloFAS itself scores NSE 0.21 against the gauge. Because the gauge's measuring method and quality are unknown, this is called a consistency check, not a validation.</div>
+<p>Two more discoveries came from checking data sources carefully: GloFAS is <strong>reanalysis only up to 2023-08-04</strong> and forecast-derived after that, and the gauge files may be used with credit but their raw data is not redistributed in the repository.</p>
+</section>
+
+<section id="drift">
+<h2><span class="n">10</span>Drift monitoring and retraining</h2>
+<p><strong>Drift</strong> means the data or the model's behaviour has changed compared with what it was trained on. A weekly check looks at three things: the inputs (covariate drift), the predictions (prediction drift) and the errors once true values arrive (residual drift).</p>
+<p>The trick is to be <strong>season-aware</strong>: comparing July with last December would always shout "drift". The season-aware detectors compare each week with the same weeks in past years.</p>
+<figure><img src="{{IMG:fig_drift.png}}" alt="Bar chart of alert rates for naive and season-aware detectors."><figcaption>A naive detector alarms on 99.8% of weeks (useless). The season-aware detector alarms on 4.9%, so its alarms mean something.</figcaption></figure>
+<div class="tbl"><table>
+<thead><tr><th>Tier</th><th>Trigger</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Data quality problem</td><td>Fix the data, re-run ingestion. Model unchanged.</td></tr>
+<tr><td>2</td><td>Ranges drifting</td><td>Recalibrate the ranges on recent data.</td></tr>
+<tr><td>3</td><td>Errors grow persistently</td><td>Retrain a candidate and compare it with the current model on the same period.</td></tr>
+<tr><td>4</td><td>Candidate is better</td><td>Promote, only through the gate and a human approver.</td></tr>
+</tbody></table></div>
+<figure class="shot"><img src="{{IMG:screens/dash_5_drift.png}}" alt="Dashboard drift page with alert rates, alert timeline, synthetic tests and recommended actions."><figcaption><strong>Drift page.</strong> Alert rates per detector; a timeline of alerts (the dashed line is the July 2023 flood); synthetic tests where faults were injected on purpose to measure detection; and the recommended action for each recent week.</figcaption></figure>
+</section>
+
+<section id="registry">
+<h2><span class="n">11</span>Model registry and promotion gate</h2>
+<p>Every trained model is stored with a <strong>model card</strong>: which data (dataset id), which code (Git commit), which settings and seeds, and its test scores. A model can only become the "production" model if it passes <strong>every</strong> rule of the gate:</p>
+<ul>
+  <li>NSE at least 0.7 (1 day), 0.4 (7 days), 0.0 (30 days)</li>
+  <li>P10-P90 coverage between 0.70 and 0.90 at every horizon</li>
+  <li>Better than climatology, at least 180 test samples</li>
+  <li>At least 2% better than the current model (if there is one)</li>
+  <li>A named person approves it</li>
+</ul>
+<p>Every decision goes into an audit log, and <strong>rollback</strong> brings back the previous model in one command.</p>
+<figure class="shot"><img src="{{IMG:screens/dash_6_governance.png}}" alt="Dashboard governance page: production model none approved, 3 registered candidates, audit log with failed gates."><figcaption><strong>Models and retraining page.</strong> "Production model: none approved" is correct: all 3 candidates failed the gate. The audit log shows each gate result with the reason, for example "h30: P10-P90 coverage 0.689 outside [0.7, 0.9]".</figcaption></figure>
+</section>
+
+<section id="quantum">
+<h2><span class="n">12</span>Quantum benchmark</h2>
+<p>A variational quantum circuit (VQC) with 4 qubits was compared fairly with classical models of the same size (same inputs, same training budget, 5 random seeds, same calibration). It runs on a <strong>simulator</strong>, a normal computer pretending to be a quantum computer.</p>
+<figure><img src="{{IMG:fig_quantum.png}}" alt="Horizontal bars of quantile score for quantum and classical models."><figcaption>Lower is better. All quantum variants (violet) were worse than the classical ones (blue) on the 2026 test.</figcaption></figure>
+<p>What to say: the simulated quantum model did not beat simple classical models on this task. A simulation can never show "quantum advantage"; the result only tells us about this model type on this problem.</p>
+</section>
+
+<section id="lakes">
+<h2><span class="n">13</span>Glacial lakes</h2>
+<p>Melting glaciers can form lakes that may burst. The project maps water in the high zone (above 3,500 m, gentle slopes) every autumn from 2019 to 2025 using Sentinel-2 (optical) and Sentinel-1 (radar), tracks 34 lake objects and checks whether any grow fast.</p>
+<figure><img src="{{IMG:fig_lake_overlay_2025.png}}" alt="Satellite image with detected water highlighted in cyan."><figcaption>Sentinel-2 image of the largest lake area, autumn 2025, with detected water in cyan.</figcaption></figure>
+<figure><img src="{{IMG:fig_lakes_himag.png}}" alt="Bar charts comparing detection and area against the Hi-MAG inventory."><figcaption>Against the published Hi-MAG inventory: 17 of 21 lakes found, but their area is about half of Hi-MAG's.</figcaption></figure>
+<ul>
+  <li>Against JRC water maps the detector scores IoU 0.11-0.16 (low). It marks shadows and wet snow as water and misses lake edges.</li>
+  <li>A registered attempt with five improved rules found none better, so the rule stayed. A negative result, reported honestly.</li>
+  <li>No lake shows significant growth after correcting for testing 34 lakes at once.</li>
+</ul>
+</section>
+
+<section id="screens">
+<h2><span class="n">14</span>Every screen explained</h2>
+<p>These screenshots come from the real system running on your laptop with real data.</p>
+<figure class="shot"><img src="{{IMG:screens/dash_1_forecast.png}}" alt="Dashboard forecast page."><figcaption><strong>Forecast and replay (home page).</strong> Blue box: a reminder that the target is GloFAS. Four cards: last data date, data age (293 days, because the data stops at 2025-12-31), the model serving forecasts, and its status ("unpromoted candidate", because none passed the gate). The table gives P10/P50/P90 for 1, 7 and 30 days ahead. Below it, the historical replay lets you pick a model, horizon and period and see past forecasts against what happened.</figcaption></figure>
+<figure class="shot"><img src="{{IMG:screens/dash_2_skill.png}}" alt="Dashboard skill page."><figcaption><strong>Skill and calibration.</strong> The full score table for every model and horizon; quantile score by lead time (lower is better); coverage against the dashed 0.80 target; scores per season (the monsoon is hardest); and the bootstrap comparisons that say whether one model is really better than another.</figcaption></figure>
+<figure class="shot"><img src="{{IMG:screens/dash_4_lakes.png}}" alt="Dashboard lakes page."><figcaption><strong>Glacial lakes.</strong> Segmentation scores, yearly water area, the lake objects and their growth screening.</figcaption></figure>
+<figure class="shot"><img src="{{IMG:screens/dash_7_quantum.png}}" alt="Dashboard quantum page."><figcaption><strong>Quantum benchmark.</strong> The comparison table and statistical tests for the main experiment.</figcaption></figure>
+<figure class="shot"><img src="{{IMG:screens/api_1_docs.png}}" alt="API documentation page."><figcaption><strong>API documentation (/docs).</strong> FastAPI generates this page automatically. Each line is an endpoint; you can try them from the browser.</figcaption></figure>
+<figure class="shot"><img src="{{IMG:screens/api_3_forecast.png}}" alt="API forecast JSON response."><figcaption><strong>A forecast from the API (/v1/forecast).</strong> The same numbers as the dashboard, in JSON, with the model id, dataset id and a note that the target is modelled, so any program can use the forecast and trace where it came from.</figcaption></figure>
+<p>API endpoints: <code>/health</code> (is it running, how old is the data), <code>/v1/forecast</code>, <code>/v1/hindcast</code> (past forecasts), <code>/v1/models</code> (the registry), <code>/v1/reports/{name}</code>. In the cloud, <code>/v1</code> routes need an API key.</p>
+</section>
+
+<section id="cloud">
+<h2><span class="n">15</span>The Azure cloud design</h2>
+<figure><img src="{{IMG:fig_azure.png}}" alt="Azure design: GitHub, Container Apps environment, users, Azure Files, Key Vault, Azure Monitor, scripts."><figcaption>What will run in Azure once the student subscription is active.</figcaption></figure>
+<div class="tbl"><table>
+<thead><tr><th>Azure service</th><th>What it does here</th><th>AWS equivalent (template)</th><th class="num">Est. cost / month</th></tr></thead>
+<tbody>
+<tr><td>Container Apps</td><td>Runs the API and dashboard; sleeps when nobody uses it (scale to zero)</td><td>Lambda + API Gateway</td><td class="num">$0 (free grant)</td></tr>
+<tr><td>Container Apps Jobs</td><td>Weekly data update and drift check; training and lakes on demand</td><td>SageMaker Pipelines</td><td class="num">$0 (free grant)</td></tr>
+<tr><td>Azure Files</td><td>Shared folder with data, models and reports</td><td>S3</td><td class="num">about $0.01</td></tr>
+<tr><td>Key Vault + managed identity</td><td>Keeps the API key and Earth Engine key secret</td><td>Secrets Manager + IAM</td><td class="num">under $0.01</td></tr>
+<tr><td>Azure Monitor</td><td>Logs (capped), alerts on errors and restarts, e-mail</td><td>CloudWatch</td><td class="num">about $0.20</td></tr>
+<tr><td>Budget</td><td>E-mail warnings at 50%, 80%, 100% of $20</td><td>AWS Budgets</td><td class="num">free</td></tr>
+<tr><td>GitHub Container Registry</td><td>Stores the Docker image</td><td>ECR</td><td class="num">free</td></tr>
+</tbody></table></div>
+<div class="callout warn"><strong>Status.</strong> Everything is written as code (Bicep) and tested with scripts, but nothing is created in Azure yet: the student subscription is still awaiting approval. After approval: <code>az login</code>, then <code>preflight.ps1</code>, <code>deploy.ps1</code> and <code>verify.ps1</code>. Cost estimates come from Azure's price list for Central India and are estimates, not guarantees.</div>
+<p>Why Azure instead of AWS: the Azure for Students offer gives $100 credit without a credit card, and every needed service fits inside the free monthly allowances.</p>
+</section>
+
+<section id="cicd">
+<h2><span class="n">16</span>Testing and CI/CD</h2>
+<ul>
+  <li><strong>112 automated tests</strong> (pytest): data checks, leakage, metrics, calibration, registry rules, drift, API, dashboard rendering, Azure script safety (run against a fake Azure), lakes, gauge cleaning.</li>
+  <li><strong>Code quality:</strong> ruff (style and errors) and mypy (types).</li>
+  <li><strong>GitHub Actions CI</strong> runs all of that on every pull request, builds the Docker image, starts it, calls the API, and scans the image for vulnerabilities (Trivy).</li>
+  <li><strong>Image workflow</strong> publishes the image to GHCR; the <strong>CD workflow</strong> deploys to Azure (manual trigger).</li>
+</ul>
+<h3>Measured speed (local baseline)</h3>
+<div class="reading">
+  <div><div class="big">61 ms</div><div class="cap">Median time for one forecast request (P50)</div></div>
+  <div><div class="big">75 ms</div><div class="cap">95th percentile, one request at a time (P95)</div></div>
+  <div><div class="big">13.5/s</div><div class="cap">Peak requests per second, one server process, 0 errors</div></div>
+</div>
+</section>
+
+<section id="files">
+<h2><span class="n">17</span>Project folder map</h2>
+<div class="tbl"><table>
+<thead><tr><th>Folder</th><th>What is inside</th></tr></thead>
+<tbody>
+<tr><td><code>src/ingest</code></td><td>Downloading data, validation, provenance (fingerprints), extending data versions</td></tr>
+<tr><td><code>src/features</code></td><td>Building the feature table without leakage</td></tr>
+<tr><td><code>src/models</code></td><td>Baselines, LightGBM, LSTM, conformal calibration</td></tr>
+<tr><td><code>src/pipeline</code></td><td>Training, retraining and the refresh job</td></tr>
+<tr><td><code>src/evaluate</code></td><td>Metrics, splits, bootstrap, the gauge check</td></tr>
+<tr><td><code>src/drift</code></td><td>Drift detectors, replay, retraining policy</td></tr>
+<tr><td><code>src/registry</code></td><td>Model registry, gate, approval, rollback</td></tr>
+<tr><td><code>src/quantum</code>, <code>src/lakes</code></td><td>The two research modules</td></tr>
+<tr><td><code>api</code>, <code>dashboard</code></td><td>FastAPI service and Streamlit dashboard</td></tr>
+<tr><td><code>configs</code></td><td>All settings in YAML (no numbers hidden in code)</td></tr>
+<tr><td><code>infra</code>, <code>scripts/azure</code>, <code>docker</code>, <code>.github/workflows</code></td><td>Cloud and delivery</td></tr>
+<tr><td><code>docs</code>, <code>reports</code></td><td>Protocols, cards, results, this guide's figures, the report</td></tr>
+<tr><td><code>tests</code></td><td>The 112 automated tests</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="run">
+<h2><span class="n">18</span>Run it yourself</h2>
+<p>From the project folder <code>C:\SEM_5_Works\QGlacierWatch</code> in PowerShell:</p>
+<pre>.\.venv\Scripts\python.exe -m pytest                                  # all tests
+$env:QGW_MODE="real"
+.\.venv\Scripts\python.exe -m uvicorn api.main:app --port 8000       # API: http://localhost:8000/docs
+.\.venv\Scripts\python.exe -m streamlit run dashboard/streamlit_app.py  # dashboard: http://localhost:8501</pre>
+<p>Stop either one with <kbd>Ctrl</kbd>+<kbd>C</kbd> in its window. The dashboard needs nothing else; the API reads the same files.</p>
+</section>
+
+<section id="limits">
+<h2><span class="n">19</span>What is not done (say this openly)</h2>
+<div class="tbl"><table>
+<thead><tr><th>Item</th><th>Status</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>Azure deployment</td><td><span class="pill warn">pending</span></td><td>Student subscription awaiting approval; everything else is ready</td></tr>
+<tr><td>Real river data for training</td><td><span class="pill bad">blocked</span></td><td>CWC data is classified; the one open gauge covers only 2023-2026 with gaps</td></tr>
+<tr><td>A model passing the gate</td><td><span class="pill bad">not achieved</span></td><td>Uncertainty ranges not reliable across very different years</td></tr>
+<tr><td>Lake mapping accuracy</td><td><span class="pill warn">low</span></td><td>Simple threshold rules; reference maps end in 2017 and 2021</td></tr>
+<tr><td>Everything else</td><td><span class="pill ok">done</span></td><td>Data, models, evaluation, drift, registry, API, dashboard, CI, Azure code</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="viva">
+<h2><span class="n">20</span>Viva questions and answers</h2>
+<details><summary>What does your project do, in one minute?</summary><p>It forecasts the Beas River's flow 1, 7 and 30 days ahead with an uncertainty range, using satellite snow cover and weather data. Around the model it has a full MLOps pipeline: versioned data, fair testing, a model registry with a quality gate and human approval, season-aware drift monitoring with retraining rules, an API and a dashboard, and an Azure deployment design that costs under a dollar a month.</p></details>
+<details><summary>What is MLOps and why do you need it?</summary><p>MLOps is the set of practices that keep machine learning models reliable after deployment: data versioning, automated testing, monitoring, retraining and controlled release. Without it, a model silently degrades when seasons, weather or data sources change, and nobody can tell which data and code produced a forecast.</p></details>
+<details><summary>Why GloFAS and not real gauge data?</summary><p>Daily discharge for the Beas at Bhuntar is held by the Central Water Commission and is classified for Indus-basin rivers. GloFAS is an open modelled dataset. We checked it against the one open gauge we found and showed it differs a lot (NSE 0.21), so we state clearly that our skill is skill at reproducing GloFAS.</p></details>
+<details><summary>What do P10, P50 and P90 mean?</summary><p>P50 is the middle estimate. There is a 10% chance the real flow is below P10 and a 10% chance it is above P90, so P10-P90 should contain the true value 80% of the time.</p></details>
+<details><summary>What is conformal calibration?</summary><p>It measures how often the raw ranges missed on a separate calibration period and widens or narrows future ranges so they reach the target coverage. We do it per season because monsoon errors are larger.</p></details>
+<details><summary>Why did no model pass the gate?</summary><p>The ranges were too narrow in 2023-2025 at 30 days (0.689) and too wide in 2026 (0.938 and 0.955), because calibration years and test years had very different flows. Accuracy itself was high. We report it as a finding instead of tuning until it passes.</p></details>
+<details><summary>How do you prevent cheating or leakage in testing?</summary><p>Time-ordered splits, features built only from data available on the issue date, selection by cross-validation on earlier years, protocols committed before running, and a log of every test access.</p></details>
+<details><summary>What is drift, and what is special about your detector?</summary><p>Drift is a change in the data or model behaviour. Normal seasons look like drift to a naive detector (it alarmed on 99.8% of weeks). Ours compares each week with the same season in past years, cutting alarms to about 5%.</p></details>
+<details><summary>Why Azure Container Apps instead of a virtual machine or Lambda?</summary><p>It runs our container with the full ML libraries, scales to zero so we pay nothing when idle, gives HTTPS and revisions for rollback, and the free monthly grant covers our load. A VM would cost money all the time; Lambda-style functions limit package size.</p></details>
+<details><summary>Is the quantum model better?</summary><p>No. On a simulator it was worse than linear and small neural network models. A simulation also cannot demonstrate quantum advantage; the comparison only tells us about this model type on this task.</p></details>
+<details><summary>What would you do next?</summary><p>Deploy to Azure and measure cloud latency; obtain long observed discharge through an official request; try adaptive conformal methods that adjust to changing regimes; orchestrate the jobs with Durable Functions or Azure ML pipelines; improve lake mapping with labelled data and a trained model.</p></details>
+<details><summary>Did you use AI tools?</summary><p>Answer honestly according to your college's rules. The report has an editable AI-assistance declaration in its acknowledgement section.</p></details>
+</section>
+
+<section id="glossary">
+<h2><span class="n">21</span>Glossary A to Z</h2>
+<dl class="gloss">
+<dt><span class="l">A</span>API</dt><dd>A web address programs call to get data, here the forecasts.</dd>
+<dt><span class="l">B</span>Baseline</dt><dd>A simple method (persistence, climatology) a real model must beat.</dd>
+<dt><span class="l">B</span>Bootstrap</dt><dd>Resampling the test days many times to see if one model is really better or just lucky.</dd>
+<dt><span class="l">C</span>Coverage</dt><dd>Share of days where the real value fell inside P10-P90; target 80%.</dd>
+<dt><span class="l">C</span>CQR</dt><dd>Conformalized quantile regression: adjusts ranges to reach the target coverage.</dd>
+<dt><span class="l">C</span>CI/CD</dt><dd>Continuous integration and delivery: automatic testing, building and deploying.</dd>
+<dt><span class="l">D</span>Drift</dt><dd>Change in data or model behaviour compared with training time.</dd>
+<dt><span class="l">D</span>DVC</dt><dd>Data Version Control: Git-like versioning for large data files.</dd>
+<dt><span class="l">E</span>ERA5-Land</dt><dd>A global reconstruction of past weather and land conditions from ECMWF.</dd>
+<dt><span class="l">F</span>Feature</dt><dd>One input column of the model, such as last week's rain.</dd>
+<dt><span class="l">G</span>Gate</dt><dd>The set of rules a model must pass before it can be used.</dd>
+<dt><span class="l">G</span>GloFAS</dt><dd>Global Flood Awareness System: a computer model of river flow; our target.</dd>
+<dt><span class="l">H</span>Horizon</dt><dd>How far ahead a forecast looks: 1, 7 or 30 days.</dd>
+<dt><span class="l">I</span>IoU</dt><dd>Intersection over union: overlap of predicted and true water; 1 is perfect.</dd>
+<dt><span class="l">K</span>KGE</dt><dd>Kling-Gupta efficiency: accuracy score combining correlation, bias and variability.</dd>
+<dt><span class="l">L</span>Leakage</dt><dd>Using information from the future by mistake; makes tests look too good.</dd>
+<dt><span class="l">L</span>LightGBM</dt><dd>A fast gradient-boosted decision tree library; our main model.</dd>
+<dt><span class="l">L</span>LSTM</dt><dd>Long short-term memory: a neural network for sequences.</dd>
+<dt><span class="l">M</span>MODIS</dt><dd>NASA satellite sensor; gives daily snow cover.</dd>
+<dt><span class="l">N</span>NSE</dt><dd>Nash-Sutcliffe efficiency: 1 perfect, 0 no better than the average.</dd>
+<dt><span class="l">P</span>Pre-registration</dt><dd>Writing and committing the test plan before seeing results.</dd>
+<dt><span class="l">P</span>P10 / P50 / P90</dt><dd>Low, middle and high forecast values (10th, 50th, 90th percentiles).</dd>
+<dt><span class="l">Q</span>Quantile score (QS)</dt><dd>Error score for ranges; rewards narrow ranges that still contain the truth. Lower is better.</dd>
+<dt><span class="l">R</span>Registry</dt><dd>Store of all trained models with their cards, status and audit log.</dd>
+<dt><span class="l">R</span>Rollback</dt><dd>Going back to the previous model or app version.</dd>
+<dt><span class="l">S</span>Scale to zero</dt><dd>The cloud app shuts down when unused, so it costs nothing.</dd>
+<dt><span class="l">S</span>Sentinel-1 / 2</dt><dd>European radar and optical satellites used for lakes.</dd>
+<dt><span class="l">T</span>Telemetry</dt><dd>Automatic sensor readings sent remotely, here every 15 minutes.</dd>
+<dt><span class="l">V</span>VQC</dt><dd>Variational quantum circuit: a trainable quantum model, simulated here.</dd>
+</dl>
+</section>
+</main>
+</div>

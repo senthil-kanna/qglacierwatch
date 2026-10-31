@@ -53,7 +53,7 @@ def deleted(log):
 # --- template and configuration consistency -----------------------------------------------------
 
 def test_mount_uid_matches_container_user():
-    bicep = (ROOT / "infra" / "main.bicep").read_text()
+    bicep = (ROOT / "infra" / "azure" / "main.bicep").read_text()
     docker = (ROOT / "docker" / "Dockerfile").read_text()
     uid = re.search(r"uid=(\d+),gid=(\d+)", bicep)
     assert uid, "Azure Files mountOptions must set uid/gid for the non-root user"
@@ -61,7 +61,7 @@ def test_mount_uid_matches_container_user():
 
 
 def test_parameters_use_public_ghcr_and_contain_no_secrets():
-    p = json.loads((ROOT / "infra" / "main.parameters.json").read_text())["parameters"]
+    p = json.loads((ROOT / "infra" / "azure" / "main.parameters.json").read_text())["parameters"]
     assert p["useAcr"]["value"] is False and p["externalImage"]["value"].startswith("ghcr.io/")
     env = (ROOT / ".env.example").read_text()
     for line in env.splitlines():
@@ -71,14 +71,14 @@ def test_parameters_use_public_ghcr_and_contain_no_secrets():
 
 
 def test_every_tagged_resource_type_in_template():
-    bicep = (ROOT / "infra" / "main.bicep").read_text()
+    bicep = (ROOT / "infra" / "azure" / "main.bicep").read_text()
     # Each top-level resource with a location also carries the project tags (cleanup relies on it).
     assert bicep.count("tags: tags") >= bicep.count("location: location") + bicep.count("location: 'global'")
 
 
 @pytest.mark.skipif(shutil.which("az") is None, reason="Azure CLI not installed")
 def test_bicep_compiles():
-    p = subprocess.run([shutil.which("az"), "bicep", "build", "--file", str(ROOT / "infra" / "main.bicep"), "--stdout"], capture_output=True, text=True)
+    p = subprocess.run([shutil.which("az"), "bicep", "build", "--file", str(ROOT / "infra" / "azure" / "main.bicep"), "--stdout"], capture_output=True, text=True)
     if "Bicep CLI not found" in p.stderr or "bicep" in p.stderr.lower() and "install" in p.stderr.lower():
         pytest.skip("Bicep CLI not installed")
     assert p.returncode == 0, p.stderr

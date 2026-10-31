@@ -224,3 +224,15 @@ artifacts/
 mlruns/
 
 reports/demo/
+
+# AWS deployment (Terraform local state, generated bundles)
+infra/aws/.terraform/
+infra/aws/*.tfstate
+infra/aws/*.tfstate.*
+infra/aws/terraform.tfvars
+infra/aws/tfplan
+build/
+
+# graphify knowledge-graph output
+.graphify_*
+graphify-out/

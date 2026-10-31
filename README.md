@@ -12,8 +12,8 @@ for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532
 > Bridge, HP Water Department via the National Water Data Portal, 737 days 2023-2026) shows GloFAS
 > matches it poorly (NSE 0.21; about half the observed flow in 2026; large seasonal biases), and
 > our forecasts reach only NSE 0.1-0.3 against it** (`docs/protocol_gauge_check.md`; gauge quality
-> unknown, so this is not independent validation). No model has passed the promotion gate, nothing
-> is deployed to Azure, and nothing here is a live feed. Synthetic data are used only in tests and
+> unknown, so this is not independent validation). No model has passed the promotion gate, the AWS
+> deployment is prepared but not yet applied, and nothing here is a live feed. Synthetic data are used only in tests and
 > `demo` mode.
 
 ## What is implemented, what ran, what is blocked
@@ -33,7 +33,8 @@ for the Beas River above Bhuntar, Himachal Pradesh (HydroBASINS catchment, 3,532
 | REST API (FastAPI, /v1) | yes | locally, on real artifacts | - | `docs/openapi.json` |
 | Dashboard (Streamlit, 7 pages) | yes | headless render tests on real artifacts | - | |
 | Docker image, compose | yes | **not built locally** (no Docker) | Docker | built and smoke-tested in CI |
-| Azure Bicep (Container Apps, ACR/GHCR, Files, Key Vault, budget) | yes | compiled + linted only; **not deployed** | Azure subscription | `docs/deployment.md` |
+| **AWS Terraform** (Lambda API + Function URL, Fargate dashboard, Lambda + EventBridge jobs, S3, ECR, CI IAM user, SSM, CloudWatch, Budgets; ap-southeast-2) | yes | `terraform validate` + cost-guard tests; **not applied yet** | AWS account | `docs/aws-deployment.md` (primary) |
+| Azure Bicep (Container Apps, ACR/GHCR, Files, Key Vault, budget) | yes, alternative | compiled + linted only; not deployed | Azure subscription | `infra/azure/`, `docs/deployment.md` |
 | CI/CD (GitHub Actions) | yes | **not run yet** (needs a push) | GitHub | |
 
 ## Quick start (no credentials, SYNTHETIC demo)
@@ -94,7 +95,8 @@ Full tables: [forecast](reports/real/forecast_results.md), [drift](reports/real/
 - [Data-access and licensing audit](docs/data_access.md) | [data card](docs/data_card.md) | [model card](docs/model_card.md)
 - [Drift, retraining and governance](docs/governance.md)
 - [Quantum benchmark](docs/quantum_benchmark.md) | [Lakes](docs/lakes.md)
-- [Deployment, Azure cost model, security](docs/deployment.md)
+- [AWS deployment guide, architecture diagram, costs, demo-day checklist](docs/aws-deployment.md) (primary)
+- [Azure alternative: deployment, cost model, security](docs/deployment.md)
 - API: `docs/openapi.json`, or `/docs` on a running server
 
 ## API summary
@@ -117,4 +119,4 @@ Errors are JSON `{"error", "detail"}` with 401/404/422/429/503. Set `QGW_API_KEY
 - **Spatial detail**: elevation-band snow cover and temperature lapse rates instead of basin means.
 - **Lakes**: Hi-MAG (CC BY 4.0) is now compared (`reports/real/himag_comparison.md`) but ends in 2017; a post-2019 reference (manual annotation or a newer inventory) is still needed for pixel-level validation; per-lake uncertainty.
 - **Quantum**: trainable input scaling, longer schedules and noise models; a hardware run would test feasibility only.
-- **Operations**: rolling data versions for operational updates beyond 2025; deploy and monitor on Azure.
+- **Operations**: rolling data versions for operational updates beyond 2025; deploy and monitor on AWS (`docs/aws-deployment.md`).

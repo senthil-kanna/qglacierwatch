@@ -1,12 +1,23 @@
 name: ci
 
+# test -> container (build + Trivy) -> aws-deploy (push to ECR, roll Lambdas and the dashboard).
+# aws-deploy runs on push to main, or by hand (workflow_dispatch) for the first deploy from the
+# feature branch, and only once the repository variable AWS_DEPLOY_ENABLED is 'true'
+# (docs/aws-deployment.md). The project's managed SCP denies GitHub OIDC, so the job signs in as the
+# scoped IAM user qglacierwatch-github-deploy; its key lives only in the repository secrets
+# AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (scripts/aws/github-keys.ps1 sets and revokes them).
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  AWS_REGION: ap-southeast-2
+  PROJECT: qglacierwatch
 
 jobs:
   test:
@@ -57,7 +68,7 @@ jobs:
           for i in $(seq 1 30); do curl -fsS localhost:8000/health && break; sleep 2; done
           curl -fsS localhost:8000/v1/forecast | python -m json.tool
       - name: Scan image (Trivy)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0 (pinned by SHA; old unprefixed tags were removed)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0 (pinned by SHA; old unprefixed tags such as 0.28.0 were removed)
         with:
           image-ref: qglacierwatch:ci
           severity: CRITICAL,HIGH
@@ -67,8 +78,94 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Bicep build and lint
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.7
+          terraform_wrapper: false
+      - name: Terraform fmt and validate (AWS, no credentials; state is local to the deployer's laptop)
+        run: |
+          terraform fmt -check -recursive infra/aws
+          terraform -chdir=infra/aws init -backend=false -input=false
+          terraform -chdir=infra/aws validate
+      - name: Bicep build and lint (Azure alternative)
         run: |
           az bicep install
-          az bicep build --file infra/main.bicep --stdout > /dev/null
-          az bicep lint --file infra/main.bicep
+          az bicep build --file infra/azure/main.bicep --stdout > /dev/null
+          az bicep lint --file infra/azure/main.bicep
+
+  aws-deploy:
+    needs: [test, container, infra]
+    if: >-
+      vars.AWS_DEPLOY_ENABLED == 'true' &&
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    concurrency: {group: aws-deploy, cancel-in-progress: false}
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+      - name: Sign in to public ECR (anonymous base-image pulls get rate-limited on shared runners)
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-api.txt
+      - name: Bake the serving model and data from S3 (build/api-bundle)
+        run: |
+          pip install -r requirements-api.txt
+          account=$(aws sts get-caller-identity --query Account --output text)
+          export QGW_S3_BUCKET="$PROJECT-$account-$AWS_REGION" QGW_DATA=$PWD/.s3/data QGW_ARTIFACTS=$PWD/.s3/artifacts QGW_REPORTS=$PWD/.s3/reports
+          python -m src.storage pull artifacts/real/registry artifacts/real/hindcasts.parquet data/processed/real reports/real
+          python scripts/aws/bake_api_bundle.py
+      - name: Build images
+        run: |
+          reg=${{ steps.ecr.outputs.registry }}
+          docker build -f docker/Dockerfile.api -t "$reg/$PROJECT-api:$TAG" .
+          docker build -f docker/Dockerfile -t "$reg/$PROJECT-app:$TAG" -t "$reg/$PROJECT-app:live" .
+      - name: Scan API image (Trivy)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.ecr.outputs.registry }}/${{ env.PROJECT }}-api:${{ env.TAG }}
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+      - name: Push to ECR
+        run: |
+          reg=${{ steps.ecr.outputs.registry }}
+          docker push "$reg/$PROJECT-api:$TAG"
+          docker push "$reg/$PROJECT-app:$TAG"
+          docker push "$reg/$PROJECT-app:live"
+          echo "Pushed images with tag \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
+      - name: Roll out (Lambdas and dashboard), if already created
+        run: |
+          reg=${{ steps.ecr.outputs.registry }}
+          if ! aws lambda get-function --function-name "$PROJECT-api" > /dev/null 2>&1; then
+            echo "::notice::Functions not created yet. On your laptop run: scripts/aws/deploy.ps1 -ImageTag $TAG"
+            echo "First deploy: run \`scripts/aws/deploy.ps1 -ImageTag $TAG\` locally." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          aws lambda update-function-code --function-name "$PROJECT-api" --image-uri "$reg/$PROJECT-api:$TAG" > /dev/null
+          for fn in refresh drift; do
+            aws lambda update-function-code --function-name "$PROJECT-$fn" --image-uri "$reg/$PROJECT-app:$TAG" > /dev/null
+          done
+          for fn in api refresh drift; do aws lambda wait function-updated-v2 --function-name "$PROJECT-$fn"; done
+          desired=$(aws ecs describe-services --cluster "$PROJECT" --services "$PROJECT-dashboard" --query 'services[0].desiredCount' --output text)
+          if [ "$desired" != "0" ] && [ "$desired" != "None" ]; then
+            aws ecs update-service --cluster "$PROJECT" --service "$PROJECT-dashboard" --force-new-deployment > /dev/null
+            echo "Dashboard redeploying (new public IP: run scripts/aws/status.ps1)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Smoke test API
+        run: |
+          url=$(aws lambda get-function-url-config --function-name "$PROJECT-api" --query FunctionUrl --output text 2>/dev/null || true)
+          [ -z "$url" ] && { echo "no function URL yet"; exit 0; }
+          for i in $(seq 1 10); do curl -fsS "${url}health" && echo "API: $url" >> "$GITHUB_STEP_SUMMARY" && exit 0; sleep 10; done
+          echo "health check failed: roll back with scripts/aws/deploy.ps1 -ImageTag <previous sha>" && exit 1

@@ -62,6 +62,13 @@ class Store:
     def _bundle(self, model_id: str) -> dict:
         return self.registry.load_bundle(model_id)
 
+    def serving_bundle(self) -> tuple[str, str, dict]:
+        """(model_id, status, bundle) of the serving model."""
+        model_id, status = self.serving_model()
+        if model_id is None:
+            raise LookupError("No registered model. Run: python -m src.pipeline.train --final")
+        return model_id, status, self._bundle(model_id)
+
     def operational_forecast(self, issue_date: pd.Timestamp | None = None) -> dict:
         model_id, status = self.serving_model()
         if model_id is None:
