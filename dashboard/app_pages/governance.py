@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from dashboard import data
+from src import approvals
 
 state = data.store().registry.list()
 prod = state["production"]
@@ -28,6 +29,15 @@ if audit.exists():
     st.subheader("Audit log (promotion decisions, gates, rollbacks)")
     events = [json.loads(line) for line in audit.read_text().splitlines()]
     st.dataframe(pd.DataFrame(events).iloc[::-1], hide_index=True)
+
+st.subheader("Retraining requests (Tier 3 alerts)")
+reqs = approvals.recent()
+if reqs:
+    cols = ["id", "status", "created_utc", "source", "check_date", "approver", "approved_utc", "approved_via"]
+    st.dataframe(pd.DataFrame(reqs)[cols], hide_index=True)
+    st.caption("Each request is approved by a named person, from the one-time link in the alert e-mail or on the upload page.")
+else:
+    st.caption("No retraining requests yet.")
 
 st.subheader("Retraining runs")
 runs_path = data.store().reports / "retraining_runs.json"

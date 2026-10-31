@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from dashboard import data
-from src import alerts, config
+from src import alerts, approvals, config
 
 SAMPLES = config.ROOT / "dashboard" / "samples"
 LIGHTS = {
@@ -73,17 +73,20 @@ with st.container(border=True):
         "Tier 0: no alert or inputs outside past seasons only | Tier 1: input problem | Tier 2: interval coverage dropped, "
         "recalibrate | Tier 3: forecast error degraded persistently, retrain a candidate. Same rules as the weekly job."
     )
+    # file hash -> retraining request id; one e-mail (and one request) per file and session
+    sent = st.session_state.setdefault("upload_requests", {})
+    key = hashlib.sha256(file.getvalue()).hexdigest()
     if rec["tier"] == 3 and alerts.enabled():
-        sent = st.session_state.setdefault("upload_alerts_sent", set())
-        key = hashlib.sha256(file.getvalue()).hexdigest()
         if key in sent:
-            st.caption(":material/mark_email_read: Alert e-mail sent for this file.")
+            st.caption(f":material/mark_email_read: Alert e-mail with approval link sent (request `{sent[key]}`).")
         elif st.button("Send alert e-mail", icon=":material/mail:", help="One e-mail per file and session, to the project's alert address."):
-            subject, body = alerts.drift_message(rec, r["check_date"], f"dashboard upload '{file.name}' (what-if check, not the live data)",
-                                                 [f"Uploaded window: {r['window'][0]} to {r['window'][1]}"])
+            source = f"dashboard upload '{file.name}' (what-if check, not the live data)"
+            req, token = approvals.create(rec, r["check_date"], source)
+            subject, body = alerts.drift_message(rec, r["check_date"], source,
+                                                 [f"Uploaded window: {r['window'][0]} to {r['window'][1]}", *approvals.email_lines(req, token)])
             if alerts.notify("[Upload] " + subject, body):
-                sent.add(key)
-                st.success("Alert e-mail sent.", icon=":material/mark_email_read:")
+                sent[key] = req["id"]
+                st.success("Alert e-mail sent. The approval link in it records a named approval.", icon=":material/mark_email_read:")
 
 with st.container(border=True):
     st.subheader("3. Evidence")
@@ -119,12 +122,35 @@ with st.container(border=True):
     st.altair_chart((band + p50 + obs).properties(height=280), width="stretch")
     st.caption(f"Blue: serving model `{r['model_id']}` ({r['model_status'].replace('_', ' ')}) P50 with P10-P90 band. Red dashed: uploaded discharge.")
 
-if rec["tier"] == 3:
+if rec["tier"] == 3 and key in sent:
+    with st.container(border=True):
+        st.subheader("4. Human decision")
+        st.caption(
+            "Retraining starts only after a named person approves the request, from the e-mail link or here; a retrained "
+            "candidate is then promoted only if it passes the registry gate."
+        )
+        req = approvals.load(sent[key])
+        if req and req["status"] == "approved":
+            st.success(f"Approved by **{req['approver']}** at {req['approved_utc']} ({req['approved_via']}).", icon=":material/verified:")
+        else:
+            st.info(f"Request `{sent[key]}` is waiting for approval.", icon=":material/hourglass_top:")
+            st.button("Refresh status", icon=":material/refresh:")
+            with st.form("approve"):
+                who = st.text_input("Approver name")
+                ok = st.form_submit_button("Approve retraining request", type="primary")
+            if ok:
+                try:
+                    approvals.approve_from_dashboard(sent[key], who)
+                    st.rerun()
+                except approvals.ApprovalError as e:
+                    st.warning(str(e))
+elif rec["tier"] == 3:
     with st.container(border=True):
         st.subheader("4. Human decision")
         st.caption(
             "Retraining starts only after a named person approves the request; a retrained candidate is then promoted only "
-            "if it passes the registry gate. This demo records the decision in this session only."
+            "if it passes the registry gate. Send the alert e-mail to record the request; without it this demo records the "
+            "decision in this session only."
         )
         log = st.session_state.setdefault("upload_decisions", [])
         with st.form("approve"):

@@ -25,6 +25,8 @@ locals {
     actions   = ["s3:ListBucket"]
     resources = [aws_s3_bucket.data.arn]
   }
+  # Retraining requests (src/approvals.py PREFIX); the job role writes them through reports/*.
+  approvals_prefix = "reports/approvals"
 }
 
 # --- API Lambda: read features/reports, read the API key ---------------------------------------
@@ -53,6 +55,11 @@ data "aws_iam_policy_document" "api" {
     sid       = "ApiKey"
     actions   = ["ssm:GetParameter"]
     resources = ["${local.ssm_prefix}${local.ssm_api_key}"]
+  }
+  statement {
+    sid       = "RecordApprovals"
+    actions   = ["s3:GetObject", "s3:PutObject"]
+    resources = ["${aws_s3_bucket.data.arn}/${local.approvals_prefix}/*"]
   }
 }
 
@@ -135,6 +142,11 @@ data "aws_iam_policy_document" "dashboard" {
     sid       = "UploadAlert"
     actions   = ["sns:Publish"]
     resources = [aws_sns_topic.alerts.arn]
+  }
+  statement {
+    sid       = "RecordApprovals"
+    actions   = ["s3:PutObject"]
+    resources = ["${aws_s3_bucket.data.arn}/${local.approvals_prefix}/*"]
   }
 }
 

@@ -252,3 +252,15 @@ def test_alert_publish_is_scoped_to_the_project_topic():
     publish = re.findall(r'actions\s*=\s*\["sns:Publish"\]\s*\n\s*resources\s*=\s*\[([^\]]*)\]', TF)
     assert publish == ["aws_sns_topic.alerts.arn"] * 2, publish
     assert TF.count("QGW_ALERT_TOPIC_ARN") == 2
+
+
+def test_approval_links_point_at_the_api_and_writes_stay_in_the_approvals_prefix():
+    # The drift job and the dashboard put the API's Function URL in the e-mail; only the API reads
+    # back and updates requests, and nobody but the job writes elsewhere under reports/.
+    urls = re.findall(r'QGW_API_URL"?\s*[=,]\s*(?:value\s*=\s*)?([\w.\[\]]+)', TF)
+    assert urls == ["aws_lambda_function_url.api[0].function_url"] * 2, urls
+    assert 'approvals_prefix = "reports/approvals"' in TF
+    for role in ("api", "dashboard"):
+        policy = re.search(rf'data "aws_iam_policy_document" "{role}" \{{(.*?)\n\}}\n', TF, re.S).group(1)
+        writes = [s for s in policy.split("statement {")[1:] if "s3:PutObject" in s]
+        assert len(writes) == 1 and "${local.approvals_prefix}/*" in writes[0], role
