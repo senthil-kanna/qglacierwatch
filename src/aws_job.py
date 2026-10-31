@@ -8,8 +8,8 @@ refresh runs the full Earth Engine + GloFAS ingest only when a real service-acco
 in SSM (QGW_EE_KEY_PARAM); with the placeholder it rebuilds features and drift from the raw data
 already in S3 (--skip-ingest). {"skip_ingest": true} forces the latter.
 
-drift e-mails the alert topic when the check recommends Tier 3 (retraining); lower tiers stay on
-the dashboard only.
+drift e-mails the alert topic when the check recommends Tier 3 (retraining), with a one-time
+approval link (src/approvals.py); lower tiers stay on the dashboard only.
 """
 
 import json
@@ -18,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from src import alerts, ssm, storage
+from src import alerts, approvals, ssm, storage
 
 WORK = Path(os.getenv("QGW_JOB_DIR", "/tmp/qgw"))
 _READS = ["data/raw", "data/processed/real", "artifacts/real/hindcasts.parquet", "reports/real"]
@@ -73,7 +73,10 @@ def notify_drift(path: Path) -> bool:
     rec = latest["recommendation"]
     if rec["tier"] != 3:
         return False
-    subject, body = alerts.drift_message(rec, latest["check_date"], "weekly drift job (real data)", [f"Severity: {latest['severity']}"])
+    source = "weekly drift job (real data)"
+    req, token = approvals.create(rec, latest["check_date"], source)
+    subject, body = alerts.drift_message(rec, latest["check_date"], source,
+                                         [f"Severity: {latest['severity']}", *approvals.email_lines(req, token)])
     return alerts.notify(subject, body)
 
 

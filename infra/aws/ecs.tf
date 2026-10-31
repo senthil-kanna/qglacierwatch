@@ -77,6 +77,7 @@ resource "aws_ecs_task_definition" "dashboard" {
       { name = "QGW_S3_BUCKET", value = aws_s3_bucket.data.bucket },
       { name = "AWS_DEFAULT_REGION", value = var.region },
       { name = "QGW_ALERT_TOPIC_ARN", value = aws_sns_topic.alerts.arn },
+      { name = "QGW_API_URL", value = aws_lambda_function_url.api[0].function_url },
     ]
     healthCheck = {
       command     = ["CMD-SHELL", "curl -fsS http://localhost:8501/_stcore/health || exit 1"]

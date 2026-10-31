@@ -8,6 +8,7 @@ a per-client in-memory token bucket (QGW_RATE_PER_MIN); behind several replicas 
 limiter instead (see docs/deployment.md).
 """
 
+import html
 import json
 import logging
 import os
@@ -18,13 +19,14 @@ from contextlib import asynccontextmanager
 from datetime import date
 from pathlib import Path
 from typing import Annotated
+from urllib.parse import parse_qs
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import APIKeyHeader
 
 from api.schemas import ErrorResponse, ForecastResponse, Health
-from src import config, ssm, storage
+from src import approvals, config, ssm, storage
 from src.serving.store import Store
 
 API_VERSION = "1.0.0"
@@ -75,6 +77,10 @@ def guard(request: Request, key: Annotated[str | None, Depends(api_key_header)])
     expected = os.getenv("QGW_API_KEY")
     if expected and not (key and secrets.compare_digest(key, expected)):
         raise HTTPException(401, "missing or invalid X-API-Key")
+    rate_limit(request)
+
+
+def rate_limit(request: Request) -> None:
     rate = float(os.getenv("QGW_RATE_PER_MIN", "60"))
     client = request.client.host if request.client else "unknown"
     bucket = request.app.state.buckets[client]
@@ -180,3 +186,66 @@ def report(name: str, s: Annotated[Store, Depends(store)]) -> dict:
     if r is None:
         raise HTTPException(404, f"report {name!r} has not been generated in {s.mode} mode")
     return r
+
+
+# --- Retraining approval from the alert e-mail (src/approvals.py) -------------------------------
+# HTML pages, not JSON: they are opened from a mail client. The one-time token in the link is the
+# credential (no X-API-Key: a mail link cannot send headers). GET only shows the request, because
+# mail scanners prefetch links; approval is the form's POST with the approver's name.
+
+def _page(title: str, body: str, status: int = 200) -> HTMLResponse:
+    doc = (
+        "<!doctype html><html lang='en'><head><meta charset='utf-8'>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        f"<meta name='referrer' content='no-referrer'><title>{html.escape(title)}</title>"
+        "<style>body{font-family:system-ui,sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem;line-height:1.5}"
+        "input,button{font-size:1rem;padding:.5rem;margin:.25rem 0}button{cursor:pointer}"
+        ".ok{color:#1a7f37}.err{color:#cf222e}</style></head>"
+        f"<body><h1>{html.escape(title)}</h1>{body}</body></html>"
+    )
+    return HTMLResponse(doc, status_code=status, headers={"Cache-Control": "no-store"})
+
+
+def _summary(req: dict) -> str:
+    e = html.escape
+    reasons = "".join(f"<li>{e(r)}</li>" for r in req["reasons"])
+    return (
+        f"<p>Request <code>{e(req['id'])}</code> from {e(req['source'])}, check date {e(req['check_date'])}.</p>"
+        f"<p><b>Tier {e(str(req['tier']))}: {e(req['action'])}</b></p><ul>{reasons}</ul>"
+    )
+
+
+def _approved(req: dict) -> str:
+    e = html.escape
+    return (f"<p class='ok'>Approved by <b>{e(req['approver'])}</b> at {e(req['approved_utc'])} ({e(req['approved_via'])}).</p>"
+            "<p>Retraining can now be started; a candidate is promoted only if it passes the registry gate.</p>")
+
+
+@app.get("/v1/approvals/{req_id}", response_class=HTMLResponse, tags=["governance"], dependencies=[Depends(rate_limit)])
+def approval_page(req_id: str, token: str = "") -> HTMLResponse:
+    try:
+        req = approvals.check_token(req_id, token)
+    except approvals.ApprovalError as e:
+        return _page("Retraining request", f"<p class='err'>{html.escape(str(e))}</p>", e.status)
+    if req["status"] == "approved":
+        return _page("Retraining request", _summary(req) + _approved(req))
+    form = (
+        f"<form method='post' action='/v1/approvals/{html.escape(req['id'])}'>"
+        f"<input type='hidden' name='token' value='{html.escape(token)}'>"
+        "<label>Your name<br><input name='approver' required maxlength='80' autocomplete='name'></label><br>"
+        "<button type='submit'>Approve retraining request</button></form>"
+        f"<p>Link valid until {html.escape(req['expires_utc'])}. Approving only records the decision.</p>"
+    )
+    return _page("Approve retraining?", _summary(req) + form)
+
+
+@app.post("/v1/approvals/{req_id}", response_class=HTMLResponse, tags=["governance"], dependencies=[Depends(rate_limit)])
+async def approval_submit(req_id: str, request: Request) -> HTMLResponse:
+    form = parse_qs((await request.body()).decode("utf-8", "replace"))
+    token, approver = form.get("token", [""])[0], form.get("approver", [""])[0]
+    try:
+        req = approvals.approve_with_token(req_id, token, approver)
+    except approvals.ApprovalError as e:
+        return _page("Retraining request", f"<p class='err'>{html.escape(str(e))}</p>", e.status)
+    log.info("retraining request approved", extra={"extra_fields": {"request": req["id"], "via": req["approved_via"]}})
+    return _page("Retraining request approved", _summary(req) + _approved(req))
